@@ -143,6 +143,12 @@ class odict(dict):
             dict.__delitem__(self, key)
         else:
             raise KeyError, key
+    
+    def __contains__(self, key):
+        return key in self.keys()
+    
+    def __len__(self):
+        return len(self.keys())
 
     def __str__(self):
         pairs = ("%r: %r" % (k, v) for k, v in self.iteritems())
