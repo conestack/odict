@@ -56,8 +56,7 @@ class odict(dict):
         >>> odict(a=1)
         Traceback (most recent call last):
           ...
-        TypeError: __init__() of ordered dict takes no keyword arguments to 
-        avoid an ordering trap.
+        TypeError: __init__() of ordered dict takes no keyword arguments to avoid an ordering trap.
 
         If initialized with a dict the order of elements is undefined!:
         >>> o = odict({"a":1, "b":2, "c":3, "d":4})
