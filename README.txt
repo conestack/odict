@@ -2,7 +2,7 @@
 Yet another odict implementation.
 
   >>> from odict import odict
-  >>> odict = odict()
+  >>> od = odict()
   
 Credits
 -------
