@@ -4,13 +4,14 @@
 from setuptools import setup, find_packages
 import sys, os
 
+version = '1.2'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
 
 setup(name='odict',
       version=version,
       description=shortdesc,
-      long_description=longdesc + todo + changes,
+      long_description=longdesc,
       classifiers=[
             'Development Status :: 5 - Production/Stable',
             'License :: OSI Approved :: Python Software Foundation License',
