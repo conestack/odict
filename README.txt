@@ -7,5 +7,5 @@ Yet another odict implementation.
 Credits:
 --------
 
-  Written by bearophile (Oct 12 2006)
-  Eggified by rnix (Mar 17 2009)
+  -Written by ``bearophile`` (Oct 12 2006)
+  -Eggified by ``rnix`` (Mar 17 2009)
