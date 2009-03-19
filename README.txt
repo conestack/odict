@@ -14,5 +14,6 @@ Credits
 -------
 
   -Written by ``bearophile`` (Oct 12 2006)
+   http://code.activestate.com/recipes/498195/
 
-  -Eggified by ``rnix`` (Mar 17 2009)
+  -Eggified by Robert Niederreiter <rnix@squarewave.at> (Mar 17 2009)
