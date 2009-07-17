@@ -81,9 +81,9 @@ class odict(dict):
         return dict.__getitem__(self, key)[1]
 
     def __setitem__(self, key, val):
-        if key in self:
+        try:
             dict.__getitem__(self, key)[1] = val
-        else:
+        except KeyError, e:
             new = [self.lt, val, _nil]
             dict.__setitem__(self, key, new)
             if self.lt is _nil:

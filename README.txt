@@ -7,6 +7,9 @@ Yet another odict implementation.
 Changes
 -------
 
+  -A use try/except instead of __iter__ in __setitem__ to determine if value
+   was already set.
+
   -Add missing ``__len__`` and ``__contains__`` functions.
    rnix, 2009-03-17
  
