@@ -1,12 +1,12 @@
-# Copyright 2003-2009, BlueDynamics Alliance - http://bluedynamics.com
 # GNU General Public License Version 2 or later
 
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.2.2'
+version = '1.2.3'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
+tests_require = ['interlude']
 
 setup(name='odict',
       version=version,
@@ -30,5 +30,9 @@ setup(name='odict',
       include_package_data=True,
       zip_safe=True,
       install_requires=['setuptools'],
-      extras_require = {},
-      )
+      tests_require=tests_require,
+      test_suite="odict.tests.test_suite",
+      extras_require = dict(
+          test=tests_require,
+      ),
+)

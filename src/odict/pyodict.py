@@ -1,35 +1,4 @@
-"""
-odict.py  -- V.1.1, Oct 12 2006, by bearophile.
-
-Dictionary in which the *insertion* order of items is preserved (using an
-internal double linked list). In this implementation replacing an existing 
-item keeps it at its original position.
-
-Requires Python V.2.4 or successive.
-
-Note: I have removed the doctstrings from most methods to make this code 
-shorter for the cookbook.
-
-Internal representation: values of the dict:
-  +-----------+----------+-----------+
-  | <pred key | true val | succ key> |
-  +-----------+----------+-----------+
-The sequence of elements uses as a double linked list. The 'links' are dict
-keys. self.lh and self.lt are the keys of first and last element inseted in
-the odict. In a C reimplementation of this data structure, things can be
-simplified (and speed up) a lot if given a value you can at the same time find
-its key. With that, you can use normal C pointers.
-
-Memory used (Python 2.5):
--set(int): 28.2 bytes/element
--dict(int:None): 36.2 bytes/element
--odict(int:None): 102 bytes/element
-
-Speed:
-- This odict is about 20-25 times slower than a dict, for insert and del
-  operations.
-- del too is O(1).
-"""
+# GNU General Public License Version 2 or later
 
 class _Nil:
     """Class of the 'pointer' to the null key. For internal usage only.
@@ -51,24 +20,11 @@ class odict(dict):
         a trap - inside a function or method the keyword args are accessible
         only as a dict, without a defined order, so their original order is
         lost.
-
-        __init__ test, with keyword args:
-        >>> odict(a=1)
-        Traceback (most recent call last):
-          ...
-        TypeError: __init__() of ordered dict takes no keyword arguments to avoid an ordering trap.
-
-        If initialized with a dict the order of elements is undefined!:
-        >>> o = odict({"a":1, "b":2, "c":3, "d":4})
-        >>> print o
-        {'a': 1, 'c': 3, 'b': 2, 'd': 4}
         """
         if kwds:
             raise TypeError("__init__() of ordered dict takes no keyword "
                             "arguments to avoid an ordering trap.")
         dict.__init__(self)
-        self.lh = _nil # Double-linked list header
-        self.lt = _nil # Double-linked list tail
         # If you give a normal dict, then the order of elements is undefined
         if hasattr(data, "iteritems"):
             for key, val in data.iteritems():
@@ -76,6 +32,28 @@ class odict(dict):
         else:
             for key, val in data:
                 self[key] = val
+    
+    # Double-linked list header
+    def _get_lh(self):
+        if not hasattr(self, '_lh'):
+            self._lh = _nil
+        return self._lh
+    
+    def _set_lh(self, val):
+        self._lh = val
+    
+    lh = property(_get_lh, _set_lh)
+    
+    # Double-linked list tail
+    def _get_lt(self):
+        if not hasattr(self, '_lt'):
+            self._lt = _nil
+        return self._lt
+    
+    def _set_lt(self, val):
+        self._lt = val
+    
+    lt = property(_get_lt, _set_lt)
 
     def __getitem__(self, key):
         return dict.__getitem__(self, key)[1]
@@ -93,43 +71,6 @@ class odict(dict):
             self.lt = key
 
     def __delitem__(self, key):
-        """del test 1, removal from empty odict:
-        >>> o = odict()
-        >>> del o["1"]
-        Traceback (most recent call last):
-          ...
-        KeyError: '1'
-
-        del test 2, removal from odict with one element:
-        >>> o = odict()
-        >>> o["1"] = 1
-        >>> del o["1"]
-        >>> o.lh, o.lt, o, o
-        (nil, nil, odict(), odict())
-        >>> o._repr()
-        'odict low level repr lh,lt,data: nil, nil, {}'
-
-        del test 3, removal firt element of the odict sequence:
-        >>> o = odict()
-        >>> for i in [1,2,3]: o[str(i)] = i
-        >>> del o["1"]
-        >>> o.lh, o.lt, o
-        ('2', '3', odict([('2', 2), ('3', 3)]))
-
-        del test 4, removal element in the middle of the odict sequence:
-        >>> o = odict()
-        >>> for i in [1,2,3]: o[str(i)] = i
-        >>> del o["2"]
-        >>> o.lh, o.lt, o
-        ('1', '3', odict([('1', 1), ('3', 3)]))
-
-        del test 5, removal element at the end of the odict sequence:
-        >>> o = odict()
-        >>> for i in [1,2,3]: o[str(i)] = i
-        >>> del o["3"]
-        >>> o.lh, o.lt, o
-        ('1', '2', odict([('1', 1), ('2', 2)]))
-        """
         if key in self:
             pred, _ ,succ= dict.__getitem__(self, key)
             if pred is _nil:
@@ -249,9 +190,10 @@ class odict(dict):
         else:
             raise KeyError("'popitem(): ordered dictionary is empty'")
 
-    # Some odict-specific methods ---------------------------------
+    # odict extension methods
     def riterkeys(self):
-        """To iterate on keys in reversed order."""
+        """To iterate on keys in reversed order.
+        """
         curr_key = self.lt
         while curr_key is not _nil:
             yield curr_key
@@ -260,22 +202,26 @@ class odict(dict):
     __reversed__ = riterkeys
 
     def rkeys(self):
-        """List of the keys in reversed order."""
+        """List of the keys in reversed order.
+        """
         return list(self.riterkeys())
 
     def ritervalues(self):
-        """To iterate on values in reversed order."""
+        """To iterate on values in reversed order.
+        """
         curr_key = self.lt
         while curr_key is not _nil:
             curr_key, val, _ = dict.__getitem__(self, curr_key)
             yield val
 
     def rvalues(self):
-        """List of the values in reversed order."""
+        """List of the values in reversed order.
+        """
         return list(self.ritervalues())
 
     def riteritems(self):
-        """To iterate on (key, value) in reversed order."""
+        """To iterate on (key, value) in reversed order.
+        """
         curr_key = self.lt
         while curr_key is not _nil:
             pred_key, val, _ = dict.__getitem__(self, curr_key)
@@ -283,7 +229,8 @@ class odict(dict):
             curr_key = pred_key
 
     def ritems(self):
-        """List of the (key, value) in reversed order."""
+        """List of the (key, value) in reversed order.
+        """
         return list(self.riteritems())
 
     def firstkey(self):
@@ -303,8 +250,3 @@ class odict(dict):
         Useful for debugging."""
         form = "odict low level repr lh,lt,data: %r, %r, %s"
         return form % (self.lh, self.lt, dict.__repr__(self))
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    print "Tests done."
