@@ -50,7 +50,7 @@ Version 1.2.3
 -------------
 
   -Move tests to seperate file and make egg testable with 
-   ``python setup.py test``
+   ``python setup.py test``.
    rnix, 2009-12-07
 
   -improve ``lt`` and ``lh`` properties to make ``odict`` work with 
@@ -61,7 +61,7 @@ Version 1.2.2
 -------------
 
   -Use try/except instead of ``__iter__`` in ``__setitem__`` to determine if
-   value was already set. rnix,
+   value was already set.
    rnix, 2009-07-17
 
 Version 1.2.1
