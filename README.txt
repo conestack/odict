@@ -50,8 +50,8 @@ Version 1.2.4
 -------------
 
   -Do not check for ``key`` in self on ``__delitem__``, ``KeyError`` is raised
-   properly anyway.
-   rnix, 2009-12-18
+   properly anyway. Huge Speedup!
+   rnix, jensens, 2009-12-18
 
 Version 1.2.3
 -------------
