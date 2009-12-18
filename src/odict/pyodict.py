@@ -71,19 +71,16 @@ class odict(dict):
             self.lt = key
 
     def __delitem__(self, key):
-        if key in self:
-            pred, _ ,succ= dict.__getitem__(self, key)
-            if pred is _nil:
-                self.lh = succ
-            else:
-                dict.__getitem__(self, pred)[2] = succ
-            if succ is _nil:
-                self.lt = pred
-            else:
-                dict.__getitem__(self, succ)[0] = pred
-            dict.__delitem__(self, key)
+        pred, _ ,succ= dict.__getitem__(self, key)
+        if pred is _nil:
+            self.lh = succ
         else:
-            raise KeyError, key
+            dict.__getitem__(self, pred)[2] = succ
+        if succ is _nil:
+            self.lt = pred
+        else:
+            dict.__getitem__(self, succ)[0] = pred
+        dict.__delitem__(self, key)
     
     def __contains__(self, key):
         return key in self.keys()
