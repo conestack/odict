@@ -98,8 +98,33 @@ Relation ``dict:odict`` of creating and deleting.
 Usage
 -----
 
+Import and create ordered dictionary.
+::
+
     >>> from odict import odict
     >>> od = odict()
+
+type conversion to ordinary ``dict``. This will fail.
+::
+
+    >>> dict(odict([(1, 1)]))
+    {1: [nil, 1, nil]}
+
+The reason for this is here -> http://bugs.python.org/issue1615701
+
+The ``__init__`` function of ``dict`` checks wether arg is subclass of dict,
+and ignores overwritten ``__getitem__`` & co if so.
+
+This was fixed and later reverted due to behavioural problems with ``pickle``.
+
+Use one of the following ways for type conversion.
+::
+    
+    >>> dict(odict([(1, 1)]).items())
+    {1: 1}
+    
+    >>> odict([(1, 1)]).as_dict()
+    {1: 1}
 
 Requires
 -------- 
@@ -112,10 +137,10 @@ Changes
 Version 1.2.5
 -------------
 
-    -Add benchmark script
+    -Add ``as_dict`` function. Supports type conversion to ordinary ``dict``.
      rnix, 2009-12-19
 
-    -Correct license comments in source files
+    -Add benchmark script
      rnix, 2009-12-19
 
 Version 1.2.4

@@ -82,7 +82,25 @@ del test 5, removal element at the end of the odict sequence.
     odict([('1', 1), ('2', 2), ('3', 3)])
 
 type conversion to ordinary ``dict``.
+
+Type conversion to ``dict`` will fail.
 ::
 
-    >>> o._debug = True
-    >>> dict(o)
+    >>> dict(odict([(1, 1)]))
+    {1: [nil, 1, nil]}
+
+Reason -> http://bugs.python.org/issue1615701
+
+The ``__init__`` function of ``dict`` checks wether arg is subclass of dict,
+and ignores overwritten ``__getitem__`` & co if so.
+
+This was fixed and later reverted due to behavioural problems with ``pickle``.
+
+The following ways for type conversion work.
+::
+    
+    >>> dict(odict([(1, 1)]).items())
+    {1: 1}
+    
+    >>> odict([(1, 1)]).as_dict()
+    {1: 1}

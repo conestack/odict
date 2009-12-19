@@ -14,9 +14,6 @@ class odict(dict):
     Overwriting values doesn't change their original sequential order.
     """
     
-    # TMP
-    _debug = False
-    
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
         a trap - inside a function or method the keyword args are accessible
@@ -242,6 +239,9 @@ class odict(dict):
             return self.lt
         else:
             raise KeyError("'lastkey(): ordered dictionary is empty'")
+    
+    def as_dict(self):
+        return dict(self.items())
 
     def _repr(self):
         """_repr(): low level repr of the whole data contained in the odict.
