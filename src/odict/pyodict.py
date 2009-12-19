@@ -1,12 +1,11 @@
-# GNU General Public License Version 2 or later
+# Python Software Foundation License
 
-class _Nil:
-    """Class of the 'pointer' to the null key. For internal usage only.
-    """
-    def __repr__(self): # Useful for odict._repr()
+class _Nil(object):
+    
+    def __repr__(self):
         return "nil"
 
-_nil = _Nil() # 'Pointer' to the null key.
+_nil = _Nil()
 
 class odict(dict):
     """Ordered dict data structure, with O(1) complexity for dict operations
@@ -14,6 +13,9 @@ class odict(dict):
     
     Overwriting values doesn't change their original sequential order.
     """
+    
+    # TMP
+    _debug = False
     
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
@@ -187,7 +189,6 @@ class odict(dict):
         else:
             raise KeyError("'popitem(): ordered dictionary is empty'")
 
-    # odict extension methods
     def riterkeys(self):
         """To iterate on keys in reversed order.
         """
@@ -244,6 +245,7 @@ class odict(dict):
 
     def _repr(self):
         """_repr(): low level repr of the whole data contained in the odict.
-        Useful for debugging."""
+        Useful for debugging.
+        """
         form = "odict low level repr lh,lt,data: %r, %r, %s"
         return form % (self.lh, self.lt, dict.__repr__(self))

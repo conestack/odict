@@ -5,75 +5,84 @@ odict
 __init__ test, with keyword args.
 ::
 
-  >>> from odict import odict
-  >>> odict(a=1)
-  Traceback (most recent call last):
-    ...
-  TypeError: __init__() of ordered dict takes no keyword arguments to avoid an ordering trap.
-
-  If initialized with a dict the order of elements is undefined!:
-  >>> o = odict({"a":1, "b":2, "c":3, "d":4})
-  >>> print o
-  {'a': 1, 'c': 3, 'b': 2, 'd': 4}
-  
+    >>> from odict import odict
+    >>> odict(a=1)
+    Traceback (most recent call last):
+      ...
+    TypeError: __init__() of ordered dict takes no keyword arguments to avoid an ordering trap.
+    
+    If initialized with a dict the order of elements is undefined!:
+    >>> o = odict({"a":1, "b":2, "c":3, "d":4})
+    >>> print o
+    {'a': 1, 'c': 3, 'b': 2, 'd': 4}
+    
 del test 1, removal from empty odict.
 ::
 
-  >>> o = odict()
-  >>> del o["1"]
-  Traceback (most recent call last):
-    ...
-  KeyError: '1'
+    >>> o = odict()
+    >>> del o["1"]
+    Traceback (most recent call last):
+      ...
+    KeyError: '1'
   
 del test 2, removal from odict with one element.
 ::
 
-  >>> o = odict()
-  >>> o["1"] = 1
-  >>> del o["1"]
-  >>> o.lh, o.lt, o, o
-  (nil, nil, odict(), odict())
-  >>> o._repr()
-  'odict low level repr lh,lt,data: nil, nil, {}'
+    >>> o = odict()
+    >>> o["1"] = 1
+    >>> del o["1"]
+    >>> o.lh, o.lt, o, o
+    (nil, nil, odict(), odict())
+    >>> o._repr()
+    'odict low level repr lh,lt,data: nil, nil, {}'
 
 del test 3, removal firt element of the odict sequence.
 ::
 
-  >>> o = odict()
-  >>> for i in [1,2,3]: o[str(i)] = i
-  >>> del o["1"]
-  >>> o.lh, o.lt, o
-  ('2', '3', odict([('2', 2), ('3', 3)]))
+    >>> o = odict()
+    >>> for i in [1,2,3]: o[str(i)] = i
+    >>> del o["1"]
+    >>> o.lh, o.lt, o
+    ('2', '3', odict([('2', 2), ('3', 3)]))
 
 del test 4, removal element in the middle of the odict sequence.
 ::
 
-  >>> o = odict()
-  >>> for i in [1,2,3]: o[str(i)] = i
-  >>> del o["2"]
-  >>> o.lh, o.lt, o
-  ('1', '3', odict([('1', 1), ('3', 3)]))
+    >>> o = odict()
+    >>> for i in [1,2,3]: o[str(i)] = i
+    >>> del o["2"]
+    >>> o.lh, o.lt, o
+    ('1', '3', odict([('1', 1), ('3', 3)]))
 
 del test 5, removal element at the end of the odict sequence.
 ::
 
-  >>> o = odict()
-  >>> for i in [1,2,3]: o[str(i)] = i
-  >>> del o["3"]
-  >>> o.lh, o.lt, o
-  ('1', '2', odict([('1', 1), ('2', 2)]))
+    >>> o = odict()
+    >>> for i in [1,2,3]: o[str(i)] = i
+    >>> del o["3"]
+    >>> o.lh, o.lt, o
+    ('1', '2', odict([('1', 1), ('2', 2)]))
 
 ``deepcopy`` test.
 ::
 
-  >>> o = odict()
-  >>> o['1'] = 1
-  >>> o['2'] = 2
-  >>> o['3'] = 3
-  >>> o
-  odict([('1', 1), ('2', 2), ('3', 3)])
-  
-  >>> import copy
-  >>> o_copied = copy.deepcopy(o)
-  >>> o_copied
-  odict([('1', 1), ('2', 2), ('3', 3)])
+    >>> o = odict()
+    >>> o['1'] = 1
+    >>> o['2'] = 2
+    >>> o['3'] = 3
+    >>> o
+    odict([('1', 1), ('2', 2), ('3', 3)])
+    
+    >>> import copy
+    >>> o_copied = copy.deepcopy(o)
+    >>> o_copied is o
+    False
+    
+    >>> o_copied
+    odict([('1', 1), ('2', 2), ('3', 3)])
+
+type conversion to ordinary ``dict``.
+::
+
+    >>> o._debug = True
+    >>> dict(o)

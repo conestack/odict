@@ -1,9 +1,9 @@
-# GNU General Public License Version 2 or later
+# Python Software Foundation License
 
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.2.4'
+version = '1.2.5'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
 tests_require = ['interlude']
@@ -19,7 +19,7 @@ setup(name='odict',
             'Programming Language :: Python', 
             'Topic :: Software Development',       
       ],
-      keywords='odict',
+      keywords='odict dict ordered dictionary mapping collection tree',
       author='Robert Niederreiter',
       author_email='rnix@squarewave.at',
       url=u'https://svn.plone.org/svn/archetypes/AGX/odict',

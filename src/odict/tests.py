@@ -1,4 +1,4 @@
-# GNU General Public License Version 2 or later
+# Python Software Foundation License
 
 import unittest
 import doctest 
