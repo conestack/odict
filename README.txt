@@ -134,6 +134,12 @@ Requires
 Changes
 =======
 
+Version 1.2.6
+-------------
+
+    -Make ``odict`` serialize and deserialize properly
+     gogo, 2010-01-12
+
 Version 1.2.5
 -------------
 
@@ -192,3 +198,5 @@ Credits
     -bearophile
     
     -Robert Niederreiter <rnix@squarewave.at>
+    
+    -Georg Bernhard <g.bernhard@akbild.ac.at>
