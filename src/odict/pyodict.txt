@@ -104,3 +104,16 @@ The following ways for type conversion work.
     
     >>> odict([(1, 1)]).as_dict()
     {1: 1}
+    
+This tests makes sure that serialisation works
+::
+
+    >>> import odict
+    >>> import cPickle
+    >>> cPickle.loads(cPickle.dumps([odict.odict([(1, 2),])]))
+    [odict([(1, 2)])]
+    
+    >>> import pickle
+    >>> pickle.loads(pickle.dumps([odict.odict([(1, 2),])]))
+    [odict([(1, 2)])]
+

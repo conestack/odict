@@ -4,7 +4,19 @@ class _Nil(object):
     
     def __repr__(self):
         return "nil"
-
+        
+    def __eq__(self, other):
+        if (isinstance(other, _Nil)):
+            return True
+        else:
+            return NotImplemented
+            
+    def __ne__(self, other):
+        if (isinstance(other, _Nil)):
+            return False
+        else:
+            return NotImplemented
+        
 _nil = _Nil()
 
 class odict(dict):
@@ -63,7 +75,7 @@ class odict(dict):
         except KeyError, e:
             new = [self.lt, val, _nil]
             dict.__setitem__(self, key, new)
-            if self.lt is _nil:
+            if self.lt == _nil:
                 self.lh = key
             else:
                 dict.__getitem__(self, self.lt)[2] = key
@@ -71,11 +83,11 @@ class odict(dict):
 
     def __delitem__(self, key):
         pred, _ ,succ= dict.__getitem__(self, key)
-        if pred is _nil:
+        if pred == _nil:
             self.lh = succ
         else:
             dict.__getitem__(self, pred)[2] = succ
-        if succ is _nil:
+        if succ == _nil:
             self.lt = pred
         else:
             dict.__getitem__(self, succ)[0] = pred
@@ -106,7 +118,7 @@ class odict(dict):
 
     def __iter__(self):
         curr_key = self.lh
-        while curr_key is not _nil:
+        while curr_key != _nil:
             yield curr_key
             curr_key = dict.__getitem__(self, curr_key)[2]
 
@@ -117,7 +129,7 @@ class odict(dict):
 
     def itervalues(self):
         curr_key = self.lh
-        while curr_key is not _nil:
+        while curr_key != _nil:
             _, val, curr_key = dict.__getitem__(self, curr_key)
             yield val
 
@@ -126,7 +138,7 @@ class odict(dict):
 
     def iteritems(self):
         curr_key = self.lh
-        while curr_key is not _nil:
+        while curr_key != _nil:
             _, val, next_key = dict.__getitem__(self, curr_key)
             yield curr_key, val
             curr_key = next_key
@@ -172,7 +184,7 @@ class odict(dict):
             val = self[k]
             del self[k]
             return val
-        elif x is _nil:
+        elif x == _nil:
             raise KeyError(k)
         else:
             return x
@@ -190,7 +202,7 @@ class odict(dict):
         """To iterate on keys in reversed order.
         """
         curr_key = self.lt
-        while curr_key is not _nil:
+        while curr_key != _nil:
             yield curr_key
             curr_key = dict.__getitem__(self, curr_key)[0]
 
@@ -205,7 +217,7 @@ class odict(dict):
         """To iterate on values in reversed order.
         """
         curr_key = self.lt
-        while curr_key is not _nil:
+        while curr_key != _nil:
             curr_key, val, _ = dict.__getitem__(self, curr_key)
             yield val
 
@@ -218,7 +230,7 @@ class odict(dict):
         """To iterate on (key, value) in reversed order.
         """
         curr_key = self.lt
-        while curr_key is not _nil:
+        while curr_key != _nil:
             pred_key, val, _ = dict.__getitem__(self, curr_key)
             yield curr_key, val
             curr_key = pred_key
