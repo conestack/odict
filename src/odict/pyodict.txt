@@ -116,3 +116,25 @@ Makes sure that serialisation works.
     >>> import pickle
     >>> pickle.loads(pickle.dumps([odict.odict([(1, 2),])]))
     [odict([(1, 2)])]
+
+Test sorting.
+::
+
+    >>> od = odict.odict([('a', 1), ('c', 3), ('b', 2)])
+    >>> od.sort()
+    >>> od.items()
+    [('a', 1), ('b', 2), ('c', 3)]
+
+A custom ``cmp`` function. Note that you get (key, value) tuples to compare.
+As example a ``cmp`` function which sorts by key in reversed order.
+::
+
+    >>> def cmp(x, y):
+    ...    if x[0] > y[0]: return -1
+    ...    if x[0] < y[0]: return 1
+    ...    return 0
+    >>> od = odict.odict([('a', 1), ('c', 3), ('b', 2)])
+    >>> od = odict.odict([('a', 1), ('c', 3), ('b', 2)])
+    >>> od.sort(cmp=cmp)
+    >>> od.items()
+    [('c', 3), ('b', 2), ('a', 1)]

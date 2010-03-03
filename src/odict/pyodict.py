@@ -109,7 +109,7 @@ class odict(dict):
             return "odict([%s])" % ", ".join(pairs)
         else:
             return "odict()"
-
+    
     def get(self, k, x=None):
         if k in self:
             return dict.__getitem__(self, k)[1]
@@ -145,6 +145,18 @@ class odict(dict):
 
     def items(self):
         return list(self.iteritems())
+    
+    def sort(self, cmp=None, key=None, reverse=False):
+        #XXX: ``key`` and ``reverse`` kwarg support not implemented yet.
+        items = [(key, value) for key, value in self.items()]
+        if cmp is None:
+            def cmp(x, y):
+                if x[1] < y[1]: return -1
+                if x[1] > y[1]: return 1
+                return 0
+        items = sorted(items, cmp=cmp)
+        self.clear()
+        self.__init__(items)
 
     def clear(self):
         dict.clear(self)
