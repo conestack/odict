@@ -147,14 +147,19 @@ class odict(dict):
         return list(self.iteritems())
     
     def sort(self, cmp=None, key=None, reverse=False):
-        #XXX: ``key`` and ``reverse`` kwarg support not implemented yet.
+        cmpkey = key
         items = [(key, value) for key, value in self.items()]
-        if cmp is None:
+        if cmp is None and cmpkey is None:
             def cmp(x, y):
                 if x[1] < y[1]: return -1
                 if x[1] > y[1]: return 1
                 return 0
-        items = sorted(items, cmp=cmp)
+        if cmp is not None:
+            items = sorted(items, cmp=cmp)
+        else:
+            items = sorted(items, key=cmpkey)
+        if reverse:
+            items.reverse()
         self.clear()
         self.__init__(items)
 

@@ -138,3 +138,15 @@ As example a ``cmp`` function which sorts by key in reversed order.
     >>> od.sort(cmp=cmp)
     >>> od.items()
     [('c', 3), ('b', 2), ('a', 1)]
+    
+Test ``key`` and ``reverse`` kwargs.
+::
+
+    >>> od = odict.odict([('a', 1), ('c', 3), ('b', 2)])
+    >>> od.sort(key=lambda x: x[0])
+    >>> od.items()
+    [('a', 1), ('b', 2), ('c', 3)]
+    
+    >>> od.sort(key=lambda x: x[0], reverse=True)
+    >>> od.items()
+    [('c', 3), ('b', 2), ('a', 1)]
