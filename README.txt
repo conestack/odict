@@ -134,6 +134,12 @@ Requires
 Changes
 =======
 
+Version 1.3.0
+-------------
+
+    -Add ``sort`` function to odict.
+     XXX: ``key`` and ``reverse`` kwarg support not implemented yet.
+
 Version 1.2.6
 -------------
 
