@@ -168,3 +168,6 @@ still works.
     >>> sub.title = 'foo'
     >>> sub.keys()
     ['title']
+    
+    >>> sub.title
+    'foo'
