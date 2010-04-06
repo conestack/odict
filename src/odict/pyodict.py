@@ -47,22 +47,22 @@ class odict(dict):
     # Double-linked list header
     def _get_lh(self):
         if not hasattr(self, '_lh'):
-            self._lh = _nil
-        return self._lh
+            object.__setattr__(self, '_lh', _nil)
+        return object.__getattribute__(self, '_lh')
     
     def _set_lh(self, val):
-        self._lh = val
+        object.__setattr__(self, '_lh', val)
     
     lh = property(_get_lh, _set_lh)
     
     # Double-linked list tail
     def _get_lt(self):
         if not hasattr(self, '_lt'):
-            self._lt = _nil
-        return self._lt
+            object.__setattr__(self, '_lt', _nil)
+        return object.__getattribute__(self, '_lt')
     
     def _set_lt(self, val):
-        self._lt = val
+        object.__setattr__(self, '_lt', val)
     
     lt = property(_get_lt, _set_lt)
 
@@ -73,22 +73,23 @@ class odict(dict):
         try:
             dict.__getitem__(self, key)[1] = val
         except KeyError, e:
-            new = [self.lt, val, _nil]
+            new = [object.__getattribute__(self, 'lt'), val, _nil]
             dict.__setitem__(self, key, new)
-            if self.lt == _nil:
-                self.lh = key
+            if object.__getattribute__(self, 'lt') == _nil:
+                object.__setattr__(self, 'lh', key)
             else:
-                dict.__getitem__(self, self.lt)[2] = key
-            self.lt = key
+                dict.__getitem__(self,
+                                 object.__getattribute__(self, 'lt'))[2] = key
+            object.__setattr__(self, 'lt', key)
 
     def __delitem__(self, key):
         pred, _ ,succ= dict.__getitem__(self, key)
         if pred == _nil:
-            self.lh = succ
+            object.__setattr__(self, 'lh', succ)
         else:
             dict.__getitem__(self, pred)[2] = succ
         if succ == _nil:
-            self.lt = pred
+            object.__setattr__(self, 'lt', pred)
         else:
             dict.__getitem__(self, succ)[0] = pred
         dict.__delitem__(self, key)
@@ -117,7 +118,7 @@ class odict(dict):
             return x
 
     def __iter__(self):
-        curr_key = self.lh
+        curr_key = object.__getattribute__(self, 'lh')
         while curr_key != _nil:
             yield curr_key
             curr_key = dict.__getitem__(self, curr_key)[2]
@@ -128,7 +129,7 @@ class odict(dict):
         return list(self.iterkeys())
 
     def itervalues(self):
-        curr_key = self.lh
+        curr_key = object.__getattribute__(self, 'lh')
         while curr_key != _nil:
             _, val, curr_key = dict.__getitem__(self, curr_key)
             yield val
@@ -137,7 +138,7 @@ class odict(dict):
         return list(self.itervalues())
 
     def iteritems(self):
-        curr_key = self.lh
+        curr_key = object.__getattribute__(self, 'lh')
         while curr_key != _nil:
             _, val, next_key = dict.__getitem__(self, curr_key)
             yield curr_key, val
@@ -165,8 +166,8 @@ class odict(dict):
 
     def clear(self):
         dict.clear(self)
-        self.lh = _nil
-        self.lt = _nil
+        object.__setattr__(self, 'lh', _nil)
+        object.__setattr__(self, 'lt', _nil)
 
     def copy(self):
         return self.__class__(self)
@@ -208,7 +209,7 @@ class odict(dict):
 
     def popitem(self):
         if self:
-            key = self.lt
+            key = object.__getattribute__(self, 'lt')
             val = dict.__getitem__(self, key)[1]
             self.__delitem__(key)
             return key, val
@@ -218,7 +219,7 @@ class odict(dict):
     def riterkeys(self):
         """To iterate on keys in reversed order.
         """
-        curr_key = self.lt
+        curr_key = object.__getattribute__(self, 'lt')
         while curr_key != _nil:
             yield curr_key
             curr_key = dict.__getitem__(self, curr_key)[0]
@@ -233,7 +234,7 @@ class odict(dict):
     def ritervalues(self):
         """To iterate on values in reversed order.
         """
-        curr_key = self.lt
+        curr_key = object.__getattribute__(self, 'lt')
         while curr_key != _nil:
             curr_key, val, _ = dict.__getitem__(self, curr_key)
             yield val
@@ -246,7 +247,7 @@ class odict(dict):
     def riteritems(self):
         """To iterate on (key, value) in reversed order.
         """
-        curr_key = self.lt
+        curr_key = object.__getattribute__(self, 'lt')
         while curr_key != _nil:
             pred_key, val, _ = dict.__getitem__(self, curr_key)
             yield curr_key, val
@@ -259,13 +260,13 @@ class odict(dict):
 
     def firstkey(self):
         if self:
-            return self.lh
+            return object.__getattribute__(self, 'lh')
         else:
             raise KeyError("'firstkey(): ordered dictionary is empty'")
 
     def lastkey(self):
         if self:
-            return self.lt
+            return object.__getattribute__(self, 'lt')
         else:
             raise KeyError("'lastkey(): ordered dictionary is empty'")
     
@@ -277,4 +278,6 @@ class odict(dict):
         Useful for debugging.
         """
         form = "odict low level repr lh,lt,data: %r, %r, %s"
-        return form % (self.lh, self.lt, dict.__repr__(self))
+        return form % (object.__getattribute__(self, 'lh'),
+                       object.__getattribute__(self, 'lt'),
+                       dict.__repr__(self))

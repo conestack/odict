@@ -137,7 +137,12 @@ Changes
 Version 1.3.0
 -------------
 
+    -Fix access to ``odict.lt`` and ``odict.lh`` properties. Now it's possible
+     to overwrite ``__setattr__`` and ``__getattr__`` on ``odict`` subclass
+     without the needs of special attribute handling in base class.
+
     -Add ``sort`` function to odict.
+     rnix 2010-03-03
 
 Version 1.2.6
 -------------

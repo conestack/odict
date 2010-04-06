@@ -150,3 +150,21 @@ Test ``key`` and ``reverse`` kwargs.
     >>> od.sort(key=lambda x: x[0], reverse=True)
     >>> od.items()
     [('c', 3), ('b', 2), ('a', 1)]
+
+Overwrite __getattr__ and __setattr__ on subclass of odict and check if odict
+still works.
+::
+
+    >>> class Sub(odict.odict):
+    ...     def __getattr__(self, name):
+    ...         try:
+    ...             return self[name]
+    ...         except KeyError:
+    ...             raise AttributeError(name)
+    ...     def __setattr__(self, name, value):
+    ...         self[name] = value
+
+    >>> sub = Sub()
+    >>> sub.title = 'foo'
+    >>> sub.keys()
+    ['title']
