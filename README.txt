@@ -137,7 +137,7 @@ Changes
 Version 1.3.1
 -------------
 
-    -Add test for bool validation
+    -Add test for bool evaluation
      rnix, 2010-04-21
 
 Version 1.3.0
