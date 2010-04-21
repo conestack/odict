@@ -175,6 +175,12 @@ still works.
 Check bool expressions
 ::
 
-    >>> odict.odict and True or False
+    >>> odict.odict() and True or False
+    False
     
-    >>> odict.odict((1, 1)) and True or False
+    >>> odict.odict([('a', 1)]) and True or False
+    True
+    
+    >>> if odict.odict([('a', 1)]):
+    ...     print True
+    True

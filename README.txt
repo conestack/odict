@@ -134,6 +134,12 @@ Requires
 Changes
 =======
 
+Version 1.3.1
+-------------
+
+    -Add test for bool validation
+     rnix, 2010-04-21
+
 Version 1.3.0
 -------------
 
