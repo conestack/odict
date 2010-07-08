@@ -126,6 +126,16 @@ Use one of the following ways for type conversion.
     >>> odict([(1, 1)]).as_dict()
     {1: 1}
 
+It is possible to use abstract mixin class ``_odict`` to hook another dict base
+implementation. This is useful i.e. when persisting to ZODB. Inheriting from
+``dict`` and ``Persistent`` would fail.
+::
+
+    >>> from persistent.dict import PersistentDict 
+    >>> class podict(_odict, PersistentDict):
+    ...     def _dict_impl(self):
+    ...         return PersistentDict
+
 Requires
 -------- 
 
@@ -133,6 +143,12 @@ Requires
 
 Changes
 =======
+
+Version 1.3.2
+-------------
+
+    - Access ``dict`` API providing class via function ``_dict_impl()`` and
+      provide odict logic as abstract base class ``_odict``.
 
 Version 1.3.1
 -------------

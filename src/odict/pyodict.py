@@ -19,12 +19,15 @@ class _Nil(object):
         
 _nil = _Nil()
 
-class odict(dict):
+class _odict(object):
     """Ordered dict data structure, with O(1) complexity for dict operations
     that modify one element.
     
     Overwriting values doesn't change their original sequential order.
     """
+    
+    def _dict_impl(self):
+        return None
     
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
@@ -35,7 +38,7 @@ class odict(dict):
         if kwds:
             raise TypeError("__init__() of ordered dict takes no keyword "
                             "arguments to avoid an ordering trap.")
-        dict.__init__(self)
+        self._dict_impl().__init__(self)
         # If you give a normal dict, then the order of elements is undefined
         if hasattr(data, "iteritems"):
             for key, val in data.iteritems():
@@ -67,32 +70,32 @@ class odict(dict):
     lt = property(_get_lt, _set_lt)
 
     def __getitem__(self, key):
-        return dict.__getitem__(self, key)[1]
+        return self._dict_impl().__getitem__(self, key)[1]
 
     def __setitem__(self, key, val):
         try:
-            dict.__getitem__(self, key)[1] = val
+            self._dict_impl().__getitem__(self, key)[1] = val
         except KeyError, e:
             new = [object.__getattribute__(self, 'lt'), val, _nil]
-            dict.__setitem__(self, key, new)
+            self._dict_impl().__setitem__(self, key, new)
             if object.__getattribute__(self, 'lt') == _nil:
                 object.__setattr__(self, 'lh', key)
             else:
-                dict.__getitem__(self,
-                                 object.__getattribute__(self, 'lt'))[2] = key
+                self._dict_impl().__getitem__(
+                    self, object.__getattribute__(self, 'lt'))[2] = key
             object.__setattr__(self, 'lt', key)
 
     def __delitem__(self, key):
-        pred, _ ,succ= dict.__getitem__(self, key)
+        pred, _ ,succ= self._dict_impl().__getitem__(self, key)
         if pred == _nil:
             object.__setattr__(self, 'lh', succ)
         else:
-            dict.__getitem__(self, pred)[2] = succ
+            self._dict_impl().__getitem__(self, pred)[2] = succ
         if succ == _nil:
             object.__setattr__(self, 'lt', pred)
         else:
-            dict.__getitem__(self, succ)[0] = pred
-        dict.__delitem__(self, key)
+            self._dict_impl().__getitem__(self, succ)[0] = pred
+        self._dict_impl().__delitem__(self, key)
     
     def __contains__(self, key):
         return key in self.keys()
@@ -113,7 +116,7 @@ class odict(dict):
     
     def get(self, k, x=None):
         if k in self:
-            return dict.__getitem__(self, k)[1]
+            return self._dict_impl().__getitem__(self, k)[1]
         else:
             return x
 
@@ -121,7 +124,7 @@ class odict(dict):
         curr_key = object.__getattribute__(self, 'lh')
         while curr_key != _nil:
             yield curr_key
-            curr_key = dict.__getitem__(self, curr_key)[2]
+            curr_key = self._dict_impl().__getitem__(self, curr_key)[2]
 
     iterkeys = __iter__
 
@@ -131,7 +134,7 @@ class odict(dict):
     def itervalues(self):
         curr_key = object.__getattribute__(self, 'lh')
         while curr_key != _nil:
-            _, val, curr_key = dict.__getitem__(self, curr_key)
+            _, val, curr_key = self._dict_impl().__getitem__(self, curr_key)
             yield val
 
     def values(self):
@@ -140,7 +143,7 @@ class odict(dict):
     def iteritems(self):
         curr_key = object.__getattribute__(self, 'lh')
         while curr_key != _nil:
-            _, val, next_key = dict.__getitem__(self, curr_key)
+            _, val, next_key = self._dict_impl().__getitem__(self, curr_key)
             yield curr_key, val
             curr_key = next_key
 
@@ -165,7 +168,7 @@ class odict(dict):
         self.__init__(items)
 
     def clear(self):
-        dict.clear(self)
+        self._dict_impl().clear(self)
         object.__setattr__(self, 'lh', _nil)
         object.__setattr__(self, 'lt', _nil)
 
@@ -210,7 +213,7 @@ class odict(dict):
     def popitem(self):
         if self:
             key = object.__getattribute__(self, 'lt')
-            val = dict.__getitem__(self, key)[1]
+            val = self._dict_impl().__getitem__(self, key)[1]
             self.__delitem__(key)
             return key, val
         else:
@@ -222,7 +225,7 @@ class odict(dict):
         curr_key = object.__getattribute__(self, 'lt')
         while curr_key != _nil:
             yield curr_key
-            curr_key = dict.__getitem__(self, curr_key)[0]
+            curr_key = self._dict_impl().__getitem__(self, curr_key)[0]
 
     __reversed__ = riterkeys
 
@@ -236,7 +239,7 @@ class odict(dict):
         """
         curr_key = object.__getattribute__(self, 'lt')
         while curr_key != _nil:
-            curr_key, val, _ = dict.__getitem__(self, curr_key)
+            curr_key, val, _ = self._dict_impl().__getitem__(self, curr_key)
             yield val
 
     def rvalues(self):
@@ -249,7 +252,7 @@ class odict(dict):
         """
         curr_key = object.__getattribute__(self, 'lt')
         while curr_key != _nil:
-            pred_key, val, _ = dict.__getitem__(self, curr_key)
+            pred_key, val, _ = self._dict_impl().__getitem__(self, curr_key)
             yield curr_key, val
             curr_key = pred_key
 
@@ -271,7 +274,7 @@ class odict(dict):
             raise KeyError("'lastkey(): ordered dictionary is empty'")
     
     def as_dict(self):
-        return dict(self.items())
+        return self._dict_impl()(self.items())
 
     def _repr(self):
         """_repr(): low level repr of the whole data contained in the odict.
@@ -280,4 +283,9 @@ class odict(dict):
         form = "odict low level repr lh,lt,data: %r, %r, %s"
         return form % (object.__getattribute__(self, 'lh'),
                        object.__getattribute__(self, 'lt'),
-                       dict.__repr__(self))
+                       self._dict_impl().__repr__(self))
+
+class odict(_odict, dict):
+    
+    def _dict_impl(self):
+        return dict
