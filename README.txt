@@ -128,7 +128,7 @@ Use one of the following ways for type conversion.
 
 It is possible to use abstract mixin class ``_odict`` to hook another dict base
 implementation. This is useful i.e. when persisting to ZODB. Inheriting from
-``dict`` and ``Persistent`` would fail.
+``dict`` and ``Persistent`` at the same time fails.
 ::
 
     >>> from persistent.dict import PersistentDict 
@@ -147,8 +147,9 @@ Changes
 Version 1.3.2
 -------------
 
-    - Access ``dict`` API providing class via function ``_dict_impl()`` and
-      provide odict logic as abstract base class ``_odict``.
+    -Access ``dict`` API providing class via function ``_dict_impl()`` and
+     provide odict logic as abstract base class ``_odict``.
+     rnix, 2010-07-08
 
 Version 1.3.1
 -------------
