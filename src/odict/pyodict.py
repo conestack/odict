@@ -158,17 +158,13 @@ class _odict(object):
         return list(self.iteritems())
     
     def sort(self, cmp=None, key=None, reverse=False):
-        cmpkey = key
-        items = [(key, value) for key, value in self.items()]
-        if cmp is None and cmpkey is None:
-            def cmp(x, y):
-                if x[1] < y[1]: return -1
-                if x[1] > y[1]: return 1
-                return 0
+        items = [(k, v) for k,v in self.items()]
         if cmp is not None:
             items = sorted(items, cmp=cmp)
+        elif key is not None:
+            items = sorted(items, key=key)
         else:
-            items = sorted(items, key=cmpkey)
+            items = sorted(items, key=lambda x: x[1])
         if reverse:
             items.reverse()
         self.clear()
@@ -188,44 +184,33 @@ class _odict(object):
             raise TypeError("update() of ordered dict takes no keyword "
                             "arguments to avoid an ordering trap.")
         if hasattr(data, "iteritems"):
-            for key, val in data.iteritems():
-                self[key] = val
-        else:
-            for key, val in data:
-                self[key] = val
-
-    @classmethod
-    def fromkeys(cls, seq, value=None):
-        new = cls()
-        for key in seq:
-            new[key] = value
-        return new
+            data = data.iteritems()
+        for key, val in data:
+            self[key] = val
 
     def setdefault(self, k, x=None):
-        if k in self:
+        try:
             return self[k]
-        else:
+        except KeyError:
             self[k] = x
             return x
 
     def pop(self, k, x=_nil):
-        if k in self:
+        try:
             val = self[k]
             del self[k]
             return val
-        elif x == _nil:
-            raise KeyError(k)
-        else:
+        except KeyError:
+            if x == _nil:
+                raise
             return x
 
     def popitem(self):
-        if self:
+        try:
             dict_impl = self._dict_impl()
             key = dict_impl.__getattribute__(self, 'lt')
-            val = dict_impl.__getitem__(self, key)[1]
-            self.__delitem__(key)
-            return key, val
-        else:
+            return key, self.pop(key)
+        except KeyError:
             raise KeyError("'popitem(): ordered dictionary is empty'")
 
     def riterkeys(self):

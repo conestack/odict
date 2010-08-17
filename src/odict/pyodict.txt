@@ -2,6 +2,18 @@
 odict
 =====
 
+_odict is abstract and subclasses need to implement _dict_impl:
+
+
+    >>> from odict.pyodict import _odict
+    >>> o = _odict()
+
+    >>> class MyODict(_odict, dict):
+    ...     def _dict_impl(self):
+    ...         return dict
+    >>> o = MyODict()
+    >>> del o
+
 __init__ test, with keyword args.
 ::
 
@@ -15,7 +27,109 @@ __init__ test, with keyword args.
     >>> o = odict({"a":1, "b":2, "c":3, "d":4})
     >>> print o
     {'a': 1, 'c': 3, 'b': 2, 'd': 4}
-    
+
+Also updates don't accepts kwds
+::
+    >>> o.update(foo=1)
+    Traceback (most recent call last):
+      ...
+    TypeError: update() of ordered dict takes no keyword arguments to avoid an ordering trap.
+
+
+Test containment
+::
+    >>> 'a' in o
+    True
+
+    >>> 'foo' in o
+    False
+
+Fetch values
+::
+    >>> o.get('a')
+    1
+    >>> o.get('foo', '')
+    ''
+
+Copy odict
+::
+    >>> o.copy() is not o
+    True
+    >>> o.copy()
+    odict([('a', 1), ('c', 3), ('b', 2), ('d', 4)])
+
+First and last key
+::
+    >>> o.firstkey()
+    'a'
+
+    >>> o.lastkey()
+    'd'
+
+    >>> odict().firstkey()
+    Traceback (most recent call last):
+    ...
+    KeyError: "'firstkey(): ordered dictionary is empty'"
+
+    >>> odict().lastkey()
+    Traceback (most recent call last):
+    ...
+    KeyError: "'lastkey(): ordered dictionary is empty'"
+
+Reverse iteration
+::
+    >>> [x for x in o.riterkeys()]
+    ['d', 'b', 'c', 'a']
+
+    >>> o.rkeys()
+    ['d', 'b', 'c', 'a']
+
+    >>> [x for x in o.ritervalues()]
+    [4, 2, 3, 1]
+
+    >>> o.rvalues()
+    [4, 2, 3, 1]
+
+    >>> [x for x in o.riteritems()]
+    [('d', 4), ('b', 2), ('c', 3), ('a', 1)]
+
+    >>> o.ritems()
+    [('d', 4), ('b', 2), ('c', 3), ('a', 1)]
+
+From keys initialization
+::
+    >>> o2 = odict.fromkeys((1,2,3), 'x')
+    >>> o2
+    odict([(1, 'x'), (2, 'x'), (3, 'x')])
+
+Setdefault
+::
+    >>> o2.setdefault(1, 9999)
+    'x'
+    >>> o2.setdefault(4, 9999)
+    9999
+
+Popping
+::
+    >>> o2.pop(5)
+    Traceback (most recent call last):
+      ...
+    KeyError: 5
+    >>> o2.pop(5, 'foo')
+    'foo'
+    >>> o2.pop(4)
+    9999
+    >>> o2
+    odict([(1, 'x'), (2, 'x'), (3, 'x')])
+
+    >>> o2.popitem()
+    (3, 'x')
+
+    >>> odict().popitem()
+    Traceback (most recent call last):
+    ...
+    KeyError: "'popitem(): ordered dictionary is empty'"
+
 del test 1, removal from empty odict.
 ::
 
@@ -36,7 +150,7 @@ del test 2, removal from odict with one element.
     >>> o._repr()
     'odict low level repr lh,lt,data: nil, nil, {}'
 
-del test 3, removal firt element of the odict sequence.
+del test 3, removal first element of the odict sequence.
 ::
 
     >>> o = odict()
