@@ -1,4 +1,3 @@
-
 odict
 =====
 
@@ -8,7 +7,6 @@ item keeps it at its original position.
 
 Internal representation: values of the dict:
 ::
-
     [pred_key, val, succ_key]
 
 The sequence of elements uses as a double linked list. The ``links`` are dict
@@ -34,7 +32,6 @@ on recent common hardware.
 
 Adding and deleting ``dict`` objects.
 ::
-
     +----------------+--------------------+
     | Add 1000       | 0.000653028488159  |
     +----------------+--------------------+
@@ -55,7 +52,6 @@ Adding and deleting ``dict`` objects.
 
 Adding and deleting ``odict`` objects.
 ::
-
     +----------------+--------------------+
     | Add 1000       | 0.0096800327301    |
     +----------------+--------------------+
@@ -76,7 +72,6 @@ Adding and deleting ``odict`` objects.
 
 Relation ``dict:odict`` of creating and deleting.
 ::
-
     +---------------------------+-----------+
     | creating 1000 objects     | 1:14.823  |
     +---------------------------+-----------+
@@ -100,13 +95,11 @@ Usage
 
 Import and create ordered dictionary.
 ::
-
     >>> from odict import odict
     >>> od = odict()
 
 type conversion to ordinary ``dict``. This will fail.
 ::
-
     >>> dict(odict([(1, 1)]))
     {1: [nil, 1, nil]}
 
@@ -119,7 +112,6 @@ This was fixed and later reverted due to behavioural problems with ``pickle``.
 
 Use one of the following ways for type conversion.
 ::
-    
     >>> dict(odict([(1, 1)]).items())
     {1: 1}
     
@@ -130,7 +122,6 @@ It is possible to use abstract mixin class ``_odict`` to hook another dict base
 implementation. This is useful i.e. when persisting to ZODB. Inheriting from
 ``dict`` and ``Persistent`` at the same time fails.
 ::
-
     >>> from persistent.dict import PersistentDict 
     >>> class podict(_odict, PersistentDict):
     ...     def _dict_impl(self):
@@ -150,7 +141,7 @@ Version 1.4.0
     -Full test coverage
      chaoflow, rnix, 2010-08-17
      
-    -Code optimizing
+    -Code cleanup and optimizing
      chaoflow, rnix, 2010-08-17
 
 Version 1.3.2
