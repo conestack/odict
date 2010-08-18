@@ -144,6 +144,15 @@ Requires
 Changes
 =======
 
+Version 1.4.0
+-------------
+
+    -Full test coverage
+     chaoflow, rnix, 2010-08-17
+     
+    -Code optimizing
+     chaoflow, rnix, 2010-08-17
+
 Version 1.3.2
 -------------
 
@@ -234,3 +243,5 @@ Credits
     -Robert Niederreiter <rnix@squarewave.at>
     
     -Georg Bernhard <g.bernhard@akbild.ac.at>
+    
+    -Florian Friesdorf <flo@chaoflow.net>
