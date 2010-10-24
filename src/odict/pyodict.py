@@ -1,5 +1,7 @@
 # Python Software Foundation License
 
+# XXX: it feels like using the class with "is" and "is not" instead of "==" and
+# "!=" should be faster.
 class _Nil(object):
     
     def __repr__(self):
