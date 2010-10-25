@@ -8,3 +8,4 @@
 /develop-eggs
 /src/odict.egg-info/
 *.pyc
+/parts
