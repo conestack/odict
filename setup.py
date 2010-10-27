@@ -5,7 +5,7 @@ import sys, os
 
 version = '1.4.0'
 shortdesc = 'Ordered dictionary.'
-longdesc = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
+longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 tests_require = ['interlude']
 
 setup(name='odict',
