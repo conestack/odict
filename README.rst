@@ -226,8 +226,8 @@ Version < 1.2
     -http://code.activestate.com/recipes/498195/
      bearophile, 2006-10-12
  
-Credits
-=======
+Contributors
+============
   
     -bearophile
     
