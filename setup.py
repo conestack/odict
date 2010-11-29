@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.4.0'
+version = '1.4.1'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 tests_require = ['interlude']
@@ -22,7 +22,7 @@ setup(name='odict',
       keywords='odict dict ordered dictionary mapping collection tree',
       author='BlueDynamics Alliance',
       author_email='dev@bluedynamics.com',
-      url=u'https://svn.plone.org/svn/archetypes/AGX/odict',
+      url=u'https://github.com/bluedynamics/odict',
       license='Python Software Foundation License',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
