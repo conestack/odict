@@ -243,11 +243,11 @@ Version < 1.2
 Contributors
 ============
   
--bearophile
+- bearophile
 
--Robert Niederreiter <rnix@squarewave.at>
+- Robert Niederreiter <rnix@squarewave.at>
 
--Georg Bernhard <g.bernhard@akbild.ac.at>
+- Georg Bernhard <g.bernhard@akbild.ac.at>
 
--Florian Friesdorf <flo@chaoflow.net>
+- Florian Friesdorf <flo@chaoflow.net>
 
