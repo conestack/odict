@@ -7,6 +7,7 @@ item keeps it at its original position.
 
 Internal representation: values of the dict:
 ::
+
     [pred_key, val, succ_key]
 
 The sequence of elements uses as a double linked list. The ``links`` are dict
@@ -18,11 +19,11 @@ time find its key. With that, you can use normal C pointers.
 Memory used (Python 2.5)
 ------------------------
 
-    -set(int): 28.2 bytes/element
-  
-    -dict(int:None): 36.2 bytes/element
-  
-    -odict(int:None): 102 bytes/element
+- set(int): 28.2 bytes/element
+
+- dict(int:None): 36.2 bytes/element
+
+- odict(int:None): 102 bytes/element
 
 Performance
 -----------
@@ -32,6 +33,7 @@ on recent common hardware.
 
 Adding and deleting ``dict`` objects.
 ::
+
     +----------------+--------------------+
     | Add 1000       | 0.000653028488159  |
     +----------------+--------------------+
@@ -52,6 +54,7 @@ Adding and deleting ``dict`` objects.
 
 Adding and deleting ``odict`` objects.
 ::
+
     +----------------+--------------------+
     | Add 1000       | 0.0096800327301    |
     +----------------+--------------------+
@@ -72,6 +75,7 @@ Adding and deleting ``odict`` objects.
 
 Relation ``dict:odict`` of creating and deleting.
 ::
+
     +---------------------------+-----------+
     | creating 1000 objects     | 1:14.823  |
     +---------------------------+-----------+
@@ -95,11 +99,13 @@ Usage
 
 Import and create ordered dictionary.
 ::
+
     >>> from odict import odict
     >>> od = odict()
 
 type conversion to ordinary ``dict``. This will fail.
 ::
+
     >>> dict(odict([(1, 1)]))
     {1: [nil, 1, nil]}
 
@@ -112,6 +118,7 @@ This was fixed and later reverted due to behavioural problems with ``pickle``.
 
 Use one of the following ways for type conversion.
 ::
+
     >>> dict(odict([(1, 1)]).items())
     {1: 1}
     
@@ -122,6 +129,7 @@ It is possible to use abstract mixin class ``_odict`` to hook another dict base
 implementation. This is useful i.e. when persisting to ZODB. Inheriting from
 ``dict`` and ``Persistent`` at the same time fails.
 ::
+
     >>> from persistent.dict import PersistentDict 
     >>> class podict(_odict, PersistentDict):
     ...     def _dict_impl(self):
@@ -130,109 +138,116 @@ implementation. This is useful i.e. when persisting to ZODB. Inheriting from
 Requires
 -------- 
 
-    -Python 2.4+
+- Python 2.4+
 
 Changes
 =======
 
+Version 1.4.1
+-------------
+
+- Fix release, README.rst was missing, added MANIFEST.in file to include it
+  jensens - 2010-11-29
+
 Version 1.4.0
 -------------
 
-    -Full test coverage
-     chaoflow, rnix, 2010-08-17
-     
-    -Code cleanup and optimizing
-     chaoflow, rnix, 2010-08-17
+- Full test coverage
+  chaoflow, rnix, 2010-08-17
+
+- Code cleanup and optimizing
+  chaoflow, rnix, 2010-08-17
 
 Version 1.3.2
 -------------
 
-    -Access ``dict`` API providing class via function ``_dict_impl()`` and
-     provide odict logic as abstract base class ``_odict``.
-     rnix, 2010-07-08
+- Access ``dict`` API providing class via function ``_dict_impl()`` and
+  provide odict logic as abstract base class ``_odict``.
+  rnix, 2010-07-08
 
 Version 1.3.1
 -------------
 
-    -Add test for bool evaluation
-     rnix, 2010-04-21
+- Add test for bool evaluation
+  rnix, 2010-04-21
 
 Version 1.3.0
 -------------
 
-    -Fix access to ``odict.lt`` and ``odict.lh`` properties. Now it's possible
-     to overwrite ``__setattr__`` and ``__getattr__`` on ``odict`` subclass
-     without hassle.
-     rnix, 2010-04-06
+- Fix access to ``odict.lt`` and ``odict.lh`` properties. Now it's possible
+  to overwrite ``__setattr__`` and ``__getattr__`` on ``odict`` subclass
+  without hassle.
+  rnix, 2010-04-06
 
-    -Add ``sort`` function to odict.
-     rnix, 2010-03-03
+- Add ``sort`` function to odict.
+  rnix, 2010-03-03
 
 Version 1.2.6
 -------------
 
-    -Make ``odict`` serialize and deserialize properly
-     gogo, 2010-01-12
+- Make ``odict`` serialize and deserialize properly
+  gogo, 2010-01-12
 
 Version 1.2.5
 -------------
 
-    -Add ``as_dict`` function. Supports type conversion to ordinary ``dict``.
-     rnix, 2009-12-19
+- Add ``as_dict`` function. Supports type conversion to ordinary ``dict``.
+  rnix, 2009-12-19
 
-    -Add benchmark script
-     rnix, 2009-12-19
+- Add benchmark script
+  rnix, 2009-12-19
 
 Version 1.2.4
 -------------
 
-    -Do not check for ``key in self`` on ``__delitem__``, ``KeyError`` is raised
-     properly anyway. Huge Speedup!
-     rnix, jensens, 2009-12-18
+- Do not check for ``key in self`` on ``__delitem__``, ``KeyError`` is raised
+  properly anyway. Huge Speedup!
+  rnix, jensens, 2009-12-18
 
 Version 1.2.3
 -------------
 
-    -Move tests to seperate file and make egg testable with 
-     ``python setup.py test``.
-     rnix, 2009-12-07
+- Move tests to seperate file and make egg testable with 
+  ``python setup.py test``.
+  rnix, 2009-12-07
 
-    -improve ``lt`` and ``lh`` properties to make ``odict`` work with 
-     ``copy.deepcopy``.
-     rnix, 2009-12-07
+- improve ``lt`` and ``lh`` properties to make ``odict`` work with 
+  ``copy.deepcopy``.
+  rnix, 2009-12-07
 
 Version 1.2.2
 -------------
 
-    -Use try/except instead of ``__iter__`` in ``__setitem__`` to determine if
-     value was already set.
-     rnix, 2009-07-17
+- Use try/except instead of ``__iter__`` in ``__setitem__`` to determine if
+  value was already set.
+  rnix, 2009-07-17
 
 Version 1.2.1
 -------------
 
-    -Add missing ``__len__`` and ``__contains__`` functions.
-     rnix, 2009-03-17
+- Add missing ``__len__`` and ``__contains__`` functions.
+  rnix, 2009-03-17
    
 Version 1.2.0
 -------------
 
-    -eggified
-     rnix, 2009-03-17
+- eggified
+  rnix, 2009-03-17
 
 Version < 1.2
 -------------
 
-    -http://code.activestate.com/recipes/498195/
-     bearophile, 2006-10-12
+- http://code.activestate.com/recipes/498195/
+  bearophile, 2006-10-12
  
 Contributors
 ============
   
-    -bearophile
-    
-    -Robert Niederreiter <rnix@squarewave.at>
-    
-    -Georg Bernhard <g.bernhard@akbild.ac.at>
-    
-    -Florian Friesdorf <flo@chaoflow.net>
+-bearophile
+
+-Robert Niederreiter <rnix@squarewave.at>
+
+-Georg Bernhard <g.bernhard@akbild.ac.at>
+
+-Florian Friesdorf <flo@chaoflow.net>
+
