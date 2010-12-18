@@ -141,11 +141,17 @@ Requires
 Changes
 =======
 
+Version 1.4.2
+-------------
+
+- Add ``has_key`` to odict
+  rnix, 2010-12-18
+
 Version 1.4.1
 -------------
 
 - Fix release, README.rst was missing, added MANIFEST.in file to include it
-  jensens - 2010-11-29
+  jensens, 2010-11-29
 
 Version 1.4.0
 -------------

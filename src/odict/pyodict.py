@@ -104,7 +104,11 @@ class _odict(object):
         dict_impl.__delitem__(self, key)
     
     def __contains__(self, key):
+        # XXX: try: self[key] ...
         return key in self.keys()
+    
+    def has_key(self, key):
+        return key in self
     
     def __len__(self):
         return len(self.keys())

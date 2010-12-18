@@ -39,6 +39,9 @@ Test containment.
 
     >>> 'foo' in o
     False
+    
+    >>> o.has_key('a')
+    True
 
 Fetch values.
 ::
