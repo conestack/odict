@@ -144,6 +144,8 @@ Changes
 Version 1.4.2
 -------------
 
+- More ``copy`` testing
+
 - Add ``has_key`` to odict
   rnix, 2010-12-18
 

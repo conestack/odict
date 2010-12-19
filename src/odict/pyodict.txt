@@ -59,8 +59,12 @@ Copy odict.
 ::
     >>> o.copy() is not o
     True
+    
     >>> o.copy()
     odict([('a', 1), ('c', 3), ('b', 2), ('d', 4)])
+    
+    >>> o['a'] is o.copy()['a']
+    True
 
 Update odict.
 ::
