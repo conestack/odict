@@ -1,7 +1,7 @@
 # Python Software Foundation License
 
 from setuptools import setup, find_packages
-import sys, os
+import os
 
 version = '1.4.2'
 shortdesc = 'Ordered dictionary.'
