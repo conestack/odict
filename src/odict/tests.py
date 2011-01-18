@@ -1,7 +1,7 @@
 # Python Software Foundation License
 
 import unittest
-import doctest 
+import doctest
 from pprint import pprint
 from interlude import interact
 
@@ -16,7 +16,7 @@ TESTFILES = [
 def test_suite():
     return unittest.TestSuite([
         doctest.DocFileSuite(
-            file, 
+            file,
             optionflags=optionflags,
             globs={'interact': interact,
                    'pprint': pprint},
@@ -24,4 +24,4 @@ def test_suite():
     ])
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite') 
+    unittest.main(defaultTest='test_suite')

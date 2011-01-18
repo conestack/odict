@@ -9,7 +9,7 @@ RELATION_ROW = '+---------------------------+-----------+'
 def create(factory, _range):
     for i in range(_range):
         root[str(i)] = factory()
-    
+
 def delete(_range):
     for i in range(_range):
         del root[str(i)]

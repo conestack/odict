@@ -3,34 +3,34 @@
 # XXX: it feels like using the class with "is" and "is not" instead of "==" and
 # "!=" should be faster.
 class _Nil(object):
-    
+
     def __repr__(self):
         return "nil"
-        
+
     def __eq__(self, other):
         if (isinstance(other, _Nil)):
             return True
         else:
             return NotImplemented
-            
+
     def __ne__(self, other):
         if (isinstance(other, _Nil)):
             return False
         else:
             return NotImplemented
-        
+
 _nil = _Nil()
 
 class _odict(object):
     """Ordered dict data structure, with O(1) complexity for dict operations
     that modify one element.
-    
+
     Overwriting values doesn't change their original sequential order.
     """
-    
+
     def _dict_impl(self):
         return None
-    
+
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
         a trap - inside a function or method the keyword args are accessible
@@ -48,29 +48,29 @@ class _odict(object):
         else:
             for key, val in data:
                 self[key] = val
-    
+
     # Double-linked list header
     def _get_lh(self):
         dict_impl = self._dict_impl()
         if not hasattr(self, '_lh'):
             dict_impl.__setattr__(self, '_lh', _nil)
         return dict_impl.__getattribute__(self, '_lh')
-    
+
     def _set_lh(self, val):
         self._dict_impl().__setattr__(self, '_lh', val)
-    
+
     lh = property(_get_lh, _set_lh)
-    
+
     # Double-linked list tail
     def _get_lt(self):
         dict_impl = self._dict_impl()
         if not hasattr(self, '_lt'):
             dict_impl.__setattr__(self, '_lt', _nil)
         return dict_impl.__getattribute__(self, '_lt')
-    
+
     def _set_lt(self, val):
         self._dict_impl().__setattr__(self, '_lt', val)
-    
+
     lt = property(_get_lt, _set_lt)
 
     def __getitem__(self, key):
@@ -102,14 +102,14 @@ class _odict(object):
         else:
             dict_impl.__getitem__(self, succ)[0] = pred
         dict_impl.__delitem__(self, key)
-    
+
     def __contains__(self, key):
         # XXX: try: self[key] ...
         return key in self.keys()
-    
+
     def has_key(self, key):
         return key in self
-    
+
     def __len__(self):
         return len(self.keys())
 
@@ -123,7 +123,7 @@ class _odict(object):
             return "odict([%s])" % ", ".join(pairs)
         else:
             return "odict()"
-    
+
     def get(self, k, x=None):
         if k in self:
             return self._dict_impl().__getitem__(self, k)[1]
@@ -162,7 +162,7 @@ class _odict(object):
 
     def items(self):
         return list(self.iteritems())
-    
+
     def sort(self, cmp=None, key=None, reverse=False):
         items = [(k, v) for k,v in self.items()]
         if cmp is not None:
@@ -275,7 +275,7 @@ class _odict(object):
             return self._dict_impl().__getattribute__(self, 'lt')
         else:
             raise KeyError("'lastkey(): ordered dictionary is empty'")
-    
+
     def as_dict(self):
         return self._dict_impl()(self.items())
 
@@ -290,6 +290,6 @@ class _odict(object):
                        dict_impl.__repr__(self))
 
 class odict(_odict, dict):
-    
+
     def _dict_impl(self):
         return dict
