@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.4.2b7'
+version = '1.4.2'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
