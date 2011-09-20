@@ -141,6 +141,12 @@ Requires
 Changes
 =======
 
+Version 1.4.3
+-------------
+
+- get rid of annoying warning about "global" usage in bench.py
+  [jensens, 2011-09-20]
+
 Version 1.4.2
 -------------
 

@@ -6,6 +6,8 @@ import time
 CREATE_DELETE_ROW = '+----------------+--------------------+'
 RELATION_ROW = '+---------------------------+-----------+'
 
+root = {}
+
 def create(factory, _range):
     for i in range(_range):
         root[str(i)] = factory()
@@ -52,7 +54,6 @@ def head(value):
 def run():
     head('dict')
     root = dict()
-    global root
     print CREATE_DELETE_ROW
     dict_results = {
         1000: result(dict, 1000),
@@ -61,8 +62,6 @@ def run():
         1000000: result(dict, 1000000),
     }
     head('odict')
-    root = odict.odict()
-    global root
     print CREATE_DELETE_ROW
     odict_results = {
         1000: result(odict.odict, 1000),
