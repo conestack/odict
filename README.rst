@@ -5,8 +5,7 @@ Dictionary in which the *insertion* order of items is preserved (using an
 internal double linked list). In this implementation replacing an existing 
 item keeps it at its original position.
 
-Internal representation: values of the dict:
-::
+Internal representation: values of the dict::
 
     [pred_key, val, succ_key]
 
@@ -33,76 +32,74 @@ on recent common hardware.
 
 Adding and deleting ``dict`` objects.
 
-+----------------+--------------------+
-| Add 1000       | 0.000653028488159  |
-+----------------+--------------------+
-| Delete 1000    | 0.000339031219482  |
-+----------------+--------------------+
-| Add 10000      | 0.00774908065796   |
-+----------------+--------------------+
-| Delete 10000   | 0.00406503677368   |
-+----------------+--------------------+
-| Add 100000     | 0.130412101746     |
-+----------------+--------------------+
-| Delete 100000  | 0.0517508983612    |
-+----------------+--------------------+
-| Add 1000000    | 3.17614817619      |
-+----------------+--------------------+
-| Delete 1000000 | 0.564585924149     |
-+----------------+--------------------+
++----------------+-------------------+
+| Add 1000       | 0.000653028488159 |
++----------------+-------------------+
+| Delete 1000    | 0.000339031219482 |
++----------------+-------------------+
+| Add 10000      | 0.00774908065796  |
++----------------+-------------------+
+| Delete 10000   | 0.00406503677368  |
++----------------+-------------------+
+| Add 100000     | 0.130412101746    |
++----------------+-------------------+
+| Delete 100000  | 0.0517508983612   |
++----------------+-------------------+
+| Add 1000000    | 3.17614817619     |
++----------------+-------------------+
+| Delete 1000000 | 0.564585924149    |
++----------------+-------------------+
 
 Adding and deleting ``odict`` objects.
 
-+----------------+--------------------+
-| Add 1000       | 0.0096800327301    |
-+----------------+--------------------+
-| Delete 1000    | 0.00276303291321   |
-+----------------+--------------------+
-| Add 10000      | 0.107849836349     |
-+----------------+--------------------+
-| Delete 10000   | 0.0282921791077    |
-+----------------+--------------------+
-| Add 100000     | 1.05564808846      |
-+----------------+--------------------+
-| Delete 100000  | 0.297379016876     |
-+----------------+--------------------+
-| Add 1000000    | 16.451695919       |
-+----------------+--------------------+
-| Delete 1000000 | 3.03641605377      |
-+----------------+--------------------+
++----------------+------------------+
+| Add 1000       | 0.0096800327301  |
++----------------+------------------+
+| Delete 1000    | 0.00276303291321 |
++----------------+------------------+
+| Add 10000      | 0.107849836349   |
++----------------+------------------+
+| Delete 10000   | 0.0282921791077  |
++----------------+------------------+
+| Add 100000     | 1.05564808846    |
++----------------+------------------+
+| Delete 100000  | 0.297379016876   |
++----------------+------------------+
+| Add 1000000    | 16.451695919     |
++----------------+------------------+
+| Delete 1000000 | 3.03641605377    |
++----------------+------------------+
 
 Relation ``dict:odict`` of creating and deleting.
 
 
-+---------------------------+-----------+
-| creating 1000 objects     | 1:14.823  |
-+---------------------------+-----------+
-| deleting 1000 objects     | 1:8.1497  |
-+---------------------------+-----------+
-| creating 10000 objects    | 1:13.917  |
-+---------------------------+-----------+
-| deleting 10000 objects    | 1:6.9598  |
-+---------------------------+-----------+
-| creating 100000 objects   | 1:8.0947  |
-+---------------------------+-----------+
-| deleting 100000 objects   | 1:5.7463  |
-+---------------------------+-----------+
-| creating 1000000 objects  | 1:5.1797  |
-+---------------------------+-----------+
-| deleting 1000000 objects  | 1:5.3781  |
-+---------------------------+-----------+
++--------------------------+----------+
+| creating 1000 objects    | 1:14.823 |
++--------------------------+----------+
+| deleting 1000 objects    | 1:8.1497 |
++--------------------------+----------+
+| creating 10000 objects   | 1:13.917 |
++--------------------------+----------+
+| deleting 10000 objects   | 1:6.9598 |
++--------------------------+----------+
+| creating 100000 objects  | 1:8.0947 |
++--------------------------+----------+
+| deleting 100000 objects  | 1:5.7463 |
++--------------------------+----------+
+| creating 1000000 objects | 1:5.1797 |
++--------------------------+----------+
+| deleting 1000000 objects | 1:5.3781 |
++--------------------------+----------+
 
 Usage
 -----
 
-Import and create ordered dictionary.
-::
+Import and create ordered dictionary::
 
     >>> from odict import odict
     >>> od = odict()
 
-type conversion to ordinary ``dict``. This will fail.
-::
+type conversion to ordinary ``dict``. This will fail::
 
     >>> dict(odict([(1, 1)]))
     {1: [nil, 1, nil]}
@@ -114,8 +111,7 @@ and ignores overwritten ``__getitem__`` & co if so.
 
 This was fixed and later reverted due to behavioural problems with ``pickle``.
 
-Use one of the following ways for type conversion.
-::
+Use one of the following ways for type conversion::
 
     >>> dict(odict([(1, 1)]).items())
     {1: 1}
@@ -125,21 +121,31 @@ Use one of the following ways for type conversion.
 
 It is possible to use abstract mixin class ``_odict`` to hook another dict base
 implementation. This is useful i.e. when persisting to ZODB. Inheriting from
-``dict`` and ``Persistent`` at the same time fails.
-::
+``dict`` and ``Persistent`` at the same time fails::
 
     >>> from persistent.dict import PersistentDict 
     >>> class podict(_odict, PersistentDict):
     ...     def _dict_impl(self):
     ...         return PersistentDict
 
+
 Requires
--------- 
+--------
 
 - Python 2.4+
 
+
 Changes
 =======
+
+Version 1.4.4dev
+----------------
+
+- remove unused error variable
+  [rnix, 2011-11-28]
+
+- add note on why to check with ``==`` and ``!=`` against ``_nil``
+  [rnix, 2011-11-28]
 
 Version 1.4.3
 -------------
@@ -257,11 +263,11 @@ Contributors
   
 - bearophile
 
-- Robert Niederreiter <rnix@squarewave.at>
+- Robert Niederreiter <rnix [at] squarewave [dot] at>
 
-- Georg Bernhard <g.bernhard@akbild.ac.at>
+- Georg Bernhard <g [dot] bernhard@akbild [dot] ac [dot] at>
 
-- Florian Friesdorf <flo@chaoflow.net>
+- Florian Friesdorf <flo [at] chaoflow [dot] net>
 
 under the `Python Software Foundation License 
 <http://www.opensource.org/licenses/PythonSoftFoundation.php>`_.

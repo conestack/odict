@@ -1,8 +1,11 @@
 # Python Software Foundation License
 
-# XXX: it feels like using the class with "is" and "is not" instead of "==" and
-# "!=" should be faster.
 class _Nil(object):
+    """Q: it feels like using the class with "is" and "is not" instead of 
+    "==" and "!=" should be faster.
+    
+    A: This would break implementations which use pickle for persisting.
+    """
 
     def __repr__(self):
         return "nil"
@@ -20,6 +23,7 @@ class _Nil(object):
             return NotImplemented
 
 _nil = _Nil()
+
 
 class _odict(object):
     """Ordered dict data structure, with O(1) complexity for dict operations
@@ -80,7 +84,7 @@ class _odict(object):
         dict_impl = self._dict_impl()
         try:
             dict_impl.__getitem__(self, key)[1] = val
-        except KeyError, e:
+        except KeyError:
             new = [dict_impl.__getattribute__(self, 'lt'), val, _nil]
             dict_impl.__setitem__(self, key, new)
             if dict_impl.__getattribute__(self, 'lt') == _nil:
