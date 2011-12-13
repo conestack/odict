@@ -138,8 +138,8 @@ Requires
 Changes
 =======
 
-Version 1.4.4dev
-----------------
+Version 1.4.4
+-------------
 
 - remove unused error variable
   [rnix, 2011-11-28]
