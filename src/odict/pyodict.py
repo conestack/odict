@@ -145,6 +145,22 @@ class _odict(object):
 
     def keys(self):
         return list(self.iterkeys())
+    
+    def alter_key(self, old_key, new_key):
+        dict_impl = self._dict_impl()
+        val = dict_impl.__getitem__(self, old_key)
+        dict_impl.__delitem__(self, old_key)
+        if val[0] != _nil:
+            prev = dict_impl.__getitem__(self, val[0])
+            dict_impl.__setitem__(self, val[0], [prev[0], prev[1], new_key])
+        else:
+            dict_impl.__setattr__(self, 'lh', new_key)
+        if val[2] != _nil:
+            next = dict_impl.__getitem__(self, val[2])
+            dict_impl.__setitem__(self, val[2], [new_key, next[1], next[2]])
+        else:
+            dict_impl.__setattr__(self, 'lt', new_key)
+        dict_impl.__setitem__(self, new_key, val)
 
     def itervalues(self):
         dict_impl = self._dict_impl()

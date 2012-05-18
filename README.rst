@@ -138,6 +138,12 @@ Requires
 Changes
 =======
 
+Version 1.5.0dev
+----------------
+
+- Implement ``alter_key``.
+  [rnix, 2012-05-18]
+
 Version 1.4.4
 -------------
 
