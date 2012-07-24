@@ -22,7 +22,7 @@ __init__ test, with keyword args::
     
     If initialized with a dict the order of elements is undefined!:
     >>> o = odict({"a":1, "b":2, "c":3, "d":4})
-    >>> print o
+    >>> print(o)
     {'a': 1, 'c': 3, 'b': 2, 'd': 4}
 
 Also updates don't accepts kwds::

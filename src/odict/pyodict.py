@@ -46,8 +46,8 @@ class _odict(object):
                             "arguments to avoid an ordering trap.")
         self._dict_impl().__init__(self)
         # If you give a normal dict, then the order of elements is undefined
-        if hasattr(data, "iteritems"):
-            for key, val in data.iteritems():
+        if hasattr(data, "items"):
+            for key, val in data.items():
                 self[key] = val
         else:
             for key, val in data:
@@ -118,12 +118,12 @@ class _odict(object):
         return len(self.keys())
 
     def __str__(self):
-        pairs = ("%r: %r" % (k, v) for k, v in self.iteritems())
+        pairs = ("%r: %r" % (k, v) for k, v in self.items())
         return "{%s}" % ", ".join(pairs)
 
     def __repr__(self):
         if self:
-            pairs = ("(%r, %r)" % (k, v) for k, v in self.iteritems())
+            pairs = ("(%r, %r)" % (k, v) for k, v in self.items())
             return "odict([%s])" % ", ".join(pairs)
         else:
             return "odict()"
@@ -209,8 +209,8 @@ class _odict(object):
         if kwds:
             raise TypeError("update() of ordered dict takes no keyword "
                             "arguments to avoid an ordering trap.")
-        if hasattr(data, "iteritems"):
-            data = data.iteritems()
+        if hasattr(data, "items"):
+            data = data.items()
         for key, val in data:
             self[key] = val
 
