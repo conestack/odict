@@ -9,3 +9,6 @@
 /src/odict.egg-info/
 *.pyc
 /parts
+.project
+.pydevproject
+

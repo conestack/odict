@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.5.0'
+version = '1.5.1dev'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
@@ -26,14 +26,14 @@ setup(name='odict',
       url=u'https://github.com/bluedynamics/odict',
       license='Python Software Foundation License',
       packages=find_packages('src'),
-      package_dir = {'': 'src'},
+      package_dir={'': 'src'},
       namespace_packages=[],
       include_package_data=True,
       zip_safe=True,
       install_requires=['setuptools'],
       tests_require=tests_require,
       test_suite="odict.tests.test_suite",
-      extras_require = dict(
+      extras_require=dict(
           test=tests_require,
       ),
 )

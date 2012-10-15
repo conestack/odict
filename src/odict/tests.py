@@ -13,14 +13,15 @@ TESTFILES = [
     'pyodict.rst',
 ]
 
+
 def test_suite():
     return unittest.TestSuite([
         doctest.DocFileSuite(
-            file,
+            test_file,
             optionflags=optionflags,
             globs={'interact': interact,
                    'pprint': pprint},
-        ) for file in TESTFILES
+        ) for test_file in TESTFILES
     ])
 
 if __name__ == '__main__':

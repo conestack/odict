@@ -191,22 +191,40 @@ removal element at the end of the odict sequence::
     >>> o.lh, o.lt, o
     ('1', '2', odict([('1', 1), ('2', 2)]))
 
-``deepcopy`` test::
+Test copy::
 
     >>> o = odict()
     >>> o['1'] = 1
     >>> o['2'] = 2
-    >>> o['3'] = 3
+    >>> o['3'] = object()
     >>> o
-    odict([('1', 1), ('2', 2), ('3', 3)])
+    odict([('1', 1), ('2', 2), ('3', <object object at ...>)])
     
     >>> import copy
+
+shallow copy::
+
+    >>> o_copied = copy.copy(o)
+    >>> o_copied is o
+    False
+    
+    >>> o_copied['3'] is o['3']
+    True
+    
+    >>> o_copied
+    odict([('1', 1), ('2', 2), ('3', <object object at ...>)])
+
+deep copy::
+
     >>> o_copied = copy.deepcopy(o)
     >>> o_copied is o
     False
     
     >>> o_copied
-    odict([('1', 1), ('2', 2), ('3', 3)])
+    odict([('1', 1), ('2', 2), ('3', <object object at ...>)])
+    
+    >>> o_copied['3'] is o['3']
+    False
 
 type conversion to ordinary ``dict``.
 

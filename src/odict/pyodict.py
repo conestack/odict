@@ -1,9 +1,11 @@
 # Python Software Foundation License
+import copy
+
 
 class _Nil(object):
-    """Q: it feels like using the class with "is" and "is not" instead of 
+    """Q: it feels like using the class with "is" and "is not" instead of
     "==" and "!=" should be faster.
-    
+
     A: This would break implementations which use pickle for persisting.
     """
 
@@ -96,7 +98,7 @@ class _odict(object):
 
     def __delitem__(self, key):
         dict_impl = self._dict_impl()
-        pred, _ ,succ= self._dict_impl().__getitem__(self, key)
+        pred, _, succ = self._dict_impl().__getitem__(self, key)
         if pred == _nil:
             dict_impl.__setattr__(self, 'lh', succ)
         else:
@@ -107,9 +109,28 @@ class _odict(object):
             dict_impl.__getitem__(self, succ)[0] = pred
         dict_impl.__delitem__(self, key)
 
+    def __copy__(self):
+        new = type(self)()
+        for k, v in self.iteritems():
+            new[k] = v
+        new.__dict__.update(self.__dict__)
+        return new
+
+    def __deepcopy__(self, memo):
+        new = type(self)()
+        memo[id(self)] = new
+        for k, v in self.iteritems():
+            new[k] = copy.deepcopy(v, memo)
+        for k, v in self.__dict__.iteritems():
+            setattr(new, k, copy.deepcopy(v, memo))
+        return new
+
     def __contains__(self, key):
-        # XXX: try: self[key] ...
-        return key in self.keys()
+        try:
+            self[key]
+            return True
+        except KeyError:
+            return False
 
     def has_key(self, key):
         return key in self
@@ -145,7 +166,7 @@ class _odict(object):
 
     def keys(self):
         return list(self.iterkeys())
-    
+
     def alter_key(self, old_key, new_key):
         dict_impl = self._dict_impl()
         val = dict_impl.__getitem__(self, old_key)
@@ -184,7 +205,7 @@ class _odict(object):
         return list(self.iteritems())
 
     def sort(self, cmp=None, key=None, reverse=False):
-        items = [(k, v) for k,v in self.items()]
+        items = [(k, v) for k, v in self.items()]
         if cmp is not None:
             items = sorted(items, cmp=cmp)
         elif key is not None:
@@ -308,6 +329,7 @@ class _odict(object):
         return form % (dict_impl.__getattribute__(self, 'lh'),
                        dict_impl.__getattribute__(self, 'lt'),
                        dict_impl.__repr__(self))
+
 
 class odict(_odict, dict):
 
