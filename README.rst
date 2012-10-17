@@ -141,10 +141,10 @@ Changes
 =======
 
 
-Version 1.5.1dev
-----------------
+Version 1.5.1
+-------------
 
-- Implement ``__copy__`` and ``__deepcopy__`` in order to work with python 2.7.
+- Implement ``__copy__`` and ``__deepcopy__`` in order to work with Python 2.7.
   [rnix, 2012-10-15]
 
 - Use ``try/except`` instead of ``in`` in ``__contains__``.
