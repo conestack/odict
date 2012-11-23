@@ -61,6 +61,16 @@ def run():
         100000: result(dict, 100000),
         1000000: result(dict, 1000000),
     }
+    try:
+        from collections import OrderedDict
+        head('OrderedDict')
+        print CREATE_DELETE_ROW
+        result(OrderedDict, 1000)
+        result(OrderedDict, 10000)
+        result(OrderedDict, 100000)
+        result(OrderedDict, 1000000)
+    except ImportError:
+        pass
     head('odict')
     print CREATE_DELETE_ROW
     odict_results = {
