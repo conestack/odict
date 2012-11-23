@@ -1,6 +1,6 @@
 # Python Software Foundation License
 
-import odict
+import pyodict as odict # also allow execution as non-egg
 import time
 
 CREATE_DELETE_ROW = '+----------------+--------------------+'
