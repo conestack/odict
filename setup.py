@@ -1,7 +1,10 @@
 # Python Software Foundation License
-
-from setuptools import setup, find_packages
 import os
+from setuptools import (
+    setup,
+    find_packages,
+)
+
 
 version = '1.5.1'
 shortdesc = 'Ordered dictionary.'
@@ -9,16 +12,17 @@ longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
 tests_require = ['interlude']
 
+
 setup(name='odict',
       version=version,
       description=shortdesc,
       long_description=longdesc,
       classifiers=[
-            'Development Status :: 5 - Production/Stable',
-            'License :: OSI Approved :: Python Software Foundation License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python',
-            'Topic :: Software Development',
+          'Development Status :: 5 - Production/Stable',
+          'License :: OSI Approved :: Python Software Foundation License',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python',
+          'Topic :: Software Development',
       ],
       keywords='odict dict ordered dictionary mapping collection tree',
       author='BlueDynamics Alliance',
@@ -35,5 +39,4 @@ setup(name='odict',
       test_suite="odict.tests.test_suite",
       extras_require=dict(
           test=tests_require,
-      ),
-)
+      ))
