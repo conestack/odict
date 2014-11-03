@@ -346,7 +346,7 @@ Check alter_key function::
     ['foo', '2', '3']
 
     >>> od._dict_impl()
-    <class 'dict'>
+    <... 'dict'>
 
     # this one does not consider sorting
     #>>> od._dict_impl().values(od)
