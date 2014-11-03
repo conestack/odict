@@ -1,5 +1,6 @@
 # Python Software Foundation License
 import copy
+import sys
 
 
 class _Nil(object):
@@ -23,6 +24,9 @@ class _Nil(object):
             return False
         else:
             return NotImplemented
+
+    def __hash__(self):
+        return sys.maxsize
 
 _nil = _Nil()
 
@@ -48,8 +52,8 @@ class _odict(object):
                             "arguments to avoid an ordering trap.")
         self._dict_impl().__init__(self)
         # If you give a normal dict, then the order of elements is undefined
-        if hasattr(data, "iteritems"):
-            for key, val in data.iteritems():
+        if hasattr(data, "items"):
+            for key, val in data.items():
                 self[key] = val
         else:
             for key, val in data:
@@ -111,7 +115,7 @@ class _odict(object):
 
     def __copy__(self):
         new = type(self)()
-        for k, v in self.iteritems():
+        for k, v in self.items():
             new[k] = v
         new.__dict__.update(self.__dict__)
         return new
@@ -119,9 +123,9 @@ class _odict(object):
     def __deepcopy__(self, memo):
         new = type(self)()
         memo[id(self)] = new
-        for k, v in self.iteritems():
+        for k, v in self.items():
             new[k] = copy.deepcopy(v, memo)
-        for k, v in self.__dict__.iteritems():
+        for k, v in self.__dict__.items():
             setattr(new, k, copy.deepcopy(v, memo))
         return new
 
@@ -228,10 +232,12 @@ class _odict(object):
 
     def update(self, data=(), **kwds):
         if kwds:
-            raise TypeError("update() of ordered dict takes no keyword "
-                            "arguments to avoid an ordering trap.")
-        if hasattr(data, "iteritems"):
-            data = data.iteritems()
+            raise TypeError(
+                "update() of ordered dict takes no keyword arguments to avoid "
+                "an ordering trap."
+            )
+        if hasattr(data, "items"):
+            data = data.items()
         for key, val in data:
             self[key] = val
 

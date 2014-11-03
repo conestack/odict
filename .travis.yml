@@ -1,6 +1,8 @@
 language: python
-python: "2.7"
+python: 
+  - "2.7"
+  - "3.4"
 install:
-  - python2.7 bootstrap.py 
+  - python bootstrap.py 
   - ./bin/buildout -q
 script: ./bin/test

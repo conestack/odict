@@ -5,9 +5,11 @@ import doctest
 from pprint import pprint
 from interlude import interact
 
-optionflags = doctest.NORMALIZE_WHITESPACE | \
-              doctest.ELLIPSIS | \
-              doctest.REPORT_ONLY_FIRST_FAILURE
+optionflags = (
+    doctest.NORMALIZE_WHITESPACE |
+    doctest.ELLIPSIS |
+    doctest.REPORT_ONLY_FIRST_FAILURE
+)
 
 TESTFILES = [
     'pyodict.rst',
@@ -25,4 +27,4 @@ def test_suite():
     ])
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')                 #pragma NO COVERAGE
+    unittest.main(defaultTest='test_suite')                # pragma NO COVERAGE
