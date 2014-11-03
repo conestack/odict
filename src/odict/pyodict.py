@@ -1,6 +1,7 @@
 # Python Software Foundation License
 import copy
 import sys
+import functools
 
 
 class _Nil(object):
@@ -211,8 +212,8 @@ class _odict(object):
     def sort(self, cmp=None, key=None, reverse=False):
         items = [(k, v) for k, v in self.items()]
         if cmp is not None:
-            items = sorted(items, cmp=cmp)
-        elif key is not None:
+            key = functools.cmp_to_key(cmp)
+        if key is not None:
             items = sorted(items, key=key)
         else:
             items = sorted(items, key=lambda x: x[1])
