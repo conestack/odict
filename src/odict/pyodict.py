@@ -40,7 +40,7 @@ class _odict(object):
     """
 
     def _dict_impl(self):
-        return None
+        return None                                        # pragma NO COVERAGE
 
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
@@ -53,8 +53,8 @@ class _odict(object):
                             "arguments to avoid an ordering trap.")
         self._dict_impl().__init__(self)
         # If you give a normal dict, then the order of elements is undefined
-        if hasattr(data, "items"):
-            for key, val in data.items():
+        if hasattr(data, "iteritems"):
+            for key, val in data.iteritems():
                 self[key] = val
         else:
             for key, val in data:
@@ -116,7 +116,7 @@ class _odict(object):
 
     def __copy__(self):
         new = type(self)()
-        for k, v in self.items():
+        for k, v in self.iteritems():
             new[k] = v
         new.__dict__.update(self.__dict__)
         return new
@@ -124,9 +124,9 @@ class _odict(object):
     def __deepcopy__(self, memo):
         new = type(self)()
         memo[id(self)] = new
-        for k, v in self.items():
+        for k, v in self.iteritems():
             new[k] = copy.deepcopy(v, memo)
-        for k, v in self.__dict__.items():
+        for k, v in self.__dict__.iteritems():
             setattr(new, k, copy.deepcopy(v, memo))
         return new
 
@@ -210,7 +210,7 @@ class _odict(object):
         return list(self.iteritems())
 
     def sort(self, cmp=None, key=None, reverse=False):
-        items = [(k, v) for k, v in self.items()]
+        items = [(k, v) for k, v in self.iteritems()]
         if cmp is not None:
             key = functools.cmp_to_key(cmp)
         if key is not None:
@@ -237,8 +237,8 @@ class _odict(object):
                 "update() of ordered dict takes no keyword arguments to avoid "
                 "an ordering trap."
             )
-        if hasattr(data, "items"):
-            data = data.items()
+        if hasattr(data, "iteritems"):
+            data = data.iteritems()
         for key, val in data:
             self[key] = val
 
@@ -325,7 +325,7 @@ class _odict(object):
             raise KeyError("'lastkey(): ordered dictionary is empty'")
 
     def as_dict(self):
-        return self._dict_impl()(self.items())
+        return self._dict_impl()(self.iteritems())
 
     def _repr(self):
         """_repr(): low level repr of the whole data contained in the odict.

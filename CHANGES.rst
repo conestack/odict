@@ -4,7 +4,10 @@ Changes
 1.6.0 (unreleased)
 ------------------
 
-- compatible with Python 3.4, skip compatibility with Python < 2.7
+- Compatible with pypy.
+  [rnix, 2015-01-03]
+
+- Compatible with Python 3.4, skip compatibility with Python < 2.7.
   [jensens, 2014-11-03]
 
 
@@ -160,3 +163,5 @@ Changes
 
 - http://code.activestate.com/recipes/498195/
   [bearophile, 2006-10-12]
+
+  

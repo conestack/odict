@@ -4,8 +4,6 @@ odict
 ``_odict`` is abstract and subclasses need to implement ``_dict_impl``::
 
     >>> from odict.pyodict import _odict
-    >>> o = _odict()
-
     >>> class MyODict(_odict, dict):
     ...     def _dict_impl(self):
     ...         return dict
@@ -18,7 +16,8 @@ odict
     >>> odict(a=1)
     Traceback (most recent call last):
       ...
-    TypeError: __init__() of ordered dict takes no keyword arguments to avoid an ordering trap.
+    TypeError: __init__() of ordered dict takes no keyword arguments to avoid 
+    an ordering trap.
 
 If initialized with a dict the order of elements is undefined! But all are
 inside the odict::
@@ -37,16 +36,18 @@ inside the odict::
     4
 
 For further testing we work with ordered objects::
+
     >>> o = odict([("a", 1), ("b", 2), ("c", 3), ("d", 4)])
     >>> o
     odict([('a', 1), ('b', 2), ('c', 3), ('d', 4)])
 
-Also updates don't accepts kwds::
+Also ``update`` don't accepts kwds::
 
     >>> o.update(foo=1)
     Traceback (most recent call last):
       ...
-    TypeError: update() of ordered dict takes no keyword arguments to avoid an ordering trap.
+    TypeError: update() of ordered dict takes no keyword arguments to avoid 
+    an ordering trap.
 
 Test containment::
 
@@ -63,6 +64,7 @@ Fetch values::
 
     >>> o.get('a')
     1
+
     >>> o.get('foo', '')
     ''
 
@@ -136,7 +138,7 @@ From keys initialization::
     >>> o2
     odict([(1, 'x'), (2, 'x'), (3, 'x')])
 
-Setdefault::
+Test ``setdefault``::
 
     >>> o2.setdefault(1, 9999)
     'x'
@@ -149,10 +151,13 @@ Popping::
     Traceback (most recent call last):
       ...
     KeyError: 5
+
     >>> o2.pop(5, 'foo')
     'foo'
+
     >>> o2.pop(4)
     9999
+
     >>> o2
     odict([(1, 'x'), (2, 'x'), (3, 'x')])
 
@@ -164,7 +169,7 @@ Popping::
     ...
     KeyError: "'popitem(): ordered dictionary is empty'"
 
-removal from empty odict::
+Removal from empty odict::
 
     >>> o = odict()
     >>> del o["1"]
@@ -172,41 +177,42 @@ removal from empty odict::
       ...
     KeyError: '1'
 
-removal from odict with one element::
+Removal from odict with one element::
 
     >>> o = odict()
     >>> o["1"] = 1
     >>> del o["1"]
     >>> o.lh, o.lt, o, o
     (nil, nil, odict(), odict())
+
     >>> o._repr()
     'odict low level repr lh,lt,data: nil, nil, {}'
 
-removal first element of the odict sequence::
+Remove first element of the odict sequence::
 
     >>> o = odict()
-    >>> for i in [1,2,3]: o[str(i)] = i
+    >>> for i in [1, 2, 3]: o[str(i)] = i
     >>> del o["1"]
     >>> o.lh, o.lt, o
     ('2', '3', odict([('2', 2), ('3', 3)]))
 
-removal element in the middle of the odict sequence::
+Remove element in the middle of the odict sequence::
 
     >>> o = odict()
-    >>> for i in [1,2,3]: o[str(i)] = i
+    >>> for i in [1, 2, 3]: o[str(i)] = i
     >>> del o["2"]
     >>> o.lh, o.lt, o
     ('1', '3', odict([('1', 1), ('3', 3)]))
 
-removal element at the end of the odict sequence::
+Remove element at the end of the odict sequence::
 
     >>> o = odict()
-    >>> for i in [1,2,3]: o[str(i)] = i
+    >>> for i in [1, 2, 3]: o[str(i)] = i
     >>> del o["3"]
     >>> o.lh, o.lt, o
     ('1', '2', odict([('1', 1), ('2', 2)]))
 
-Test copy::
+Test ``copy``::
 
     >>> o = odict()
     >>> o['1'] = 1
@@ -217,7 +223,7 @@ Test copy::
 
     >>> import copy
 
-shallow copy::
+Shallow copy::
 
     >>> o_copied = copy.copy(o)
     >>> o_copied is o
@@ -229,7 +235,7 @@ shallow copy::
     >>> o_copied
     odict([('1', 1), ('2', 2), ('3', <object object at ...>)])
 
-deep copy::
+Deep copy::
 
     >>> o_copied = copy.deepcopy(o)
     >>> o_copied is o
@@ -241,7 +247,7 @@ deep copy::
     >>> o_copied['3'] is o['3']
     False
 
-type conversion to ordinary ``dict``.
+Type conversion to ordinary ``dict``.
 
 Type conversion to ``dict`` will fail::
 
@@ -263,11 +269,12 @@ The following ways for type conversion work::
     >>> odict([(1, 1)]).as_dict()
     {1: 1}
 
-Makes sure that serialisation works::
+Makes sure that serialization works::
 
     >>> import odict
     >>> import pickle
->>> pickle.loads(pickle.dumps([odict.odict([(1, 2),])]))
+
+    >>> pickle.loads(pickle.dumps([odict.odict([(1, 2),])]))
     [odict([(1, 2)])]
 
 Test sorting::
@@ -301,8 +308,8 @@ Test ``key`` and ``reverse`` kwargs::
     >>> od.items()
     [('c', 3), ('b', 2), ('a', 1)]
 
-Overwrite __getattr__ and __setattr__ on subclass of odict and check if odict
-still works::
+Overwrite ``__getattr__`` and ``__setattr__`` on subclass of ``odict`` and
+check whether it still works::
 
     >>> class Sub(odict.odict):
     ...     def __getattr__(self, name):
@@ -332,7 +339,7 @@ Check bool expressions::
     >>> bool(odict.odict([('a', 1)]))
     True
 
-Check alter_key function::
+Check ``alter_key`` function::
 
     >>> od = odict.odict((('1', 'a'), ('2', 'b'), ('3', 'c')))
     >>> od
@@ -348,11 +355,19 @@ Check alter_key function::
     >>> od._dict_impl()
     <... 'dict'>
 
-    # this one does not consider sorting
-    #>>> od._dict_impl().values(od)
-    #dict_values([['foo', 'b', '3'], ['2', 'c', nil], [nil, 'a', '2']])
+    >>> dict_values = od._dict_impl().values(od)
+    >>> len(dict_values)
+    3
 
-    [['foo', 'b', '3'], ['2', 'c', nil], [nil, 'a', '2']]
+    >>> ['foo', 'b', '3'] in dict_values
+    True
+
+    >>> from odict.pyodict import _nil
+    >>> ['2', 'c', _nil] in dict_values
+    True
+
+    >>> [_nil, 'a', '2'] in dict_values
+    True
 
     >>> od.values()
     ['a', 'b', 'c']
@@ -367,9 +382,18 @@ Check alter_key function::
     >>> od.keys()
     ['foo', 'bar', '3']
 
-    # this one does not consider sorting
-    #>>> od._dict_impl().values(od)
-    #[['bar', 'c', nil], ['foo', 'b', '3'], [nil, 'a', 'bar']]
+    >>> dict_values = od._dict_impl().values(od)
+    >>> len(dict_values)
+    3
+
+    >>> ['bar', 'c', _nil] in dict_values
+    True
+
+    >>> ['foo', 'b', '3'] in dict_values
+    True
+
+    >>> [_nil, 'a', 'bar'] in dict_values
+    True
 
     >>> od.values()
     ['a', 'b', 'c']
@@ -381,9 +405,18 @@ Check alter_key function::
     >>> od.keys()
     ['foo', 'bar', 'baz']
 
-    # this one does not consider sorting
-    #>>> od._dict_impl().values(od)
-    #[['foo', 'b', 'baz'], [nil, 'a', 'bar'], ['bar', 'c', nil]]
+    >>> dict_values = od._dict_impl().values(od)
+    >>> len(dict_values)
+    3
+
+    >>> ['foo', 'b', 'baz'] in dict_values
+    True
+
+    >>> [_nil, 'a', 'bar'] in dict_values
+    True
+
+    >>> ['bar', 'c', _nil] in dict_values
+    True
 
     >>> od.values()
     ['a', 'b', 'c']
@@ -393,3 +426,8 @@ Check alter_key function::
 
     >>> od.lt
     'baz'
+
+Check ``__str__`` function::
+
+    >>> str(od)
+    "{'foo': 'a', 'bar': 'b', 'baz': 'c'}"
