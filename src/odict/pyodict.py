@@ -40,7 +40,7 @@ class _odict(object):
     """
 
     def _dict_impl(self):
-        return None                                        # pragma NO COVERAGE
+        return None                                        #pragma NO COVER
 
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
