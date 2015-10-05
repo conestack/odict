@@ -3,6 +3,7 @@ from setuptools import find_packages
 from setuptools import setup
 import os
 
+
 version = '1.6.0.dev0'
 shortdesc = 'Ordered Dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()

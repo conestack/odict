@@ -1,7 +1,7 @@
 # Python Software Foundation License
 import copy
-import sys
 import functools
+import sys
 
 
 class _Nil(object):

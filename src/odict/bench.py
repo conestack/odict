@@ -1,8 +1,9 @@
 # Python Software Foundation License
 from __future__ import print_function
-from pyodict import odict
 from collections import OrderedDict
+from pyodict import odict
 import time
+
 
 CREATE_DELETE_ROW = '+----------------+---------------+'
 RELATION_ROW = '+---------------------------+-----------+'
