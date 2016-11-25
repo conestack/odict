@@ -1,1 +1,4 @@
+graft src/odict
 include *.rst
+global-exclude *.pyc
+
