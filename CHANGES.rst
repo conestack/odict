@@ -2,7 +2,7 @@
 Changes
 =======
 
-1.5.2 (unreleased)
+1.5.2 (2016-11-25)
 ------------------
 
 - fix permission problem in 1.5.1 release, some files were only rw by user.
