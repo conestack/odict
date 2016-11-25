@@ -3,9 +3,10 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.5.1'
+version = '1.5.2.dev0'
 shortdesc = 'Ordered dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
+longdesc += open(os.path.join(os.path.dirname(__file__), 'CHANGES.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
 tests_require = ['interlude']
 
@@ -18,6 +19,10 @@ setup(name='odict',
             'License :: OSI Approved :: Python Software Foundation License',
             'Operating System :: OS Independent',
             'Programming Language :: Python',
+            'Programming Language :: Python :: 2.4',
+            'Programming Language :: Python :: 2.5',
+            'Programming Language :: Python :: 2.6',
+            'Programming Language :: Python :: 2.7',
             'Topic :: Software Development',
       ],
       keywords='odict dict ordered dictionary mapping collection tree',

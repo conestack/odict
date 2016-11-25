@@ -140,6 +140,11 @@ Requires
 Changes
 =======
 
+Version 1.5.2
+-------------
+
+- fix permission problem in 1.5.1 release, some files were only rw by user.
+  [jensens, 2016-11-25]
 
 Version 1.5.1
 -------------
