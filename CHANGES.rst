@@ -1,7 +1,7 @@
 Changes
 =======
 
-1.6.0 (unreleased)
+1.6.0 (2016-11-25)
 ------------------
 
 - Compatible with pypy.
