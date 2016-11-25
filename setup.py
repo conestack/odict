@@ -4,7 +4,7 @@ from setuptools import setup
 import os
 
 
-version = '1.6.0'
+version = '1.6.1.dev0'
 shortdesc = 'Ordered Dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'CHANGES.rst')).read()
