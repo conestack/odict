@@ -4,6 +4,9 @@ import functools
 import sys
 
 
+ITER_FUNC = 'iteritems' if sys.version_info[0] < 3 else 'items'
+
+
 class _Nil(object):
     """Q: it feels like using the class with "is" and "is not" instead of
     "==" and "!=" should be faster.
@@ -53,8 +56,8 @@ class _odict(object):
                             "arguments to avoid an ordering trap.")
         self._dict_impl().__init__(self)
         # If you give a normal dict, then the order of elements is undefined
-        if hasattr(data, "iteritems"):
-            for key, val in data.iteritems():
+        if hasattr(data, ITER_FUNC):
+            for key, val in getattr(data, ITER_FUNC)():
                 self[key] = val
         else:
             for key, val in data:
@@ -126,7 +129,7 @@ class _odict(object):
         memo[id(self)] = new
         for k, v in self.iteritems():
             new[k] = copy.deepcopy(v, memo)
-        for k, v in self.__dict__.iteritems():
+        for k, v in getattr(self.__dict__, ITER_FUNC)():
             setattr(new, k, copy.deepcopy(v, memo))
         return new
 
@@ -144,12 +147,12 @@ class _odict(object):
         return len(self.keys())
 
     def __str__(self):
-        pairs = ("%r: %r" % (k, v) for k, v in self.iteritems())
+        pairs = ("%r: %r" % (k, v) for k, v in getattr(self, ITER_FUNC)())
         return "{%s}" % ", ".join(pairs)
 
     def __repr__(self):
         if self:
-            pairs = ("(%r, %r)" % (k, v) for k, v in self.iteritems())
+            pairs = ("(%r, %r)" % (k, v) for k, v in getattr(self, ITER_FUNC)())
             return "odict([%s])" % ", ".join(pairs)
         else:
             return "odict()"
@@ -237,8 +240,8 @@ class _odict(object):
                 "update() of ordered dict takes no keyword arguments to avoid "
                 "an ordering trap."
             )
-        if hasattr(data, "iteritems"):
-            data = data.iteritems()
+        if hasattr(data, ITER_FUNC):
+            data = getattr(data, ITER_FUNC)()
         for key, val in data:
             self[key] = val
 

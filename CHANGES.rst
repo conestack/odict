@@ -4,11 +4,15 @@ Changes
 1.6.0 (unreleased)
 ------------------
 
-- Compatible with pypy.
-  [rnix, 2015-01-03]
+- Compatible with Python 3 and pypy.
+  [rnix, jensens, 2015-05-17]
 
-- Compatible with Python 3.4, skip compatibility with Python < 2.7.
-  [jensens, 2014-11-03]
+
+1.5.2
+-----
+
+- Fix permission problem in 1.5.1 release, some files were only rw by user.
+  [jensens, 2016-11-25]
 
 
 1.5.1
