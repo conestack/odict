@@ -1,7 +1,8 @@
 *.pyc
-.project
-.pydevproject
+/.project
+/.pydevproject
 /.installed.cfg
+/.settings/
 /bin/
 /build/
 /coverage/
@@ -9,8 +10,11 @@
 /dist/
 /eggs/
 /include/
-/interlude-1.0-py2.6.egg
 /lib/
 /local/
-/parts
+/parts/
 /src/odict.egg-info/
+/py2/
+/py3/
+/pypy/
+
