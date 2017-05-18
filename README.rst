@@ -5,7 +5,9 @@ Dictionary in which the *insertion* order of items is preserved (using an
 internal double linked list). In this implementation replacing an existing
 item keeps it at its original position.
 
-Internal representation: values of the dict::
+Internal representation: values of the dict.
+
+.. code-block:: python
 
     [pred_key, val, succ_key]
 
@@ -13,9 +15,16 @@ The sequence of elements uses as a double linked list. The ``links`` are dict
 keys. ``self.lh`` and ``self.lt`` are the keys of first and last element
 inserted in the odict.
 
-In a C reimplementation of this data structure, things could be simplified
-(and speed up) a lot if given a value you can at the same time find its key.
-With that, you can use normal C pointers.
+
+Motivation
+----------
+
+When this package was created, ``collections.OrderedDict`` not existed yet.
+
+Another problem is that ``dict`` cannot always be inherited from in conjunction
+with other base classes. This may result in instance lay-out conflicts or other
+errors. So ``odict`` is written in a way that let you alter the dictionary
+base implementation easily.
 
 
 Memory used (Python 2.5)
@@ -138,12 +147,16 @@ Relation ``OrderedDict : odict``
 Usage
 -----
 
-Import and create ordered dictionary::
+Import and create ordered dictionary.
 
-    >>> from odict import odict
-    >>> od = odict()
+.. code-block:: python
 
-type conversion to ordinary ``dict``. This will fail::
+    from odict import odict
+    od = odict()
+
+type conversion to ordinary ``dict``. This will fail.
+
+.. code-block:: pycon
 
     >>> dict(odict([(1, 1)]))
     {1: [nil, 1, nil]}
@@ -155,7 +168,9 @@ and ignores overwritten ``__getitem__`` & co if so.
 
 This was fixed and later reverted due to behavioural problems with ``pickle``.
 
-Use one of the following ways for type conversion::
+Use one of the following ways for type conversion.
+
+.. code-block:: pycon
 
     >>> dict(odict([(1, 1)]).items())
     {1: 1}
@@ -165,12 +180,23 @@ Use one of the following ways for type conversion::
 
 It is possible to use abstract mixin class ``_odict`` to hook another dict base
 implementation. This is useful i.e. when persisting to ZODB. Inheriting from
-``dict`` and ``Persistent`` at the same time fails::
+``dict`` and ``Persistent`` at the same time fails.
 
-    >>> from persistent.dict import PersistentDict
-    >>> class podict(_odict, PersistentDict):
-    ...     def _dict_impl(self):
-    ...         return PersistentDict
+.. code-block:: python
+
+    from persistent.dict import PersistentDict
+    class podict(_odict, PersistentDict):
+
+        def _dict_impl(self):
+            return PersistentDict
+
+
+Misc
+----
+
+In a C reimplementation of this data structure, things could be simplified
+(and speed up) a lot if given a value you can at the same time find its key.
+With that, you can use normal C pointers.
 
 
 Requires
@@ -184,15 +210,15 @@ Requires
 Contributors
 ============
 
-- bearophile
+- bearophile (Original Author)
 
-- Robert Niederreiter <rnix [at] squarewave [dot] at>
+- Robert Niederreiter (Author)
 
-- Georg Bernhard <g [dot] bernhard [at] akbild [dot] ac [dot] at>
+- Georg Bernhard
 
-- Florian Friesdorf <flo [at] chaoflow [dot] net>
+- Florian Friesdorf
 
-- Jens Klein <jens@bluedynamics.com>
+- Jens Klein
 
 under the `Python Software Foundation License <http://www.opensource.org/licenses/PythonSoftFoundation.php>`_.
 
