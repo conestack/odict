@@ -43,7 +43,7 @@ class _odict(object):
     """
 
     def _dict_impl(self):
-        return None                                        #pragma NO COVER
+        return None
 
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
@@ -155,7 +155,9 @@ class _odict(object):
 
     def __repr__(self):
         if self:
-            pairs = ("(%r, %r)" % (k, v) for k, v in getattr(self, ITER_FUNC)())
+            pairs = (
+                "(%r, %r)" % (k, v) for k, v in getattr(self, ITER_FUNC)()
+            )
             return "odict([%s])" % ", ".join(pairs)
         else:
             return "odict()"

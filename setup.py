@@ -9,7 +9,6 @@ shortdesc = 'Ordered Dictionary.'
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'CHANGES.rst')).read()
 longdesc += open(os.path.join(os.path.dirname(__file__), 'LICENSE.rst')).read()
-tests_require = ['interlude']
 
 
 setup(
@@ -22,7 +21,10 @@ setup(
         'License :: OSI Approved :: Python Software Foundation License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -39,9 +41,5 @@ setup(
     include_package_data=True,
     zip_safe=True,
     install_requires=['setuptools'],
-    tests_require=tests_require,
-    test_suite="odict.tests",
-    extras_require=dict(
-        test=tests_require,
-    )
+    test_suite="odict.tests"
 )

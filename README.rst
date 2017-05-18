@@ -27,16 +27,6 @@ errors. So ``odict`` is written in a way that let you alter the dictionary
 base implementation easily.
 
 
-Memory used (Python 2.5)
-------------------------
-
-- set(int): 28.2 bytes/element
-
-- dict(int:None): 36.2 bytes/element
-
-- odict(int:None): 102 bytes/element
-
-
 Performance (Python 3.4)
 ------------------------
 
@@ -199,10 +189,10 @@ In a C reimplementation of this data structure, things could be simplified
 With that, you can use normal C pointers.
 
 
-Requires
---------
+Python Versions
+---------------
 
-- Python 2.7.x, 3.4+, pypy
+- Python 2.6+, 3.2+, pypy
 
 - May work with other versions (untested)
 
@@ -221,4 +211,3 @@ Contributors
 - Jens Klein
 
 under the `Python Software Foundation License <http://www.opensource.org/licenses/PythonSoftFoundation.php>`_.
-

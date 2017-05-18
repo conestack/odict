@@ -1,2 +1,1 @@
-# -*- coding: utf-8 -*-
-from .pyodict import odict  # noqa
+from odict.pyodict import odict
