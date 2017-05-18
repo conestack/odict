@@ -1,11 +1,9 @@
 # Python Software Foundation License
-from interlude import interact
 from odict import odict
 from odict.pyodict import _nil
 from odict.pyodict import _odict
 import copy
 import pickle
-import sys
 
 
 try:
