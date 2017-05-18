@@ -54,7 +54,10 @@ class _odict(object):
         if kwds:
             raise TypeError("__init__() of ordered dict takes no keyword "
                             "arguments to avoid an ordering trap.")
-        self._dict_impl().__init__(self)
+        dict_impl = self._dict_impl()
+        if dict_impl is None:
+            raise TypeError("No dict implementation class provided.")
+        dict_impl.__init__(self)
         # If you give a normal dict, then the order of elements is undefined
         if hasattr(data, ITER_FUNC):
             for key, val in getattr(data, ITER_FUNC)():

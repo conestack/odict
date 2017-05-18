@@ -40,7 +40,7 @@ setup(
     zip_safe=True,
     install_requires=['setuptools'],
     tests_require=tests_require,
-    test_suite="odict.tests.test_suite",
+    test_suite="odict.tests",
     extras_require=dict(
         test=tests_require,
     )
