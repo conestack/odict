@@ -9,7 +9,7 @@ if [ -x "$(which python3)" ]; then
     virtualenv --clear --no-site-packages -p python3 py3
     ./py3/bin/python setup.py develop
 fi
-if [ -x "$(which python3)" ]; then
+if [ -x "$(which pypy)" ]; then
     rm -r pypy
     virtualenv --clear --no-site-packages -p pypy pypy
     ./pypy/bin/python setup.py develop
