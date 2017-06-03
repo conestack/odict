@@ -2,10 +2,12 @@
 /.project
 /.pydevproject
 /.installed.cfg
+/.coverage
 /.settings/
 /bin/
 /build/
 /coverage/
+/htmlcov/
 /develop-eggs/
 /dist/
 /eggs/

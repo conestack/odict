@@ -303,4 +303,4 @@ class TestOdict(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')                #pragma NO COVER
+    unittest.main()                                          # pragma: no cover
