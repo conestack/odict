@@ -1,6 +1,12 @@
 Changes
 =======
 
+1.6.1 (unreleased)
+------------------
+
+- No changes yet.
+
+
 1.6.0
 -----
 
