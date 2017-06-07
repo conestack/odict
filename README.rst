@@ -189,6 +189,23 @@ In a C reimplementation of this data structure, things could be simplified
 With that, you can use normal C pointers.
 
 
+TestCoverage
+------------
+
+.. image:: https://travis-ci.org/bluedynamics/odict.svg?branch=master
+    :target: https://travis-ci.org/bluedynamics/odict
+
+Summary of the test coverage report::
+
+    Name                    Stmts   Miss  Cover
+    -------------------------------------------
+    src/odict/__init__.py       1      0   100%
+    src/odict/pyodict.py      237      0   100%
+    src/odict/tests.py        198      0   100%
+    -------------------------------------------
+    TOTAL                     436      0   100%
+
+
 Python Versions
 ---------------
 
