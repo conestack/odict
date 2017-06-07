@@ -1,11 +1,11 @@
 Changes
 =======
 
-1.6.0 (unreleased)
-------------------
+1.6.0
+-----
 
 - Compatible with Python 3 and pypy.
-  [rnix, jensens, 2015-05-17]
+  [rnix]
 
 
 1.5.2

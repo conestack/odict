@@ -9,7 +9,7 @@ def read_file(name):
         return f.read()
 
 
-version = '1.6.0.dev0'
+version = '1.6.0'
 shortdesc = 'Ordered Dictionary.'
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.rst',
