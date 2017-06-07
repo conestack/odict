@@ -1,10 +1,11 @@
 Changes
 =======
 
-1.6.1 (unreleased)
-------------------
+1.6.1
+-----
 
-- No changes yet.
+- pypi masness.
+  [rnix]
 
 
 1.6.0
