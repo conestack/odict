@@ -158,9 +158,9 @@ class _odict(object):
             pairs = (
                 "(%r, %r)" % (k, v) for k, v in getattr(self, ITER_FUNC)()
             )
-            return "odict([%s])" % ", ".join(pairs)
+            return "%s([%s])" % (self.__class__.__name__, ", ".join(pairs))
         else:
-            return "odict()"
+            return "%s()" % self.__class__.__name__
 
     def get(self, k, x=None):
         if k in self:

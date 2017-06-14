@@ -4,7 +4,8 @@ Changes
 1.6.2 (unreleased)
 ------------------
 
-- No changes yet.
+- Use class name instead of 'odict()' in ``__repr__``.
+  [rnix]
 
 
 1.6.1
