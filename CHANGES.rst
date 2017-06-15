@@ -1,8 +1,8 @@
 Changes
 =======
 
-1.6.2 (unreleased)
-------------------
+1.6.2
+-----
 
 - Use class name instead of 'odict()' in ``__repr__``.
   [rnix]
