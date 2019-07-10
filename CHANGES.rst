@@ -1,10 +1,12 @@
 Changes
 =======
 
-1.6.3 (unreleased)
+1.7.0 (unreleased)
 ------------------
 
-- No changes yet.
+- Add ``swap``, ``insertbefore``, ``insertafter``, ``insertfirst`` and
+  ``insertlast`` functions to ``odict``.
+  [rnix]
 
 
 1.6.2

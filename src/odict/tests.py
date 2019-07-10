@@ -301,6 +301,107 @@ class TestOdict(unittest.TestCase):
         self.assertEqual(repr(odict()), 'odict()')
         self.assertEqual(repr(odict([('foo', 'a')])), "odict([('foo', 'a')])")
 
+    def test_swap(self):
+        # Test ``swap``
+        o = odict([('0', 'a'), ('1', 'b'), ('2', 'c'), ('3', 'd'), ('4', 'e')])
+        # Cannot swap same key
+        with self.assertRaises(ValueError):
+            o.swap('0', '0')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        # Case first 2, a < b
+        o.swap('0', '1')
+        self.assertEqual(o.keys(), ['1', '0', '2', '3', '4'])
+        self.assertEqual(o.values(), ['b', 'a', 'c', 'd', 'e'])
+        # Case first 2, a > b
+        o.swap('0', '1')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        # Case last 2, a < b
+        o.swap('3', '4')
+        self.assertEqual(o.keys(), ['0', '1', '2', '4', '3'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'e', 'd'])
+        # Case last 2, a > b
+        o.swap('3', '4')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        # Case neighbors, a < b
+        o.swap('1', '2')
+        self.assertEqual(o.keys(), ['0', '2', '1', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'c', 'b', 'd', 'e'])
+        # Case neighbors, a > b
+        o.swap('1', '2')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        # Case non neighbors, one key first, a < b
+        o.swap('0', '2')
+        self.assertEqual(o.keys(), ['2', '1', '0', '3', '4'])
+        self.assertEqual(o.values(), ['c', 'b', 'a', 'd', 'e'])
+        # Case non neighbors, one key first, a > b
+        o.swap('0', '2')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        # Case non neighbors, one key last, a < b
+        o.swap('2', '4')
+        self.assertEqual(o.keys(), ['0', '1', '4', '3', '2'])
+        self.assertEqual(o.values(), ['a', 'b', 'e', 'd', 'c'])
+        # Case non neighbors, one key last, a > b
+        o.swap('2', '4')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        # Case non neighbors, a < b
+        o.swap('1', '3')
+        self.assertEqual(o.keys(), ['0', '3', '2', '1', '4'])
+        self.assertEqual(o.values(), ['a', 'd', 'c', 'b', 'e'])
+        # Case non neighbors, a > b
+        o.swap('1', '3')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+
+    def test_insertbefore(self):
+        o = odict([('0', 'a')])
+        with self.assertRaises(ValueError):
+            o.insertbefore('0', '0', 'a')
+        with self.assertRaises(KeyError):
+            o.insertbefore('x', '1', 'b')
+        o.insertbefore('0', '1', 'b')
+        self.assertEqual(o.keys(), ['1', '0'])
+        self.assertEqual(o.values(), ['b', 'a'])
+        o.insertbefore('0', '2', 'c')
+        self.assertEqual(o.keys(), ['1', '2', '0'])
+        self.assertEqual(o.values(), ['b', 'c', 'a'])
+
+    def test_insertafter(self):
+        o = odict([('0', 'a')])
+        with self.assertRaises(ValueError):
+            o.insertafter('0', '0', 'a')
+        with self.assertRaises(KeyError):
+            o.insertafter('x', '1', 'b')
+        o.insertafter('0', '1', 'b')
+        self.assertEqual(o.keys(), ['0', '1'])
+        self.assertEqual(o.values(), ['a', 'b'])
+        o.insertafter('0', '2', 'c')
+        self.assertEqual(o.keys(), ['0', '2', '1'])
+        self.assertEqual(o.values(), ['a', 'c', 'b'])
+
+    def test_insertfirst(self):
+        o = odict()
+        o.insertfirst('0', 'a')
+        self.assertEqual(o.keys(), ['0'])
+        self.assertEqual(o.values(), ['a'])
+        o.insertfirst('1', 'b')
+        self.assertEqual(o.keys(), ['1', '0'])
+        self.assertEqual(o.values(), ['b', 'a'])
+
+    def test_insertlast(self):
+        o = odict()
+        o.insertlast('0', 'a')
+        self.assertEqual(o.keys(), ['0'])
+        self.assertEqual(o.values(), ['a'])
+        o.insertlast('1', 'b')
+        self.assertEqual(o.keys(), ['0', '1'])
+        self.assertEqual(o.values(), ['a', 'b'])
+
 
 if __name__ == '__main__':
     unittest.main()                                          # pragma: no cover

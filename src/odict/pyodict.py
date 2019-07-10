@@ -32,6 +32,7 @@ class _Nil(object):
     def __hash__(self):
         return sys.maxsize
 
+
 _nil = _Nil()
 
 
@@ -344,6 +345,96 @@ class _odict(object):
         return form % (dict_impl.__getattribute__(self, 'lh'),
                        dict_impl.__getattribute__(self, 'lt'),
                        dict_impl.__repr__(self))
+
+    def swap(self, a, b):
+        if a == b:
+            raise ValueError('Swap keys are equal')
+        dict_impl = self._dict_impl()
+        orgin_a = dict_impl.__getitem__(self, a)
+        orgin_b = dict_impl.__getitem__(self, b)
+        new_a = [orgin_b[0], orgin_a[1], orgin_b[2]]
+        new_b = [orgin_a[0], orgin_b[1], orgin_a[2]]
+        if new_a[0] == a:
+            new_a[0] = b
+            new_b[2] = a
+        if new_b[0] == b:
+            new_b[0] = a
+            new_a[2] = b
+        if new_a[0] != _nil:
+            dict_impl.__getitem__(self, new_a[0])[2] = a
+        if new_a[2] != _nil:
+            dict_impl.__getitem__(self, new_a[2])[0] = a
+        if new_b[0] != _nil:
+            dict_impl.__getitem__(self, new_b[0])[2] = b
+        if new_b[2] != _nil:
+            dict_impl.__getitem__(self, new_b[2])[0] = b
+        dict_impl.__setitem__(self, a, new_a)
+        dict_impl.__setitem__(self, b, new_b)
+        if new_a[0] == _nil:
+            dict_impl.__setattr__(self, 'lh', a)
+        if new_a[2] == _nil:
+            dict_impl.__setattr__(self, 'lt', a)
+        if new_b[0] == _nil:
+            dict_impl.__setattr__(self, 'lh', b)
+        if new_b[2] == _nil:
+            dict_impl.__setattr__(self, 'lt', b)
+
+    def insertbefore(self, ref, key, value):
+        if ref == key:
+            raise ValueError('Reference key and new key are equal')
+        try:
+            index = self.keys().index(ref)
+        except ValueError:
+            raise KeyError('Reference key \'{}\' not found'.format(ref))
+        prevkey = prevval = None
+        dict_impl = self._dict_impl()
+        if index > 0:
+            prevkey = self.keys()[index - 1]
+            prevval = dict_impl.__getitem__(self, prevkey)
+        if prevval is not None:
+            dict_impl.__getitem__(self, prevkey)[2] = key
+            newval = [prevkey, value, ref]
+        else:
+            dict_impl.__setattr__(self, 'lh', key)
+            newval = [_nil, value, ref]
+        dict_impl.__getitem__(self, ref)[0] = key
+        dict_impl.__setitem__(self, key, newval)
+
+    def insertafter(self, ref, key, value):
+        if ref == key:
+            raise ValueError('Reference key and new key are equal')
+        try:
+            index = self.keys().index(ref)
+        except ValueError:
+            raise KeyError('Reference key \'{}\' not found'.format(ref))
+        nextkey = nextval = None
+        keys = self.keys()
+        dict_impl = self._dict_impl()
+        if index < len(keys) - 1:
+            nextkey = keys[index + 1]
+            nextval = dict_impl.__getitem__(self, nextkey)
+        if nextval is not None:
+            dict_impl.__getitem__(self, nextkey)[0] = key
+            newval = [ref, value, nextkey]
+        else:
+            dict_impl.__setattr__(self, 'lt', key)
+            newval = [ref, value, _nil]
+        dict_impl.__getitem__(self, ref)[2] = key
+        dict_impl.__setitem__(self, key, newval)
+
+    def insertfirst(self, key, value):
+        keys = self.keys()
+        if not keys:
+            self[key] = value
+            return
+        self.insertbefore(keys[0], key, value)
+
+    def insertlast(self, key, value):
+        keys = self.keys()
+        if not keys:
+            self[key] = value
+            return
+        self.insertafter(keys[-1], key, value)
 
 
 class odict(_odict, dict):
