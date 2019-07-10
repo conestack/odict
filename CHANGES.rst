@@ -1,8 +1,8 @@
 Changes
 =======
 
-1.7.0 (unreleased)
-------------------
+1.7.0
+-----
 
 - Add ``swap``, ``insertbefore``, ``insertafter``, ``insertfirst`` and
   ``insertlast`` functions to ``odict``.
