@@ -200,11 +200,10 @@ Summary of the test coverage report::
     Name                    Stmts   Miss  Cover
     -------------------------------------------
     src/odict/__init__.py       1      0   100%
-    src/odict/pyodict.py      237      0   100%
-    src/odict/tests.py        198      0   100%
+    src/odict/pyodict.py      320      0   100%
+    src/odict/tests.py        280      0   100%
     -------------------------------------------
-    TOTAL                     436      0   100%
-
+    TOTAL                     601      0   100%
 
 Python Versions
 ---------------
