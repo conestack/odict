@@ -4,6 +4,7 @@ from odict.pyodict import _nil
 from odict.pyodict import _odict
 import copy
 import pickle
+import sys
 
 
 try:
@@ -193,13 +194,16 @@ class TestOdict(unittest.TestCase):
         self.assertFalse(o_copy['3'] is o['3'])
 
     def test_casting(self):
-        # casting to dict will fail
+        # in python < 3.7 casting to dict will fail
         # Reason -> http://bugs.python.org/issue1615701
         # The __init__ function of dict checks wether arg is subclass of dict,
         # and ignores overwritten __getitem__ & co if so.
         # This was fixed and later reverted due to behavioural problems with
         # pickle.
-        self.assertEqual(dict(odict([(1, 1)])), {1: [_nil, 1, _nil]})
+        if sys.version_info < (3, 7):
+            self.assertEqual(dict(odict([(1, 1)])), {1: [_nil, 1, _nil]})
+        else:
+            self.assertEqual(dict(odict([(1, 1)])), {1: 1})
         # The following ways for type conversion work
         self.assertEqual(dict(odict([(1, 1)]).items()), {1: 1})
         self.assertEqual(odict([(1, 1)]).as_dict(), {1: 1})
@@ -404,4 +408,4 @@ class TestOdict(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()                                          # pragma: no cover
+    unittest.main()  # pragma: no cover
