@@ -58,10 +58,10 @@ class _odict(object):
         if kwds:
             raise TypeError("__init__() of ordered dict takes no keyword "
                             "arguments to avoid an ordering trap.")
-        dict_impl = self._dict_impl()
-        if dict_impl is None:
+        dict_ = self._dict_impl()
+        if dict_ is None:
             raise TypeError("No dict implementation class provided.")
-        dict_impl.__init__(self)
+        dict_.__init__(self)
         # If you give a normal dict, then the order of elements is undefined
         if hasattr(data, ITER_FUNC):
             for key, val in getattr(data, ITER_FUNC)():
@@ -73,10 +73,10 @@ class _odict(object):
     # Double-linked list header
     @property
     def lh(self):
-        dict_impl = self._dict_impl()
+        dict_ = self._dict_impl()
         if not hasattr(self, '_lh'):
-            dict_impl.__setattr__(self, '_lh', _nil)
-        return dict_impl.__getattribute__(self, '_lh')
+            dict_.__setattr__(self, '_lh', _nil)
+        return dict_.__getattribute__(self, '_lh')
 
     @lh.setter
     def lh(self, val):
@@ -85,10 +85,10 @@ class _odict(object):
     # Double-linked list tail
     @property
     def lt(self):
-        dict_impl = self._dict_impl()
+        dict_ = self._dict_impl()
         if not hasattr(self, '_lt'):
-            dict_impl.__setattr__(self, '_lt', _nil)
-        return dict_impl.__getattribute__(self, '_lt')
+            dict_.__setattr__(self, '_lt', _nil)
+        return dict_.__getattribute__(self, '_lt')
 
     @lt.setter
     def lt(self, val):
@@ -98,33 +98,32 @@ class _odict(object):
         return self._dict_impl().__getitem__(self, key)[1]
 
     def __setitem__(self, key, val):
-        dict_impl = self._dict_impl()
+        dict_ = self._dict_impl()
         try:
-            dict_impl.__getitem__(self, key)[1] = val
+            dict_.__getitem__(self, key)[1] = val
         except KeyError:
-            list_factory = self._list_factory()
-            new = list_factory(
-                [dict_impl.__getattribute__(self, 'lt'), val, _nil])
-            dict_impl.__setitem__(self, key, new)
-            if dict_impl.__getattribute__(self, 'lt') == _nil:
-                dict_impl.__setattr__(self, 'lh', key)
+            list_ = self._list_factory()
+            lt = dict_.__getattribute__(self, 'lt')
+            new = list_([lt, val, _nil])
+            dict_.__setitem__(self, key, new)
+            if lt == _nil:
+                dict_.__setattr__(self, 'lh', key)
             else:
-                dict_impl.__getitem__(
-                    self, dict_impl.__getattribute__(self, 'lt'))[2] = key
-            dict_impl.__setattr__(self, 'lt', key)
+                dict_.__getitem__(self, lt)[2] = key
+            dict_.__setattr__(self, 'lt', key)
 
     def __delitem__(self, key):
-        dict_impl = self._dict_impl()
-        pred, _, succ = self._dict_impl().__getitem__(self, key)
+        dict_ = self._dict_impl()
+        pred, _, succ = dict_.__getitem__(self, key)
         if pred == _nil:
-            dict_impl.__setattr__(self, 'lh', succ)
+            dict_.__setattr__(self, 'lh', succ)
         else:
-            dict_impl.__getitem__(self, pred)[2] = succ
+            dict_.__getitem__(self, pred)[2] = succ
         if succ == _nil:
-            dict_impl.__setattr__(self, 'lt', pred)
+            dict_.__setattr__(self, 'lt', pred)
         else:
-            dict_impl.__getitem__(self, succ)[0] = pred
-        dict_impl.__delitem__(self, key)
+            dict_.__getitem__(self, succ)[0] = pred
+        dict_.__delitem__(self, key)
 
     def __copy__(self):
         new = type(self)()
@@ -175,11 +174,11 @@ class _odict(object):
             return x
 
     def __iter__(self):
-        dict_impl = self._dict_impl()
-        curr_key = dict_impl.__getattribute__(self, 'lh')
+        dict_ = self._dict_impl()
+        curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             yield curr_key
-            curr_key = dict_impl.__getitem__(self, curr_key)[2]
+            curr_key = dict_.__getitem__(self, curr_key)[2]
 
     iterkeys = __iter__
 
@@ -187,39 +186,37 @@ class _odict(object):
         return list(self.iterkeys())
 
     def alter_key(self, old_key, new_key):
-        dict_impl = self._dict_impl()
-        list_factory = self._list_factory()
-        val = dict_impl.__getitem__(self, old_key)
-        dict_impl.__delitem__(self, old_key)
+        dict_ = self._dict_impl()
+        list_ = self._list_factory()
+        val = dict_.__getitem__(self, old_key)
+        dict_.__delitem__(self, old_key)
         if val[0] != _nil:
-            prev = dict_impl.__getitem__(self, val[0])
-            dict_impl.__setitem__(
-                self, val[0], list_factory([prev[0], prev[1], new_key]))
+            prev = dict_.__getitem__(self, val[0])
+            dict_.__setitem__(self, val[0], list_([prev[0], prev[1], new_key]))
         else:
-            dict_impl.__setattr__(self, 'lh', new_key)
+            dict_.__setattr__(self, 'lh', new_key)
         if val[2] != _nil:
-            next = dict_impl.__getitem__(self, val[2])
-            dict_impl.__setitem__(
-                self, val[2], list_factory([new_key, next[1], next[2]]))
+            next = dict_.__getitem__(self, val[2])
+            dict_.__setitem__(self, val[2], list_([new_key, next[1], next[2]]))
         else:
-            dict_impl.__setattr__(self, 'lt', new_key)
-        dict_impl.__setitem__(self, new_key, val)
+            dict_.__setattr__(self, 'lt', new_key)
+        dict_.__setitem__(self, new_key, val)
 
     def itervalues(self):
-        dict_impl = self._dict_impl()
-        curr_key = dict_impl.__getattribute__(self, 'lh')
+        dict_ = self._dict_impl()
+        curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
-            _, val, curr_key = dict_impl.__getitem__(self, curr_key)
+            _, val, curr_key = dict_.__getitem__(self, curr_key)
             yield val
 
     def values(self):
         return list(self.itervalues())
 
     def iteritems(self):
-        dict_impl = self._dict_impl()
-        curr_key = dict_impl.__getattribute__(self, 'lh')
+        dict_ = self._dict_impl()
+        curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
-            _, val, next_key = dict_impl.__getitem__(self, curr_key)
+            _, val, next_key = dict_.__getitem__(self, curr_key)
             yield curr_key, val
             curr_key = next_key
 
@@ -240,10 +237,10 @@ class _odict(object):
         self.__init__(items)
 
     def clear(self):
-        dict_impl = self._dict_impl()
-        dict_impl.clear(self)
-        dict_impl.__setattr__(self, 'lh', _nil)
-        dict_impl.__setattr__(self, 'lt', _nil)
+        dict_ = self._dict_impl()
+        dict_.clear(self)
+        dict_.__setattr__(self, 'lh', _nil)
+        dict_.__setattr__(self, 'lt', _nil)
 
     def copy(self):
         return self.__class__(self)
@@ -278,8 +275,8 @@ class _odict(object):
 
     def popitem(self):
         try:
-            dict_impl = self._dict_impl()
-            key = dict_impl.__getattribute__(self, 'lt')
+            dict_ = self._dict_impl()
+            key = dict_.__getattribute__(self, 'lt')
             return key, self.pop(key)
         except KeyError:
             raise KeyError("'popitem(): ordered dictionary is empty'")
@@ -287,11 +284,11 @@ class _odict(object):
     def riterkeys(self):
         """To iterate on keys in reversed order.
         """
-        dict_impl = self._dict_impl()
-        curr_key = dict_impl.__getattribute__(self, 'lt')
+        dict_ = self._dict_impl()
+        curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             yield curr_key
-            curr_key = dict_impl.__getitem__(self, curr_key)[0]
+            curr_key = dict_.__getitem__(self, curr_key)[0]
 
     __reversed__ = riterkeys
 
@@ -303,10 +300,10 @@ class _odict(object):
     def ritervalues(self):
         """To iterate on values in reversed order.
         """
-        dict_impl = self._dict_impl()
-        curr_key = dict_impl.__getattribute__(self, 'lt')
+        dict_ = self._dict_impl()
+        curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
-            curr_key, val, _ = dict_impl.__getitem__(self, curr_key)
+            curr_key, val, _ = dict_.__getitem__(self, curr_key)
             yield val
 
     def rvalues(self):
@@ -317,10 +314,10 @@ class _odict(object):
     def riteritems(self):
         """To iterate on (key, value) in reversed order.
         """
-        dict_impl = self._dict_impl()
-        curr_key = dict_impl.__getattribute__(self, 'lt')
+        dict_ = self._dict_impl()
+        curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
-            pred_key, val, _ = dict_impl.__getitem__(self, curr_key)
+            pred_key, val, _ = dict_.__getitem__(self, curr_key)
             yield curr_key, val
             curr_key = pred_key
 
@@ -348,21 +345,23 @@ class _odict(object):
         """_repr(): low level repr of the whole data contained in the odict.
         Useful for debugging.
         """
-        dict_impl = self._dict_impl()
+        dict_ = self._dict_impl()
         form = "odict low level repr lh,lt,data: %r, %r, %s"
-        return form % (dict_impl.__getattribute__(self, 'lh'),
-                       dict_impl.__getattribute__(self, 'lt'),
-                       dict_impl.__repr__(self))
+        return form % (
+            dict_.__getattribute__(self, 'lh'),
+            dict_.__getattribute__(self, 'lt'),
+            dict_.__repr__(self)
+        )
 
     def swap(self, a, b):
         if a == b:
             raise ValueError('Swap keys are equal')
-        dict_impl = self._dict_impl()
-        list_factory = self._list_factory()
-        orgin_a = dict_impl.__getitem__(self, a)
-        orgin_b = dict_impl.__getitem__(self, b)
-        new_a = list_factory([orgin_b[0], orgin_a[1], orgin_b[2]])
-        new_b = list_factory([orgin_a[0], orgin_b[1], orgin_a[2]])
+        dict_ = self._dict_impl()
+        list_ = self._list_factory()
+        orgin_a = dict_.__getitem__(self, a)
+        orgin_b = dict_.__getitem__(self, b)
+        new_a = list_([orgin_b[0], orgin_a[1], orgin_b[2]])
+        new_b = list_([orgin_a[0], orgin_b[1], orgin_a[2]])
         if new_a[0] == a:
             new_a[0] = b
             new_b[2] = a
@@ -370,23 +369,23 @@ class _odict(object):
             new_b[0] = a
             new_a[2] = b
         if new_a[0] != _nil:
-            dict_impl.__getitem__(self, new_a[0])[2] = a
+            dict_.__getitem__(self, new_a[0])[2] = a
         if new_a[2] != _nil:
-            dict_impl.__getitem__(self, new_a[2])[0] = a
+            dict_.__getitem__(self, new_a[2])[0] = a
         if new_b[0] != _nil:
-            dict_impl.__getitem__(self, new_b[0])[2] = b
+            dict_.__getitem__(self, new_b[0])[2] = b
         if new_b[2] != _nil:
-            dict_impl.__getitem__(self, new_b[2])[0] = b
-        dict_impl.__setitem__(self, a, new_a)
-        dict_impl.__setitem__(self, b, new_b)
+            dict_.__getitem__(self, new_b[2])[0] = b
+        dict_.__setitem__(self, a, new_a)
+        dict_.__setitem__(self, b, new_b)
         if new_a[0] == _nil:
-            dict_impl.__setattr__(self, 'lh', a)
+            dict_.__setattr__(self, 'lh', a)
         if new_a[2] == _nil:
-            dict_impl.__setattr__(self, 'lt', a)
+            dict_.__setattr__(self, 'lt', a)
         if new_b[0] == _nil:
-            dict_impl.__setattr__(self, 'lh', b)
+            dict_.__setattr__(self, 'lh', b)
         if new_b[2] == _nil:
-            dict_impl.__setattr__(self, 'lt', b)
+            dict_.__setattr__(self, 'lt', b)
 
     def insertbefore(self, ref, key, value):
         if ref == key:
@@ -396,19 +395,19 @@ class _odict(object):
         except ValueError:
             raise KeyError('Reference key \'{}\' not found'.format(ref))
         prevkey = prevval = None
-        dict_impl = self._dict_impl()
-        list_factory = self._list_factory()
+        dict_ = self._dict_impl()
+        list_ = self._list_factory()
         if index > 0:
             prevkey = self.keys()[index - 1]
-            prevval = dict_impl.__getitem__(self, prevkey)
+            prevval = dict_.__getitem__(self, prevkey)
         if prevval is not None:
-            dict_impl.__getitem__(self, prevkey)[2] = key
-            newval = list_factory([prevkey, value, ref])
+            dict_.__getitem__(self, prevkey)[2] = key
+            newval = list_([prevkey, value, ref])
         else:
-            dict_impl.__setattr__(self, 'lh', key)
-            newval = list_factory([_nil, value, ref])
-        dict_impl.__getitem__(self, ref)[0] = key
-        dict_impl.__setitem__(self, key, newval)
+            dict_.__setattr__(self, 'lh', key)
+            newval = list_([_nil, value, ref])
+        dict_.__getitem__(self, ref)[0] = key
+        dict_.__setitem__(self, key, newval)
 
     def insertafter(self, ref, key, value):
         if ref == key:
@@ -419,19 +418,19 @@ class _odict(object):
             raise KeyError('Reference key \'{}\' not found'.format(ref))
         nextkey = nextval = None
         keys = self.keys()
-        dict_impl = self._dict_impl()
-        list_factory = self._list_factory()
+        dict_ = self._dict_impl()
+        list_ = self._list_factory()
         if index < len(keys) - 1:
             nextkey = keys[index + 1]
-            nextval = dict_impl.__getitem__(self, nextkey)
+            nextval = dict_.__getitem__(self, nextkey)
         if nextval is not None:
-            dict_impl.__getitem__(self, nextkey)[0] = key
-            newval = list_factory([ref, value, nextkey])
+            dict_.__getitem__(self, nextkey)[0] = key
+            newval = list_([ref, value, nextkey])
         else:
-            dict_impl.__setattr__(self, 'lt', key)
-            newval = list_factory([ref, value, _nil])
-        dict_impl.__getitem__(self, ref)[2] = key
-        dict_impl.__setitem__(self, key, newval)
+            dict_.__setattr__(self, 'lt', key)
+            newval = list_([ref, value, _nil])
+        dict_.__getitem__(self, ref)[2] = key
+        dict_.__setitem__(self, key, newval)
 
     def insertfirst(self, key, value):
         keys = self.keys()
