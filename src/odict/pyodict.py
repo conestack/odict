@@ -46,6 +46,9 @@ class _odict(object):
     def _dict_impl(self):
         return None
 
+    def _list_factory(self):
+        return list
+
     def __init__(self, data=(), **kwds):
         """This doesn't accept keyword initialization as normal dicts to avoid
         a trap - inside a function or method the keyword args are accessible
@@ -68,28 +71,28 @@ class _odict(object):
                 self[key] = val
 
     # Double-linked list header
-    def _get_lh(self):
+    @property
+    def lh(self):
         dict_impl = self._dict_impl()
         if not hasattr(self, '_lh'):
             dict_impl.__setattr__(self, '_lh', _nil)
         return dict_impl.__getattribute__(self, '_lh')
 
-    def _set_lh(self, val):
+    @lh.setter
+    def lh(self, val):
         self._dict_impl().__setattr__(self, '_lh', val)
 
-    lh = property(_get_lh, _set_lh)
-
     # Double-linked list tail
-    def _get_lt(self):
+    @property
+    def lt(self):
         dict_impl = self._dict_impl()
         if not hasattr(self, '_lt'):
             dict_impl.__setattr__(self, '_lt', _nil)
         return dict_impl.__getattribute__(self, '_lt')
 
-    def _set_lt(self, val):
+    @lt.setter
+    def lt(self, val):
         self._dict_impl().__setattr__(self, '_lt', val)
-
-    lt = property(_get_lt, _set_lt)
 
     def __getitem__(self, key):
         return self._dict_impl().__getitem__(self, key)[1]
@@ -99,7 +102,9 @@ class _odict(object):
         try:
             dict_impl.__getitem__(self, key)[1] = val
         except KeyError:
-            new = [dict_impl.__getattribute__(self, 'lt'), val, _nil]
+            list_factory = self._list_factory()
+            new = list_factory(
+                [dict_impl.__getattribute__(self, 'lt'), val, _nil])
             dict_impl.__setitem__(self, key, new)
             if dict_impl.__getattribute__(self, 'lt') == _nil:
                 dict_impl.__setattr__(self, 'lh', key)
@@ -183,16 +188,19 @@ class _odict(object):
 
     def alter_key(self, old_key, new_key):
         dict_impl = self._dict_impl()
+        list_factory = self._list_factory()
         val = dict_impl.__getitem__(self, old_key)
         dict_impl.__delitem__(self, old_key)
         if val[0] != _nil:
             prev = dict_impl.__getitem__(self, val[0])
-            dict_impl.__setitem__(self, val[0], [prev[0], prev[1], new_key])
+            dict_impl.__setitem__(
+                self, val[0], list_factory([prev[0], prev[1], new_key]))
         else:
             dict_impl.__setattr__(self, 'lh', new_key)
         if val[2] != _nil:
             next = dict_impl.__getitem__(self, val[2])
-            dict_impl.__setitem__(self, val[2], [new_key, next[1], next[2]])
+            dict_impl.__setitem__(
+                self, val[2], list_factory([new_key, next[1], next[2]]))
         else:
             dict_impl.__setattr__(self, 'lt', new_key)
         dict_impl.__setitem__(self, new_key, val)
@@ -251,22 +259,22 @@ class _odict(object):
         for key, val in data:
             self[key] = val
 
-    def setdefault(self, k, x=None):
+    def setdefault(self, key, default=None):
         try:
-            return self[k]
+            return self[key]
         except KeyError:
-            self[k] = x
-            return x
+            self[key] = default
+            return default
 
-    def pop(self, k, x=_nil):
+    def pop(self, key, default=_nil):
         try:
-            val = self[k]
-            del self[k]
+            val = self[key]
+            del self[key]
             return val
         except KeyError:
-            if x == _nil:
+            if default == _nil:
                 raise
-            return x
+            return default
 
     def popitem(self):
         try:
@@ -350,10 +358,11 @@ class _odict(object):
         if a == b:
             raise ValueError('Swap keys are equal')
         dict_impl = self._dict_impl()
+        list_factory = self._list_factory()
         orgin_a = dict_impl.__getitem__(self, a)
         orgin_b = dict_impl.__getitem__(self, b)
-        new_a = [orgin_b[0], orgin_a[1], orgin_b[2]]
-        new_b = [orgin_a[0], orgin_b[1], orgin_a[2]]
+        new_a = list_factory([orgin_b[0], orgin_a[1], orgin_b[2]])
+        new_b = list_factory([orgin_a[0], orgin_b[1], orgin_a[2]])
         if new_a[0] == a:
             new_a[0] = b
             new_b[2] = a
@@ -388,15 +397,16 @@ class _odict(object):
             raise KeyError('Reference key \'{}\' not found'.format(ref))
         prevkey = prevval = None
         dict_impl = self._dict_impl()
+        list_factory = self._list_factory()
         if index > 0:
             prevkey = self.keys()[index - 1]
             prevval = dict_impl.__getitem__(self, prevkey)
         if prevval is not None:
             dict_impl.__getitem__(self, prevkey)[2] = key
-            newval = [prevkey, value, ref]
+            newval = list_factory([prevkey, value, ref])
         else:
             dict_impl.__setattr__(self, 'lh', key)
-            newval = [_nil, value, ref]
+            newval = list_factory([_nil, value, ref])
         dict_impl.__getitem__(self, ref)[0] = key
         dict_impl.__setitem__(self, key, newval)
 
@@ -410,15 +420,16 @@ class _odict(object):
         nextkey = nextval = None
         keys = self.keys()
         dict_impl = self._dict_impl()
+        list_factory = self._list_factory()
         if index < len(keys) - 1:
             nextkey = keys[index + 1]
             nextval = dict_impl.__getitem__(self, nextkey)
         if nextval is not None:
             dict_impl.__getitem__(self, nextkey)[0] = key
-            newval = [ref, value, nextkey]
+            newval = list_factory([ref, value, nextkey])
         else:
             dict_impl.__setattr__(self, 'lt', key)
-            newval = [ref, value, _nil]
+            newval = list_factory([ref, value, _nil])
         dict_impl.__getitem__(self, ref)[2] = key
         dict_impl.__setitem__(self, key, newval)
 
