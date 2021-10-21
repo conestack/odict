@@ -330,13 +330,21 @@ class _odict(object):
         if self:
             return self._dict_impl().__getattribute__(self, 'lh')
         else:
-            raise KeyError("'firstkey(): ordered dictionary is empty'")
+            raise KeyError('Ordered dictionary is empty')
+
+    @property
+    def first_key(self):
+        return self.firstkey()
 
     def lastkey(self):
         if self:
             return self._dict_impl().__getattribute__(self, 'lt')
         else:
-            raise KeyError("'lastkey(): ordered dictionary is empty'")
+            raise KeyError('Ordered dictionary is empty')
+
+    @property
+    def last_key(self):
+        return self.lastkey()
 
     def as_dict(self):
         return self._dict_impl()(self.iteritems())
@@ -445,6 +453,20 @@ class _odict(object):
             self[key] = value
             return
         self.insertafter(keys[-1], key, value)
+
+    def next_key(self, key):
+        dict_ = self._dict_impl()
+        curr = dict_.__getitem__(self, key)
+        if curr[2] == _nil:
+            raise KeyError('No next key')
+        return curr[2]
+
+    def prev_key(self, key):
+        dict_ = self._dict_impl()
+        curr = dict_.__getitem__(self, key)
+        if curr[0] == _nil:
+            raise KeyError('No previous key')
+        return curr[0]
 
 
 class odict(_odict, dict):

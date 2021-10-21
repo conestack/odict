@@ -4,7 +4,13 @@ Changes
 1.8.0 (unreleased)
 ------------------
 
-- Introduce ``_list_factory`` on ``_odict`` base class. Can be used to alter
+- Add ``next_key`` and ``prev_key`` functions.
+  [rnix]
+
+- Add ``first_key`` and ``last_key`` properties.
+  [rnix]
+
+- Add ``_list_factory`` on ``_odict`` base class. Can be used to alter
   the list implementation used for internal value triples.
   [rnix]
 

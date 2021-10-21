@@ -92,12 +92,16 @@ class TestOdict(unittest.TestCase):
         # Test first and last key.
         o = odict([('a', 1), ('b', 2), ('c', 3), ('d', 4)])
         self.assertEqual(o.firstkey(), 'a')
+        self.assertEqual(o.first_key, 'a')
         self.assertEqual(o.lastkey(), 'd')
+        self.assertEqual(o.last_key, 'd')
         o = odict()
-        msg = "\"'firstkey(): ordered dictionary is empty'\""
+        msg = "'Ordered dictionary is empty'"
         self.assertRaisesWithMessage(msg, o.firstkey, KeyError)
-        msg = "\"'lastkey(): ordered dictionary is empty'\""
+        self.assertRaisesWithMessage(msg, lambda: o.first_key, KeyError)
+        msg = "'Ordered dictionary is empty'"
         self.assertRaisesWithMessage(msg, o.lastkey, KeyError)
+        self.assertRaisesWithMessage(msg, lambda: o.last_key, KeyError)
 
     def test_reverse_iteration(self):
         # Reverse iteration
@@ -405,6 +409,26 @@ class TestOdict(unittest.TestCase):
         o.insertlast('1', 'b')
         self.assertEqual(o.keys(), ['0', '1'])
         self.assertEqual(o.values(), ['a', 'b'])
+
+    def test_next_key(self):
+        o = odict()
+        with self.assertRaises(KeyError):
+            o.next_key('x')
+        o['x'] = 'x'
+        with self.assertRaises(KeyError):
+            o.next_key('x')
+        o['y'] = 'y'
+        self.assertEqual(o.next_key('x'), 'y')
+
+    def test_prev_key(self):
+        o = odict()
+        with self.assertRaises(KeyError):
+            o.prev_key('x')
+        o['x'] = 'x'
+        with self.assertRaises(KeyError):
+            o.prev_key('x')
+        o['y'] = 'y'
+        self.assertEqual(o.prev_key('y'), 'x')
 
 
 if __name__ == '__main__':
