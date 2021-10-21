@@ -1,8 +1,8 @@
 Changes
 =======
 
-1.8.0 (unreleased)
-------------------
+1.8.0
+-----
 
 - Add ``next_key`` and ``prev_key`` functions.
   [rnix]
