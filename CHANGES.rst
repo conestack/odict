@@ -1,10 +1,12 @@
 Changes
 =======
 
-1.7.1 (unreleased)
+1.8.0 (unreleased)
 ------------------
 
-- no changes yet.
+- Introduce ``_list_factory`` on ``_odict`` base class. Can be used to alter
+  the list implementation used for internal value triples.
+  [rnix]
 
 
 1.7.0
