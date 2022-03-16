@@ -6,6 +6,10 @@
     :target: https://pypi.python.org/pypi/odict
     :alt: Number of PyPI downloads
 
+
+odict
+=====
+
 Dictionary in which the *insertion* order of items is preserved (using an
 internal double linked list). In this implementation replacing an existing
 item keeps it at its original position.
