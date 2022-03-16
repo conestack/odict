@@ -43,5 +43,5 @@ jobs:
 
       - name: Run coverage
         run: |
-          coverage run --source=src/odict -m odict.tests
+          coverage run -m odict.tests
           coverage report -m --fail-under=100
