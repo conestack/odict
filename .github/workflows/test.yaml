@@ -43,5 +43,5 @@ jobs:
 
       - name: Run coverage
         run: |
-          coverage run -m odict.tests
+          coverage run --source=src/odict --omit=src/odict/bench.py -m odict.tests
           coverage report -m --fail-under=100
