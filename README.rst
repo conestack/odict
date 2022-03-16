@@ -8,7 +8,7 @@
 
 .. image:: https://github.com/conestack/odict/actions/workflows/test.yaml/badge.svg
     :target: https://github.com/conestack/odict/actions/workflows/test.yaml
-    :alt: Tests
+    :alt: Test odict
 
 
 odict
