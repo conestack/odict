@@ -4,7 +4,10 @@ Changes
 1.8.1 (unreleased)
 ------------------
 
-- No changes yet.
+- Drop support for Python 2.6 and Python < 3.7. This actually means we don't
+  run the test suite for this versions any more. The package still continue to
+  work with this versions.
+  [rnix]
 
 
 1.8.0

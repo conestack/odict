@@ -204,9 +204,9 @@ class TestOdict(unittest.TestCase):
         # and ignores overwritten __getitem__ & co if so.
         # This was fixed and later reverted due to behavioural problems with
         # pickle.
-        if sys.version_info < (3, 7):
+        if sys.version_info < (3, 7):  # pragma: no cover
             self.assertEqual(dict(odict([(1, 1)])), {1: [_nil, 1, _nil]})
-        else:
+        else:  # pragma: no cover
             self.assertEqual(dict(odict([(1, 1)])), {1: 1})
         # The following ways for type conversion work
         self.assertEqual(dict(odict([(1, 1)]).items()), {1: 1})
