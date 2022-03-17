@@ -1,7 +1,7 @@
 Changes
 =======
 
-1.8.1 (unreleased)
+1.8.1 (2022-03-17)
 ------------------
 
 - Do not run test suites for Python 2.6 and Python < 3.7 any more. No changes
