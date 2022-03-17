@@ -1,4 +1,4 @@
+global-exclude *.pyo *.pyc
 graft src/odict
 include *.rst
-global-exclude *.pyc
-
+prune scripts
