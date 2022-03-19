@@ -5,12 +5,7 @@ from odict.pyodict import _odict
 import copy
 import pickle
 import sys
-
-
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+import unittest
 
 
 class TestOdict(unittest.TestCase):
@@ -433,7 +428,6 @@ class TestOdict(unittest.TestCase):
 
 if __name__ == '__main__':
     from odict import tests
-    import sys
 
     suite = unittest.TestSuite()
     suite.addTest(unittest.findTestCases(tests))
