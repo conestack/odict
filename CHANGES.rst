@@ -1,10 +1,16 @@
 Changes
 =======
 
-1.8.2 (unreleased)
+1.9.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add ``movebefore``, ``moveafter``, ``movefirst`` and ``movelast`` functions
+  to ``odict``.
+  [rnix]
+
+- Use ``first_key`` and ``last_key`` in ``insertfirst`` and ``insertlast``
+  instead of reading all keys.
+  [rnix]
 
 
 1.8.1 (2022-03-17)

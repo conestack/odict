@@ -441,18 +441,16 @@ class _odict(object):
         dict_.__setitem__(self, key, newval)
 
     def insertfirst(self, key, value):
-        keys = self.keys()
-        if not keys:
+        try:
+            self.insertbefore(self.first_key, key, value)
+        except KeyError:
             self[key] = value
-            return
-        self.insertbefore(keys[0], key, value)
 
     def insertlast(self, key, value):
-        keys = self.keys()
-        if not keys:
+        try:
+            self.insertafter(self.last_key, key, value)
+        except KeyError:
             self[key] = value
-            return
-        self.insertafter(keys[-1], key, value)
 
     def movebefore(self, ref, key):
         if ref == key:
@@ -460,7 +458,6 @@ class _odict(object):
         dict_ = self._dict_impl()
         val = dict_.__getitem__(self, key)
         ref_val = dict_.__getitem__(self, ref)
-        # cut value
         if val[0] == _nil:
             dict_.__setattr__(self, 'lh', val[2])
         else:
@@ -469,7 +466,6 @@ class _odict(object):
             dict_.__setattr__(self, 'lt', val[0])
         else:
             dict_.__getitem__(self, val[2])[0] = val[0]
-        # insert value
         if ref_val[0] == _nil:
             val[0] = _nil
             val[2] = ref
@@ -487,7 +483,6 @@ class _odict(object):
         dict_ = self._dict_impl()
         val = dict_.__getitem__(self, key)
         ref_val = dict_.__getitem__(self, ref)
-        # cut value
         if val[0] == _nil:
             dict_.__setattr__(self, 'lh', val[2])
         else:
@@ -496,10 +491,7 @@ class _odict(object):
             dict_.__setattr__(self, 'lt', val[0])
         else:
             dict_.__getitem__(self, val[2])[0] = val[0]
-        # append value
         if ref_val[2] == _nil:
-            #if val[0] != _nil:
-            #    dict_.__getitem__(self, ref_val[0])[2] = val_next
             val[0] = ref
             val[2] = _nil
             ref_val[2] = key
