@@ -8,11 +8,9 @@ ITER_FUNC = 'iteritems' if sys.version_info[0] < 3 else 'items'
 
 
 class _Nil(object):
-    """Q: it feels like using the class with "is" and "is not" instead of
-    "==" and "!=" should be faster.
-
-    A: This would break implementations which use pickle for persisting.
-    """
+    # Q: it feels like using the class with "is" and "is not" instead of "=="
+    #    and "!=" should be faster.
+    # A: This would break implementations which use pickle for persisting.
 
     def __repr__(self):
         return "nil"
@@ -44,9 +42,11 @@ class _odict(object):
     """
 
     def _dict_impl(self):
+        # XXX: rename to _dict_cls
         return None
 
     def _list_factory(self):
+        # XXX: rename to _list_cls
         return list
 
     def __init__(self, data=(), **kwds):
@@ -453,6 +453,43 @@ class _odict(object):
             self[key] = value
             return
         self.insertafter(keys[-1], key, value)
+
+    def movebefore(self, ref, key):
+        if ref == key:
+            raise ValueError('Move keys are equal')
+        dict_ = self._dict_impl()
+        val = dict_.__getitem__(self, key)
+        ref_val = dict_.__getitem__(self, ref)
+        # cut value
+        if val[0] == _nil:
+            dict_.__setattr__(self, 'lh', val[2])
+        else:
+            val_prev = dict_.__getitem__(self, val[0])
+            val_prev[2] = val[2]
+        if val[2] == _nil:
+            dict_.__setattr__(self, 'lt', val[0])
+        else:
+            val_next = dict_.__getitem__(self, val[2])
+            val_next[0] = val[0]
+        # insert value
+        if ref_val[0] == _nil:
+            val[0] = _nil
+            val[2] = ref
+            ref_val[0] = key
+            dict_.__setattr__(self, 'lh', key)
+        else:
+            ref_prev = dict_.__getitem__(self, ref_val[0])
+            val[0] = ref_val[0]
+            val[2] = ref_prev[2]
+            ref_val[0] = key
+            ref_prev[2] = key
+
+    def moveafter(self, ref, key):
+        if ref == key:
+            raise ValueError('Move keys are equal')
+        dict_ = self._dict_impl()
+        val = dict_.__getitem__(self, key)
+        ref_val = dict_.__getitem__(self, ref)
 
     def next_key(self, key):
         dict_ = self._dict_impl()

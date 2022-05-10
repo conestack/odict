@@ -312,54 +312,67 @@ class TestOdict(unittest.TestCase):
             o.swap('0', '0')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case first 2, a < b
         o.swap('0', '1')
         self.assertEqual(o.keys(), ['1', '0', '2', '3', '4'])
         self.assertEqual(o.values(), ['b', 'a', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('1', '4'))
         # Case first 2, a > b
         o.swap('0', '1')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case last 2, a < b
         o.swap('3', '4')
         self.assertEqual(o.keys(), ['0', '1', '2', '4', '3'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'e', 'd'])
+        self.assertEqual((o.lh, o.lt), ('0', '3'))
         # Case last 2, a > b
         o.swap('3', '4')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case neighbors, a < b
         o.swap('1', '2')
         self.assertEqual(o.keys(), ['0', '2', '1', '3', '4'])
         self.assertEqual(o.values(), ['a', 'c', 'b', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case neighbors, a > b
         o.swap('1', '2')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case non neighbors, one key first, a < b
         o.swap('0', '2')
         self.assertEqual(o.keys(), ['2', '1', '0', '3', '4'])
         self.assertEqual(o.values(), ['c', 'b', 'a', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('2', '4'))
         # Case non neighbors, one key first, a > b
         o.swap('0', '2')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case non neighbors, one key last, a < b
         o.swap('2', '4')
         self.assertEqual(o.keys(), ['0', '1', '4', '3', '2'])
         self.assertEqual(o.values(), ['a', 'b', 'e', 'd', 'c'])
+        self.assertEqual((o.lh, o.lt), ('0', '2'))
         # Case non neighbors, one key last, a > b
         o.swap('2', '4')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case non neighbors, a < b
         o.swap('1', '3')
         self.assertEqual(o.keys(), ['0', '3', '2', '1', '4'])
         self.assertEqual(o.values(), ['a', 'd', 'c', 'b', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
         # Case non neighbors, a > b
         o.swap('1', '3')
         self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
         self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
 
     def test_insertbefore(self):
         o = odict([('0', 'a')])
@@ -370,9 +383,11 @@ class TestOdict(unittest.TestCase):
         o.insertbefore('0', '1', 'b')
         self.assertEqual(o.keys(), ['1', '0'])
         self.assertEqual(o.values(), ['b', 'a'])
+        self.assertEqual((o.lh, o.lt), ('1', '0'))
         o.insertbefore('0', '2', 'c')
         self.assertEqual(o.keys(), ['1', '2', '0'])
         self.assertEqual(o.values(), ['b', 'c', 'a'])
+        self.assertEqual((o.lh, o.lt), ('1', '0'))
 
     def test_insertafter(self):
         o = odict([('0', 'a')])
@@ -383,9 +398,11 @@ class TestOdict(unittest.TestCase):
         o.insertafter('0', '1', 'b')
         self.assertEqual(o.keys(), ['0', '1'])
         self.assertEqual(o.values(), ['a', 'b'])
+        self.assertEqual((o.lh, o.lt), ('0', '1'))
         o.insertafter('0', '2', 'c')
         self.assertEqual(o.keys(), ['0', '2', '1'])
         self.assertEqual(o.values(), ['a', 'c', 'b'])
+        self.assertEqual((o.lh, o.lt), ('0', '1'))
 
     def test_insertfirst(self):
         o = odict()
@@ -404,6 +421,71 @@ class TestOdict(unittest.TestCase):
         o.insertlast('1', 'b')
         self.assertEqual(o.keys(), ['0', '1'])
         self.assertEqual(o.values(), ['a', 'b'])
+
+    def test_movebefore(self):
+        o = odict([('0', 'a'), ('1', 'b'), ('2', 'c'), ('3', 'd'), ('4', 'e')])
+        with self.assertRaises(ValueError):
+            o.movebefore('0', '0')
+        # case no neighbors ref < key
+        o.movebefore('1', '3')
+        self.assertEqual(o.keys(), ['0', '3', '1', '2', '4'])
+        self.assertEqual(o.values(), ['a', 'd', 'b', 'c', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case no neighbors ref > key
+        o.movebefore('2', '3')
+        self.assertEqual(o.keys(), ['0', '1', '3', '2', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'd', 'c', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case neighbors ref < key
+        o.movebefore('3', '2')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case neighbors ref > key
+        o.movebefore('3', '2')
+        self.assertEqual(o.keys(), ['0', '1', '2', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case insert first, no neighbors
+        o.movebefore('0', '2')
+        self.assertEqual(o.keys(), ['2', '0', '1', '3', '4'])
+        self.assertEqual(o.values(), ['c', 'a', 'b', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('2', '4'))
+        # case insert first, neighbors
+        o.movebefore('2', '0')
+        self.assertEqual(o.keys(), ['0', '2', '1', '3', '4'])
+        self.assertEqual(o.values(), ['a', 'c', 'b', 'd', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case ref last, no neighbors
+        o.movebefore('4', '1')
+        self.assertEqual(o.keys(), ['0', '2', '3', '1', '4'])
+        self.assertEqual(o.values(), ['a', 'c', 'd', 'b', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case ref last, neighbors
+        o.movebefore('4', '1')
+        self.assertEqual(o.keys(), ['0', '2', '3', '1', '4'])
+        self.assertEqual(o.values(), ['a', 'c', 'd', 'b', 'e'])
+        self.assertEqual((o.lh, o.lt), ('0', '4'))
+        # case key first, no neighbors
+        o.movebefore('3', '0')
+        self.assertEqual(o.keys(), ['2', '0', '3', '1', '4'])
+        self.assertEqual(o.values(), ['c', 'a', 'd', 'b', 'e'])
+        self.assertEqual((o.lh, o.lt), ('2', '4'))
+        # case key first, neighbors
+        o.movebefore('0', '2')
+        self.assertEqual(o.keys(), ['2', '0', '3', '1', '4'])
+        self.assertEqual(o.values(), ['c', 'a', 'd', 'b', 'e'])
+        self.assertEqual((o.lh, o.lt), ('2', '4'))
+        # case key last, no neighbors
+        o.movebefore('3', '4')
+        self.assertEqual(o.keys(), ['2', '0', '4', '3', '1'])
+        self.assertEqual(o.values(), ['c', 'a', 'e', 'd', 'b'])
+        self.assertEqual((o.lh, o.lt), ('2', '1'))
+        # case key last, neighbors
+        o.movebefore('3', '1')
+        self.assertEqual(o.keys(), ['2', '0', '4', '1', '3'])
+        self.assertEqual(o.values(), ['c', 'a', 'e', 'b', 'd'])
+        self.assertEqual((o.lh, o.lt), ('2', '3'))
 
     def test_next_key(self):
         o = odict()
