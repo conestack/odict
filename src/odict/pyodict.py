@@ -510,6 +510,12 @@ class _odict(object):
             val[2] = ref_val[2]
             ref_val[2] = ref_next[0] = key
 
+    def movefirst(self, key):
+        self.movebefore(self.first_key, key)
+
+    def movelast(self, key):
+        self.moveafter(self.last_key, key)
+
     def next_key(self, key):
         dict_ = self._dict_impl()
         curr = dict_.__getitem__(self, key)

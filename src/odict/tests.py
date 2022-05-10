@@ -600,6 +600,22 @@ class TestOdict(unittest.TestCase):
         self.assertEqual(o.values(), ['c', 'd', 'a', 'e', 'b'])
         self.assertEqual((o.lh, o.lt), ('2', '1'))
 
+    def test_movefirst(self):
+        o = odict([('0', 'a'), ('1', 'b'), ('2', 'c')])
+        o.movefirst('2')
+        self.assertEqual(o.keys(), ['2', '0', '1'])
+        self.assertEqual(o.rkeys(), ['1', '0', '2'])
+        self.assertEqual(o.values(), ['c', 'a', 'b'])
+        self.assertEqual((o.lh, o.lt), ('2', '1'))
+
+    def test_movelast(self):
+        o = odict([('0', 'a'), ('1', 'b'), ('2', 'c')])
+        o.movelast('0')
+        self.assertEqual(o.keys(), ['1', '2', '0'])
+        self.assertEqual(o.rkeys(), ['0', '2', '1'])
+        self.assertEqual(o.values(), ['b', 'c', 'a'])
+        self.assertEqual((o.lh, o.lt), ('1', '0'))
+
     def test_next_key(self):
         o = odict()
         with self.assertRaises(KeyError):
