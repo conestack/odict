@@ -503,10 +503,14 @@ class _odict(object):
             ref_val[2] = ref_next[0] = key
 
     def movefirst(self, key):
-        self.movebefore(self.first_key, key)
+        first_key = self.first_key
+        if first_key != key:
+            self.movebefore(first_key, key)
 
     def movelast(self, key):
-        self.moveafter(self.last_key, key)
+        last_key = self.last_key
+        if last_key != key:
+            self.moveafter(last_key, key)
 
     def next_key(self, key):
         dict_ = self._dict_impl()
