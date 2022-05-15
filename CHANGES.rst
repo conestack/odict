@@ -1,7 +1,7 @@
 Changes
 =======
 
-1.9.0 (unreleased)
+1.9.0 (2022-05-15)
 ------------------
 
 - Add ``movebefore``, ``moveafter``, ``movefirst`` and ``movelast`` functions
