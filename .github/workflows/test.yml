@@ -16,7 +16,6 @@ jobs:
           - macos-latest
 
         python:
-          - "2.7"
           - "3.7"
           - "3.8"
           - "3.9"
@@ -34,10 +33,16 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install
-        run: make install
+        run: |
+          pip install coverage
+          pip install -e .
 
       - name: Run tests
-        run: make test
+        run: |
+          python --version
+          python -m odict.tests
 
       - name: Run coverage
-        run: make coverage
+        run: |
+          coverage run --source=src/odict --omit=src/odict/bench.py -m odict.tests
+          coverage report --fail-under=100
