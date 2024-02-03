@@ -9,7 +9,6 @@ import unittest
 
 
 class TestOdict(unittest.TestCase):
-
     def assertRaisesWithMessage(self, msg, func, exc, *args, **kwargs):
         try:
             func(*args, **kwargs)
@@ -106,13 +105,9 @@ class TestOdict(unittest.TestCase):
         self.assertEqual([x for x in o.ritervalues()], [4, 3, 2, 1])
         self.assertEqual(o.rvalues(), [4, 3, 2, 1])
         self.assertEqual(
-            [x for x in o.riteritems()],
-            [('d', 4), ('c', 3), ('b', 2), ('a', 1)]
+            [x for x in o.riteritems()], [('d', 4), ('c', 3), ('b', 2), ('a', 1)]
         )
-        self.assertEqual(
-            o.ritems(),
-            [('d', 4), ('c', 3), ('b', 2), ('a', 1)]
-        )
+        self.assertEqual(o.ritems(), [('d', 4), ('c', 3), ('b', 2), ('a', 1)])
 
     def test_fromkeys(self):
         # From keys initialization::
@@ -132,7 +127,7 @@ class TestOdict(unittest.TestCase):
         self.assertEqual(o.pop(3, 'foo'), 'foo')
         self.assertEqual(o.pop(2), 'b')
         self.assertEqual(o.popitem(), (1, 'a'))
-        msg = "\"'popitem(): ordered dictionary is empty'\""
+        msg = '"\'popitem(): ordered dictionary is empty\'"'
         self.assertRaisesWithMessage(msg, o.popitem, KeyError)
 
     def test_delete(self):
@@ -141,29 +136,21 @@ class TestOdict(unittest.TestCase):
 
         def delete():
             del o['1']
+
         self.assertRaisesWithMessage("'1'", delete, KeyError)
         # Removal from odict with one element
         o['1'] = 1
         del o['1']
         self.assertEqual([o.lh, o.lt, o], [_nil, _nil, odict()])
-        self.assertEqual(
-            o._repr(),
-            'odict low level repr lh,lt,data: nil, nil, {}'
-        )
+        self.assertEqual(o._repr(), 'odict low level repr lh,lt,data: nil, nil, {}')
         # Remove first element of the odict sequence
         o = odict([('1', 1), ('2', 2), ('3', 3)])
         del o['1']
-        self.assertEqual(
-            [o.lh, o.lt, o],
-            ['2', '3', odict([('2', 2), ('3', 3)])]
-        )
+        self.assertEqual([o.lh, o.lt, o], ['2', '3', odict([('2', 2), ('3', 3)])])
         # Remove element in the middle of the odict sequence
         o = odict([('1', 1), ('2', 2), ('3', 3)])
         del o['2']
-        self.assertEqual(
-            [o.lh, o.lt, o],
-            ['1', '3', odict([('1', 1), ('3', 3)])]
-        )
+        self.assertEqual([o.lh, o.lt, o], ['1', '3', odict([('1', 1), ('3', 3)])])
         # Remove element at the end of the odict sequence
         o = odict([('1', 1), ('2', 2), ('3', 3)])
         del o['3']
@@ -177,10 +164,7 @@ class TestOdict(unittest.TestCase):
         o = odict([('a', 1), ('b', 2), ('c', 3), ('d', 4)])
         o_copy = o.copy()
         self.assertTrue(o_copy is not o)
-        self.assertEqual(
-            o_copy.items(),
-            [('a', 1), ('b', 2), ('c', 3), ('d', 4)]
-        )
+        self.assertEqual(o_copy.items(), [('a', 1), ('b', 2), ('c', 3), ('d', 4)])
         # test with copy module
         o = odict([('1', 1), ('2', 2), ('3', object())])
         # shallow copy
@@ -210,8 +194,7 @@ class TestOdict(unittest.TestCase):
     def test_pickle(self):
         # dump and load odict pickle
         self.assertEqual(
-            pickle.loads(pickle.dumps([odict([(1, 2)])])),
-            [odict([(1, 2)])]
+            pickle.loads(pickle.dumps([odict([(1, 2)])])), [odict([(1, 2)])]
         )
 
     def test_sort(self):
@@ -228,6 +211,7 @@ class TestOdict(unittest.TestCase):
                 return -1
             if x[0] < y[0]:
                 return 1
+
         o = odict([('a', 1), ('c', 3), ('b', 2)])
         o.sort(cmp=mycmp)
         self.assertEqual(o.items(), [('c', 3), ('b', 2), ('a', 1)])

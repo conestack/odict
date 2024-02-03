@@ -13,16 +13,16 @@ class _Nil(object):
     # A: This would break implementations which use pickle for persisting.
 
     def __repr__(self):
-        return "nil"
+        return 'nil'
 
     def __eq__(self, other):
-        if (isinstance(other, _Nil)):
+        if isinstance(other, _Nil):
             return True
         else:
             return NotImplemented
 
     def __ne__(self, other):
-        if (isinstance(other, _Nil)):
+        if isinstance(other, _Nil):
             return False
         else:
             return NotImplemented
@@ -56,11 +56,13 @@ class _odict(object):
         lost.
         """
         if kwds:
-            raise TypeError("__init__() of ordered dict takes no keyword "
-                            "arguments to avoid an ordering trap.")
+            raise TypeError(
+                '__init__() of ordered dict takes no keyword '
+                'arguments to avoid an ordering trap.'
+            )
         dict_ = self._dict_impl()
         if dict_ is None:
-            raise TypeError("No dict implementation class provided.")
+            raise TypeError('No dict implementation class provided.')
         dict_.__init__(self)
         # If you give a normal dict, then the order of elements is undefined
         if hasattr(data, ITER_FUNC):
@@ -155,17 +157,15 @@ class _odict(object):
         return len(self.keys())
 
     def __str__(self):
-        pairs = ("%r: %r" % (k, v) for k, v in getattr(self, ITER_FUNC)())
-        return "{%s}" % ", ".join(pairs)
+        pairs = ('%r: %r' % (k, v) for k, v in getattr(self, ITER_FUNC)())
+        return '{%s}' % ', '.join(pairs)
 
     def __repr__(self):
         if self:
-            pairs = (
-                "(%r, %r)" % (k, v) for k, v in getattr(self, ITER_FUNC)()
-            )
-            return "%s([%s])" % (self.__class__.__name__, ", ".join(pairs))
+            pairs = ('(%r, %r)' % (k, v) for k, v in getattr(self, ITER_FUNC)())
+            return '%s([%s])' % (self.__class__.__name__, ', '.join(pairs))
         else:
-            return "%s()" % self.__class__.__name__
+            return '%s()' % self.__class__.__name__
 
     def get(self, k, x=None):
         if k in self:
@@ -248,8 +248,8 @@ class _odict(object):
     def update(self, data=(), **kwds):
         if kwds:
             raise TypeError(
-                "update() of ordered dict takes no keyword arguments to avoid "
-                "an ordering trap."
+                'update() of ordered dict takes no keyword arguments to avoid '
+                'an ordering trap.'
             )
         if hasattr(data, ITER_FUNC):
             data = getattr(data, ITER_FUNC)()
@@ -282,8 +282,7 @@ class _odict(object):
             raise KeyError("'popitem(): ordered dictionary is empty'")
 
     def riterkeys(self):
-        """To iterate on keys in reversed order.
-        """
+        """To iterate on keys in reversed order."""
         dict_ = self._dict_impl()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
@@ -293,13 +292,11 @@ class _odict(object):
     __reversed__ = riterkeys
 
     def rkeys(self):
-        """List of the keys in reversed order.
-        """
+        """List of the keys in reversed order."""
         return list(self.riterkeys())
 
     def ritervalues(self):
-        """To iterate on values in reversed order.
-        """
+        """To iterate on values in reversed order."""
         dict_ = self._dict_impl()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
@@ -307,13 +304,11 @@ class _odict(object):
             yield val
 
     def rvalues(self):
-        """List of the values in reversed order.
-        """
+        """List of the values in reversed order."""
         return list(self.ritervalues())
 
     def riteritems(self):
-        """To iterate on (key, value) in reversed order.
-        """
+        """To iterate on (key, value) in reversed order."""
         dict_ = self._dict_impl()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
@@ -322,8 +317,7 @@ class _odict(object):
             curr_key = pred_key
 
     def ritems(self):
-        """List of the (key, value) in reversed order.
-        """
+        """List of the (key, value) in reversed order."""
         return list(self.riteritems())
 
     def firstkey(self):
@@ -354,11 +348,11 @@ class _odict(object):
         Useful for debugging.
         """
         dict_ = self._dict_impl()
-        form = "odict low level repr lh,lt,data: %r, %r, %s"
+        form = 'odict low level repr lh,lt,data: %r, %r, %s'
         return form % (
             dict_.__getattribute__(self, 'lh'),
             dict_.__getattribute__(self, 'lt'),
-            dict_.__repr__(self)
+            dict_.__repr__(self),
         )
 
     def swap(self, a, b):
@@ -401,7 +395,7 @@ class _odict(object):
         try:
             index = self.keys().index(ref)
         except ValueError:
-            raise KeyError('Reference key \'{}\' not found'.format(ref))
+            raise KeyError("Reference key '{}' not found".format(ref))
         prevkey = prevval = None
         dict_ = self._dict_impl()
         list_ = self._list_factory()
@@ -423,7 +417,7 @@ class _odict(object):
         try:
             index = self.keys().index(ref)
         except ValueError:
-            raise KeyError('Reference key \'{}\' not found'.format(ref))
+            raise KeyError("Reference key '{}' not found".format(ref))
         nextkey = nextval = None
         keys = self.keys()
         dict_ = self._dict_impl()
@@ -528,6 +522,5 @@ class _odict(object):
 
 
 class odict(_odict, dict):
-
     def _dict_impl(self):
         return dict

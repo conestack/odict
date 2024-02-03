@@ -109,5 +109,6 @@ def run():
         relation_row('creating', key, relation_create)
         relation_row('deleting', key, relation_delete)
 
+
 if __name__ == '__main__':
     run()
