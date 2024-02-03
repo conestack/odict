@@ -1,7 +1,6 @@
-name: Test odict
+name: Tests
 
-on:
-  push:
+on: [push]
 
 jobs:
   test:
@@ -22,26 +21,23 @@ jobs:
           - "3.8"
           - "3.9"
           - "3.10"
+          - "3.11"
+          - "3.12"
+          - "pypy3.9"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
 
       - name: Install
-        run: |
-          pip install coverage
-          pip install -e .
+        run: make install
 
       - name: Run tests
-        run: |
-          python --version
-          python -m odict.tests
+        run: make test
 
       - name: Run coverage
-        run: |
-          coverage run --source=src/odict --omit=src/odict/bench.py -m odict.tests
-          coverage report --fail-under=100
+        run: make coverage

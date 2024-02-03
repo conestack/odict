@@ -1,8 +1,8 @@
+*.egg-info/
 *.pyc
 /.coverage
+/.mxmake
 /dist/
 /htmlcov/
-/py2/
-/py3/
-/pypy3/
-/src/odict.egg-info/
+/requirements-mxdev.txt
+/venv
