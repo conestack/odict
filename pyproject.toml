@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "odict"
@@ -25,16 +25,6 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/conestack/odict"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-namespaces = false
-
-[tool.setuptools]
-zip-safe = true
-
-[tool.setuptools.package-dir]
-"" = "src"
 
 [tool.zest-releaser]
 create-wheel = true
