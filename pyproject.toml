@@ -26,5 +26,8 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/conestack/odict"
 
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/odict"]
 [tool.zest-releaser]
 create-wheel = true
