@@ -138,7 +138,7 @@ COVERAGE_COMMAND?=\
 		--source=src/odict \
 		--omit=src/odict/bench.py \
 		-m pytest tests \
-	&& coverage report --fail-under=99 \
+	&& coverage report --fail-under=100 \
 	&& coverage html
 
 ##############################################################################

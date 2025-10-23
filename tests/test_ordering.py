@@ -52,6 +52,44 @@ def test_swap_adjacent_at_end(ODict):
     assert o.lt == 'b'
 
 
+def test_swap_second_with_first(ODict):
+    """swap() with b < a for adjacent items (edge case for internal pointers)."""
+    o = ODict([('a', 1), ('b', 2), ('c', 3)])
+    o.swap('b', 'a')  # Swap with b before a
+    assert o.keys() == ['b', 'a', 'c']
+    assert o.values() == [2, 1, 3]
+    assert o.lh == 'b'
+
+
+def test_swap_makes_a_first(ODict):
+    """swap() where 'a' becomes first item (edge case for lh update)."""
+    o = ODict([('x', 0), ('a', 1), ('b', 2)])
+    o.swap('x', 'a')  # After swap, 'a' will be first
+    assert o.keys() == ['a', 'x', 'b']
+    assert o.lh == 'a'
+
+
+def test_swap_makes_b_last(ODict):
+    """swap() where 'b' becomes last item (edge case for lt update)."""
+    o = ODict([('a', 1), ('b', 2), ('z', 3)])
+    o.swap('z', 'b')  # Swap last with middle - 'b' becomes last
+    assert o.keys() == ['a', 'z', 'b']
+    assert o.lt == 'b'
+
+
+def test_swap_last_item_as_first_arg(ODict):
+    """swap(last, other) where first arg is last (edge case for lt set to b)."""
+    o = ODict([('a', 1), ('b', 2), ('c', 3)])
+    o.swap('c', 'a')  # Swap with last as first argument
+    # a='c' (last), b='a' (first)
+    # orgin_a = entry for 'c' = [b, 3, nil]
+    # orgin_b = entry for 'a' = [nil, 1, b]
+    # new_b = [orgin_a[0], orgin_b[1], orgin_a[2]] = [b, 1, nil]
+    # So new_b[2] == nil, which should trigger line 400
+    assert o.keys() == ['c', 'b', 'a']
+    assert o.lt == 'a'  # 'a' (second arg) becomes last
+
+
 # Insert tests
 
 def test_insertbefore_same_key_raises(ODict):
@@ -206,6 +244,22 @@ def test_moveafter_scenarios(ODict, ref, key, expected_keys, expected_values):
     o.moveafter(ref, key)
     assert o.keys() == expected_keys
     assert o.values() == expected_values
+
+
+def test_movebefore_first_key(ODict):
+    """movebefore() when moving the first key (edge case for lh update)."""
+    o = ODict([('a', 1), ('b', 2), ('c', 3)])
+    o.movebefore('c', 'a')  # Move first key before last
+    assert o.keys() == ['b', 'a', 'c']
+    assert o.lh == 'b'
+
+
+def test_moveafter_last_key(ODict):
+    """moveafter() when moving the last key (edge case for lt update)."""
+    o = ODict([('a', 1), ('b', 2), ('c', 3)])
+    o.moveafter('a', 'c')  # Move last key after first
+    assert o.keys() == ['a', 'c', 'b']
+    assert o.lt == 'b'
 
 
 def test_movefirst(ODict):

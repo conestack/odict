@@ -13,6 +13,21 @@ def test_abstract_superclass_no_dict_impl(AbstractODict, ODict):
     assert o._dict_cls() == dict
 
 
+def test_abstract_entry_cls_not_implemented():
+    """Abstract _entry_cls() raises NotImplementedError if not overridden."""
+    from odict.base import _BaseOrderedDict
+
+    # Create a minimal subclass that only implements _dict_cls
+    class PartialImpl(_BaseOrderedDict, dict):
+        def _dict_cls(self):
+            return dict
+        # Intentionally NOT implementing _entry_cls()
+
+    obj = PartialImpl()
+    with pytest.raises(NotImplementedError, match='Subclasses must implement _entry_cls'):
+        obj._entry_cls()
+
+
 def test_init_with_keyword_arguments_fails(ODict):
     """Initialization with keyword arguments fails to avoid ordering trap."""
     with pytest.raises(
