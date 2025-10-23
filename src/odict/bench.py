@@ -1,6 +1,11 @@
 # Python Software Foundation License
 from collections import OrderedDict
 from .pyodict import odict
+try:
+    from .codict import codict
+    HAS_CODICT = True
+except ImportError:
+    HAS_CODICT = False
 import time
 
 
@@ -107,6 +112,50 @@ def run():
         relation_delete = (oend - omid) / (dend - dmid)
         relation_row('creating', key, relation_create)
         relation_row('deleting', key, relation_delete)
+
+    if HAS_CODICT:
+        head('adding and deleting ``codict`` Cython-optimized objects')
+        print(CREATE_DELETE_ROW)
+        codict_results = {
+            1000: result(codict, 1000),
+            10000: result(codict, 10000),
+            100000: result(codict, 100000),
+            1000000: result(codict, 1000000),
+        }
+
+        head('relation ``odict : codict``')
+        print(RELATION_ROW)
+        for key, value in odict_results.items():
+            ostart, omid, oend = value
+            cstart, cmid, cend = codict_results[key]
+            relation_create = (cmid - cstart) / (omid - ostart)
+            relation_delete = (cend - cmid) / (oend - omid)
+            relation_row('creating', key, relation_create)
+            relation_row('deleting', key, relation_delete)
+
+        head('relation ``dict : codict``')
+        print(RELATION_ROW)
+        for key, value in dict_results.items():
+            dstart, dmid, dend = value
+            cstart, cmid, cend = codict_results[key]
+            relation_create = (cmid - cstart) / (dmid - dstart)
+            relation_delete = (cend - cmid) / (dend - dmid)
+            relation_row('creating', key, relation_create)
+            relation_row('deleting', key, relation_delete)
+
+        head('relation ``OrderedDict : codict``')
+        print(RELATION_ROW)
+        for key, value in ordereddict_results.items():
+            odstart, odmid, odend = value
+            cstart, cmid, cend = codict_results[key]
+            relation_create = (cmid - cstart) / (odmid - odstart)
+            relation_delete = (cend - cmid) / (odend - odmid)
+            relation_row('creating', key, relation_create)
+            relation_row('deleting', key, relation_delete)
+    else:
+        print('')
+        print('Cython codict not available (not compiled)')
+        print('')
 
 
 if __name__ == '__main__':

@@ -140,6 +140,12 @@ COVERAGE_COMMAND?=\
 		-m pytest tests \
 	&& coverage report --fail-under=100
 
+## custom.codict
+
+# Flag whether to build Cython extensions
+# Default: true
+BUILD_CODICT?=true
+
 ##############################################################################
 # END SETTINGS - DO NOT EDIT BELOW THIS LINE
 ##############################################################################
