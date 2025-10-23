@@ -2,18 +2,17 @@
 """Shared pytest fixtures for ordered dict tests."""
 
 import pytest
-from odict import odict
-from odict.pyodict import _odict, _nil as pyodict_nil
-from odict.codict import codict, _codict, _nil as codict_nil, Entry
+from odict.odict import odict, _odict, _nil
+from odict.codict import codict, _codict, Entry
 
 
 @pytest.fixture(params=[
     pytest.param(
-        (odict, _odict, pyodict_nil),
+        (odict, _odict, _nil),
         id='odict'
     ),
     pytest.param(
-        (codict, _codict, codict_nil),
+        (codict, _codict, _nil),
         id='codict'
     ),
 ])

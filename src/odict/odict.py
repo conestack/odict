@@ -1,8 +1,9 @@
 # Python Software Foundation License
-"""Base class for ordered dictionary implementations.
+"""Pure Python ordered dictionary implementation.
 
-This module provides the common implementation for both pyodict (pure Python)
-and codict (Cython-optimized) ordered dictionaries.
+This module provides the common base class and pure Python implementation
+for ordered dictionaries. The Cython-optimized version (codict) also uses
+this base class.
 """
 
 import copy
@@ -37,7 +38,7 @@ class _Nil(object):
 _nil = _Nil()
 
 
-class _BaseOrderedDict:
+class _base_odict:
     """Base class for ordered dict data structures.
 
     Provides O(1) complexity for dict operations that modify one element.
@@ -529,3 +530,19 @@ class _BaseOrderedDict:
         if curr[0] == _nil:
             raise KeyError('No previous key')
         return curr[0]
+
+
+class _odict(_base_odict):
+    """Ordered dict data structure, with O(1) complexity for dict operations
+    that modify one element.
+
+    Overwriting values doesn't change their original sequential order.
+    """
+
+    def _entry_cls(self):
+        return list
+
+
+class odict(_odict, dict):
+    def _dict_cls(self):
+        return dict

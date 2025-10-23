@@ -15,10 +15,10 @@ def test_abstract_superclass_no_dict_impl(AbstractODict, ODict):
 
 def test_abstract_entry_cls_not_implemented():
     """Abstract _entry_cls() raises NotImplementedError if not overridden."""
-    from odict.base import _BaseOrderedDict
+    from odict.odict import _base_odict
 
     # Create a minimal subclass that only implements _dict_cls
-    class PartialImpl(_BaseOrderedDict, dict):
+    class PartialImpl(_base_odict, dict):
         def _dict_cls(self):
             return dict
         # Intentionally NOT implementing _entry_cls()

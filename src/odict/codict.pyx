@@ -5,7 +5,7 @@
 This module provides a high-performance implementation of ordered dictionaries
 using Cython extension types for the node structure.
 """
-from odict.base import _BaseOrderedDict, _nil
+from odict.odict import _base_odict
 
 
 # Lightweight entry class for storing linked list data
@@ -68,7 +68,7 @@ cdef class Entry:
             raise IndexError("Entry index out of range")
 
 
-class _codict(_BaseOrderedDict):
+class _codict(_base_odict):
     """Cython-optimized ordered dict data structure using Entry objects.
 
     Uses Cython-optimized Entry class instead of Python lists for better performance.
