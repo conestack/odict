@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "cython>=3.0"]
+requires = ["hatchling", "hatch-cython"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,12 +7,11 @@ name = "odict"
 version = "2.0.0.dev0"
 description = "Ordered Dictionary."
 readme = "README.rst"
-license = {text = "Python Software Foundation License"}
+license = "PSF-2.0"
 authors = [{name = "Node Contributors", email = "dev@conestack.org"}]
 keywords = ["odict", "dict", "ordered", "dictionary", "mapping", "collection", "tree"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: Python Software Foundation License",
     "Operating System :: OS Independent",
     "Topic :: Software Development",
     "Programming Language :: Python",
@@ -23,11 +22,26 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 
+[project.optional-dependencies]
+build = [
+    "hatch",
+]
+
 [project.urls]
 Homepage = "https://github.com/conestack/odict"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/odict"]
+
+[tool.hatch.build.targets.wheel.hooks.cython]
+dependencies = ["hatch-cython"]
+
+[tool.hatch.build.targets.wheel.hooks.cython.options]
+directives = { language_level = 3, embedsignature = true }
+compile_py = false
+
+[tool.hatch.build.targets.wheel.hooks.cython.files]
+targets = ["*.pyx"]
 
 [tool.zest-releaser]
 create-wheel = true
