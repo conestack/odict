@@ -16,8 +16,7 @@ class _odict(_BaseOrderedDict):
 
     def _list_factory(self):
         # XXX: rename to _list_cls
-        # Return a callable that creates a list from 3 arguments
-        return lambda prev, val, next: [prev, val, next]
+        return list
 
 
 class odict(_odict, dict):

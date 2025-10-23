@@ -19,10 +19,24 @@ cdef class Node:
     cdef public object value
     cdef public object next_key
 
-    def __init__(self, prev_key, value, next_key):
-        self.prev_key = prev_key
-        self.value = value
-        self.next_key = next_key
+    def __init__(self, *args):
+        """Initialize Node with either a list or 3 separate arguments.
+
+        Supports both:
+        - Node([prev, val, next]) - for backwards compatibility
+        - Node(prev, val, next) - for pickle support
+        """
+        if len(args) == 1 and isinstance(args[0], (list, tuple)):
+            # Called with list: Node([prev, val, next])
+            self.prev_key, self.value, self.next_key = args[0]
+        elif len(args) == 3:
+            # Called with 3 args: Node(prev, val, next)
+            self.prev_key, self.value, self.next_key = args
+        else:
+            raise TypeError(
+                f"Node() takes either 1 list/tuple argument or 3 separate arguments, "
+                f"got {len(args)} argument(s)"
+            )
 
     def __reduce__(self):
         # Support for pickle

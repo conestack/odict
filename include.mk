@@ -1,11 +1,10 @@
 ##############################################################################
-# Custom Makefile includes for odict
-# This file is automatically included by the main Makefile
-##############################################################################
-
-##############################################################################
 # codict - Cython extension
 ##############################################################################
+
+# Flag whether to build Cython extensions
+# Default: true
+BUILD_CODICT?=true
 
 CODICT_TARGET:=$(SENTINEL_FOLDER)/codict.sentinel
 $(CODICT_TARGET): $(PACKAGES_TARGET)

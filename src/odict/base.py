@@ -114,7 +114,7 @@ class _BaseOrderedDict:
         except KeyError:
             list_ = self._list_factory()
             lt = dict_.__getattribute__(self, 'lt')
-            new = list_(lt, val, _nil)
+            new = list_([lt, val, _nil])
             dict_.__setitem__(self, key, new)
             if lt == _nil:
                 dict_.__setattr__(self, 'lh', key)
@@ -200,12 +200,12 @@ class _BaseOrderedDict:
         dict_.__delitem__(self, old_key)
         if val[0] != _nil:
             prev = dict_.__getitem__(self, val[0])
-            dict_.__setitem__(self, val[0], list_(prev[0], prev[1], new_key))
+            dict_.__setitem__(self, val[0], list_([prev[0], prev[1], new_key]))
         else:
             dict_.__setattr__(self, 'lh', new_key)
         if val[2] != _nil:
             next = dict_.__getitem__(self, val[2])
-            dict_.__setitem__(self, val[2], list_(new_key, next[1], next[2]))
+            dict_.__setitem__(self, val[2], list_([new_key, next[1], next[2]]))
         else:
             dict_.__setattr__(self, 'lt', new_key)
         dict_.__setitem__(self, new_key, val)
@@ -371,8 +371,8 @@ class _BaseOrderedDict:
         list_ = self._list_factory()
         orgin_a = dict_.__getitem__(self, a)
         orgin_b = dict_.__getitem__(self, b)
-        new_a = list_(orgin_b[0], orgin_a[1], orgin_b[2])
-        new_b = list_(orgin_a[0], orgin_b[1], orgin_a[2])
+        new_a = list_([orgin_b[0], orgin_a[1], orgin_b[2]])
+        new_b = list_([orgin_a[0], orgin_b[1], orgin_a[2]])
         if new_a[0] == a:
             new_a[0] = b
             new_b[2] = a
@@ -413,10 +413,10 @@ class _BaseOrderedDict:
             prevval = dict_.__getitem__(self, prevkey)
         if prevval is not None:
             dict_.__getitem__(self, prevkey)[2] = key
-            newval = list_(prevkey, value, ref)
+            newval = list_([prevkey, value, ref])
         else:
             dict_.__setattr__(self, 'lh', key)
-            newval = list_(_nil, value, ref)
+            newval = list_([_nil, value, ref])
         dict_.__getitem__(self, ref)[0] = key
         dict_.__setitem__(self, key, newval)
 
@@ -436,10 +436,10 @@ class _BaseOrderedDict:
             nextval = dict_.__getitem__(self, nextkey)
         if nextval is not None:
             dict_.__getitem__(self, nextkey)[0] = key
-            newval = list_(ref, value, nextkey)
+            newval = list_([ref, value, nextkey])
         else:
             dict_.__setattr__(self, 'lt', key)
-            newval = list_(ref, value, _nil)
+            newval = list_([ref, value, _nil])
         dict_.__getitem__(self, ref)[2] = key
         dict_.__setitem__(self, key, newval)
 

@@ -138,13 +138,8 @@ COVERAGE_COMMAND?=\
 		--source=src/odict \
 		--omit=src/odict/bench.py \
 		-m pytest tests \
-	&& coverage report --fail-under=100
-
-## custom.codict
-
-# Flag whether to build Cython extensions
-# Default: true
-BUILD_CODICT?=true
+	&& coverage report --fail-under=100 \
+	&& coverage html
 
 ##############################################################################
 # END SETTINGS - DO NOT EDIT BELOW THIS LINE
