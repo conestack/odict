@@ -26,11 +26,11 @@ def delete(_range):
 
 
 def result(factory, _range):
-    start = time.clock()
+    start = time.perf_counter()
     create(factory, _range)
-    mid = time.clock()
+    mid = time.perf_counter()
     delete(_range)
-    end = time.clock()
+    end = time.perf_counter()
     print(
         '| Add    {0:7d} | {1:11.5f}ms |'.format(
             _range,
