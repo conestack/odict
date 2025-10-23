@@ -14,11 +14,10 @@ class _odict(_BaseOrderedDict):
     Overwriting values doesn't change their original sequential order.
     """
 
-    def _list_factory(self):
-        # XXX: rename to _list_cls
+    def _entry_cls(self):
         return list
 
 
 class odict(_odict, dict):
-    def _dict_impl(self):
+    def _dict_cls(self):
         return dict

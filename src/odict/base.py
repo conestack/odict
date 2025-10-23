@@ -43,17 +43,17 @@ class _BaseOrderedDict:
     Overwriting values doesn't change their original sequential order.
 
     Subclasses must implement:
-    - _dict_impl(): Return the dict class to use
-    - _list_factory(): Return the node factory (list or Node class)
+    - _dict_cls(): Return the dict class to use
+    - _entry_cls(): Return the entry factory (list or Entry class)
     """
 
-    def _dict_impl(self):
+    def _dict_cls(self):
         """Return the dict implementation class. Must be overridden."""
         return None
 
-    def _list_factory(self):
-        """Return the node factory. Must be overridden."""
-        raise NotImplementedError("Subclasses must implement _list_factory()")
+    def _entry_cls(self):
+        """Return the entry factory. Must be overridden."""
+        raise NotImplementedError("Subclasses must implement _entry_cls()")
 
     def __init__(self, data=(), **kwds):
         """Initialize ordered dict.
@@ -68,7 +68,7 @@ class _BaseOrderedDict:
                 '__init__() of ordered dict takes no keyword '
                 'arguments to avoid an ordering trap.'
             )
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         if dict_ is None:
             raise TypeError('No dict implementation class provided.')
         dict_.__init__(self)
@@ -83,38 +83,38 @@ class _BaseOrderedDict:
     # Double-linked list header
     @property
     def lh(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         if not hasattr(self, '_lh'):
             dict_.__setattr__(self, '_lh', _nil)
         return dict_.__getattribute__(self, '_lh')
 
     @lh.setter
     def lh(self, val):
-        self._dict_impl().__setattr__(self, '_lh', val)
+        self._dict_cls().__setattr__(self, '_lh', val)
 
     # Double-linked list tail
     @property
     def lt(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         if not hasattr(self, '_lt'):
             dict_.__setattr__(self, '_lt', _nil)
         return dict_.__getattribute__(self, '_lt')
 
     @lt.setter
     def lt(self, val):
-        self._dict_impl().__setattr__(self, '_lt', val)
+        self._dict_cls().__setattr__(self, '_lt', val)
 
     def __getitem__(self, key):
-        return self._dict_impl().__getitem__(self, key)[1]
+        return self._dict_cls().__getitem__(self, key)[1]
 
     def __setitem__(self, key, val):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         try:
             dict_.__getitem__(self, key)[1] = val
         except KeyError:
-            list_ = self._list_factory()
+            entry_ = self._entry_cls()
             lt = dict_.__getattribute__(self, 'lt')
-            new = list_([lt, val, _nil])
+            new = entry_([lt, val, _nil])
             dict_.__setitem__(self, key, new)
             if lt == _nil:
                 dict_.__setattr__(self, 'lh', key)
@@ -123,7 +123,7 @@ class _BaseOrderedDict:
             dict_.__setattr__(self, 'lt', key)
 
     def __delitem__(self, key):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         pred, _, succ = dict_.__getitem__(self, key)
         if pred == _nil:
             dict_.__setattr__(self, 'lh', succ)
@@ -177,12 +177,12 @@ class _BaseOrderedDict:
 
     def get(self, k, x=None):
         if k in self:
-            return self._dict_impl().__getitem__(self, k)[1]
+            return self._dict_cls().__getitem__(self, k)[1]
         else:
             return x
 
     def __iter__(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             yield curr_key
@@ -194,24 +194,24 @@ class _BaseOrderedDict:
         return list(self.iterkeys())
 
     def alter_key(self, old_key, new_key):
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        entry_ = self._entry_cls()
         val = dict_.__getitem__(self, old_key)
         dict_.__delitem__(self, old_key)
         if val[0] != _nil:
             prev = dict_.__getitem__(self, val[0])
-            dict_.__setitem__(self, val[0], list_([prev[0], prev[1], new_key]))
+            dict_.__setitem__(self, val[0], entry_([prev[0], prev[1], new_key]))
         else:
             dict_.__setattr__(self, 'lh', new_key)
         if val[2] != _nil:
             next = dict_.__getitem__(self, val[2])
-            dict_.__setitem__(self, val[2], list_([new_key, next[1], next[2]]))
+            dict_.__setitem__(self, val[2], entry_([new_key, next[1], next[2]]))
         else:
             dict_.__setattr__(self, 'lt', new_key)
         dict_.__setitem__(self, new_key, val)
 
     def itervalues(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             _, val, curr_key = dict_.__getitem__(self, curr_key)
@@ -221,7 +221,7 @@ class _BaseOrderedDict:
         return list(self.itervalues())
 
     def iteritems(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             _, val, next_key = dict_.__getitem__(self, curr_key)
@@ -245,7 +245,7 @@ class _BaseOrderedDict:
         self.__init__(items)
 
     def clear(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         dict_.clear(self)
         dict_.__setattr__(self, 'lh', _nil)
         dict_.__setattr__(self, 'lt', _nil)
@@ -283,7 +283,7 @@ class _BaseOrderedDict:
 
     def popitem(self):
         try:
-            dict_ = self._dict_impl()
+            dict_ = self._dict_cls()
             key = dict_.__getattribute__(self, 'lt')
             return key, self.pop(key)
         except KeyError:
@@ -291,7 +291,7 @@ class _BaseOrderedDict:
 
     def riterkeys(self):
         """To iterate on keys in reversed order."""
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             yield curr_key
@@ -305,7 +305,7 @@ class _BaseOrderedDict:
 
     def ritervalues(self):
         """To iterate on values in reversed order."""
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             curr_key, val, _ = dict_.__getitem__(self, curr_key)
@@ -317,7 +317,7 @@ class _BaseOrderedDict:
 
     def riteritems(self):
         """To iterate on (key, value) in reversed order."""
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             pred_key, val, _ = dict_.__getitem__(self, curr_key)
@@ -330,7 +330,7 @@ class _BaseOrderedDict:
 
     def firstkey(self):
         if self:
-            return self._dict_impl().__getattribute__(self, 'lh')
+            return self._dict_cls().__getattribute__(self, 'lh')
         else:
             raise KeyError('Ordered dictionary is empty')
 
@@ -340,7 +340,7 @@ class _BaseOrderedDict:
 
     def lastkey(self):
         if self:
-            return self._dict_impl().__getattribute__(self, 'lt')
+            return self._dict_cls().__getattribute__(self, 'lt')
         else:
             raise KeyError('Ordered dictionary is empty')
 
@@ -349,13 +349,13 @@ class _BaseOrderedDict:
         return self.lastkey()
 
     def as_dict(self):
-        return self._dict_impl()(self.iteritems())
+        return self._dict_cls()(self.iteritems())
 
     def _repr(self):
         """_repr(): low level repr of the whole data contained in the odict.
         Useful for debugging.
         """
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         class_name = self.__class__.__name__
         form = f'{class_name} low level repr lh,lt,data: %r, %r, %s'
         return form % (
@@ -367,12 +367,12 @@ class _BaseOrderedDict:
     def swap(self, a, b):
         if a == b:
             raise ValueError('Swap keys are equal')
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        entry_ = self._entry_cls()
         orgin_a = dict_.__getitem__(self, a)
         orgin_b = dict_.__getitem__(self, b)
-        new_a = list_([orgin_b[0], orgin_a[1], orgin_b[2]])
-        new_b = list_([orgin_a[0], orgin_b[1], orgin_a[2]])
+        new_a = entry_([orgin_b[0], orgin_a[1], orgin_b[2]])
+        new_b = entry_([orgin_a[0], orgin_b[1], orgin_a[2]])
         if new_a[0] == a:
             new_a[0] = b
             new_b[2] = a
@@ -406,17 +406,17 @@ class _BaseOrderedDict:
         except ValueError:
             raise KeyError("Reference key '{}' not found".format(ref))
         prevkey = prevval = None
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        entry_ = self._entry_cls()
         if index > 0:
             prevkey = self.keys()[index - 1]
             prevval = dict_.__getitem__(self, prevkey)
         if prevval is not None:
             dict_.__getitem__(self, prevkey)[2] = key
-            newval = list_([prevkey, value, ref])
+            newval = entry_([prevkey, value, ref])
         else:
             dict_.__setattr__(self, 'lh', key)
-            newval = list_([_nil, value, ref])
+            newval = entry_([_nil, value, ref])
         dict_.__getitem__(self, ref)[0] = key
         dict_.__setitem__(self, key, newval)
 
@@ -429,17 +429,17 @@ class _BaseOrderedDict:
             raise KeyError("Reference key '{}' not found".format(ref))
         nextkey = nextval = None
         keys = self.keys()
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        entry_ = self._entry_cls()
         if index < len(keys) - 1:
             nextkey = keys[index + 1]
             nextval = dict_.__getitem__(self, nextkey)
         if nextval is not None:
             dict_.__getitem__(self, nextkey)[0] = key
-            newval = list_([ref, value, nextkey])
+            newval = entry_([ref, value, nextkey])
         else:
             dict_.__setattr__(self, 'lt', key)
-            newval = list_([ref, value, _nil])
+            newval = entry_([ref, value, _nil])
         dict_.__getitem__(self, ref)[2] = key
         dict_.__setitem__(self, key, newval)
 
@@ -458,7 +458,7 @@ class _BaseOrderedDict:
     def movebefore(self, ref, key):
         if ref == key:
             raise ValueError('Move keys are equal')
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         val = dict_.__getitem__(self, key)
         ref_val = dict_.__getitem__(self, ref)
         if val[0] == _nil:
@@ -483,7 +483,7 @@ class _BaseOrderedDict:
     def moveafter(self, ref, key):
         if ref == key:
             raise ValueError('Move keys are equal')
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         val = dict_.__getitem__(self, key)
         ref_val = dict_.__getitem__(self, ref)
         if val[0] == _nil:
@@ -516,14 +516,14 @@ class _BaseOrderedDict:
             self.moveafter(last_key, key)
 
     def next_key(self, key):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr = dict_.__getitem__(self, key)
         if curr[2] == _nil:
             raise KeyError('No next key')
         return curr[2]
 
     def prev_key(self, key):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr = dict_.__getitem__(self, key)
         if curr[0] == _nil:
             raise KeyError('No previous key')

@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # Test pickle serialization/deserialization for codict
 import pickle
-from odict.codict import codict, Node
+from odict.codict import codict, Entry
 
-def test_node_pickle():
-    """Test that Node objects pickle correctly."""
-    print("Testing Node pickle...")
-    node = Node('prev', 'value', 'next')
-    pickled = pickle.dumps(node)
+def test_entry_pickle():
+    """Test that Entry objects pickle correctly."""
+    print("Testing Entry pickle...")
+    entry = Entry('prev', 'value', 'next')
+    pickled = pickle.dumps(entry)
     unpickled = pickle.loads(pickled)
 
     assert unpickled.prev_key == 'prev'
     assert unpickled.value == 'value'
     assert unpickled.next_key == 'next'
-    print("✓ Node pickle works")
+    print("✓ Entry pickle works")
 
 def test_simple_codict_pickle():
     """Test simple codict pickle."""
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     print("Codict Pickle Serialization Tests")
     print("=" * 60)
 
-    test_node_pickle()
+    test_entry_pickle()
     test_simple_codict_pickle()
     test_complex_codict_pickle()
     test_empty_codict_pickle()

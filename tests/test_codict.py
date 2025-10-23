@@ -16,11 +16,11 @@ class TestCodict(unittest.TestCase):
             self.assertEqual(str(inst), msg)
 
     def test_abstract_superclass(self):
-        # Abstract superclass provides no concrete _dict_impl class.
+        # Abstract superclass provides no concrete _dict_cls class.
         msg = 'No dict implementation class provided.'
         self.assertRaisesWithMessage(msg, _codict, TypeError)
         o = codict()
-        self.assertEqual(o._dict_impl(), dict)
+        self.assertEqual(o._dict_cls(), dict)
         del o
 
     def test_init_with_kw(self):
@@ -256,7 +256,7 @@ class TestCodict(unittest.TestCase):
         o.alter_key('1', 'foo')
         self.assertEqual(o.keys(), ['foo', '2', '3'])
         self.assertEqual(o.rkeys(), ['3', '2', 'foo'])
-        self.assertTrue(o._dict_impl() is dict)
+        self.assertTrue(o._dict_cls() is dict)
         self.assertEqual(o.values(), ['a', 'b', 'c'])
         self.assertEqual(o['foo'], 'a')
         self.assertEqual(o.lh, 'foo')

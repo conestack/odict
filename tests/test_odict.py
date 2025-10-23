@@ -16,11 +16,11 @@ class TestOdict(unittest.TestCase):
             self.assertEqual(str(inst), msg)
 
     def test_abstract_superclass(self):
-        # Abstract superclass provides no concrete _dict_impl class.
+        # Abstract superclass provides no concrete _dict_cls class.
         msg = 'No dict implementation class provided.'
         self.assertRaisesWithMessage(msg, _odict, TypeError)
         o = odict()
-        self.assertEqual(o._dict_impl(), dict)
+        self.assertEqual(o._dict_cls(), dict)
         del o
 
     def test_init_with_kw(self):
@@ -251,8 +251,8 @@ class TestOdict(unittest.TestCase):
         o.alter_key('1', 'foo')
         self.assertEqual(o.keys(), ['foo', '2', '3'])
         self.assertEqual(o.rkeys(), ['3', '2', 'foo'])
-        self.assertTrue(o._dict_impl() is dict)
-        dict_values = o._dict_impl().values(o)
+        self.assertTrue(o._dict_cls() is dict)
+        dict_values = o._dict_cls().values(o)
         self.assertEqual(len(dict_values), 3)
         self.assertTrue(['foo', 'b', '3'] in dict_values)
         self.assertTrue(['2', 'c', _nil] in dict_values)
@@ -263,7 +263,7 @@ class TestOdict(unittest.TestCase):
         o.alter_key('2', 'bar')
         self.assertEqual(o.keys(), ['foo', 'bar', '3'])
         self.assertEqual(o.rkeys(), ['3', 'bar', 'foo'])
-        dict_values = o._dict_impl().values(o)
+        dict_values = o._dict_cls().values(o)
         self.assertEqual(len(dict_values), 3)
         self.assertTrue(['bar', 'c', _nil] in dict_values)
         self.assertTrue(['foo', 'b', '3'] in dict_values)
@@ -273,7 +273,7 @@ class TestOdict(unittest.TestCase):
         o.alter_key('3', 'baz')
         self.assertEqual(o.keys(), ['foo', 'bar', 'baz'])
         self.assertEqual(o.rkeys(), ['baz', 'bar', 'foo'])
-        dict_values = o._dict_impl().values(o)
+        dict_values = o._dict_cls().values(o)
         self.assertEqual(len(dict_values), 3)
         self.assertTrue(['foo', 'b', 'baz'] in dict_values)
         self.assertTrue([_nil, 'a', 'bar'] in dict_values)
