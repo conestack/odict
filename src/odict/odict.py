@@ -9,6 +9,7 @@ this base class.
 import copy
 import functools
 import sys
+import warnings
 
 
 class _Nil(object):
@@ -51,7 +52,7 @@ class _base_odict:
 
     def _dict_cls(self):
         """Return the dict implementation class. Must be overridden."""
-        return None
+        raise NotImplementedError('Subclasses must implement _dict_cls()')
 
     def _entry_cls(self):
         """Return the entry factory. Must be overridden."""
@@ -539,10 +540,26 @@ class _odict(_base_odict):
     Overwriting values doesn't change their original sequential order.
     """
 
-    def _entry_cls(self):
+    def _dict_impl(self):
+        """B/C. Subject to be removed."""
+        return None
+
+    def _dict_cls(self):
+        warnings.warn('`_dict_impl` is deprecated. Adopt your code to use `_dict_cls`')
+        return self._dict_impl()
+
+    def _list_factory(self):
+        """B/C. Subject to be removed."""
         return list
+
+    def _entry_cls(self):
+        warnings.warn('`_list_factory` is deprecated. Adopt your code to use `_entry_cls`')
+        return self._list_factory()
 
 
 class odict(_odict, dict):
     def _dict_cls(self):
         return dict
+
+    def _entry_cls(self):
+        return list
