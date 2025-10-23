@@ -553,7 +553,9 @@ class _odict(_base_odict):
         return list
 
     def _entry_cls(self):
-        warnings.warn('`_list_factory` is deprecated. Adopt your code to use `_entry_cls`')
+        warnings.warn(
+            '`_list_factory` is deprecated. Adopt your code to use `_entry_cls`'
+        )
         return self._list_factory()
 
 

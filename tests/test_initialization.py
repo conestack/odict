@@ -5,9 +5,15 @@ import pytest
 
 
 def test_abstract_superclass_no_dict_impl(AbstractODict, ODict):
-    """Abstract superclass provides no concrete _dict_cls class."""
-    with pytest.raises(TypeError, match='No dict implementation class provided'):
-        AbstractODict()
+    """Abstract superclass without _dict_cls implementation raises error."""
+    # _odict has backward compat wrapper that returns None -> TypeError
+    # _codict has no _dict_cls -> NotImplementedError from base class
+    if AbstractODict.__name__ == '_odict':
+        with pytest.raises(TypeError, match='No dict implementation class provided'):
+            AbstractODict()
+    else:  # _codict
+        with pytest.raises(NotImplementedError, match='Subclasses must implement _dict_cls'):
+            AbstractODict()
 
     o = ODict()
     assert o._dict_cls() == dict
@@ -69,3 +75,69 @@ def test_fromkeys_parametrized(ODict, keys, value, expected):
     """fromkeys() with various inputs."""
     o = ODict.fromkeys(keys, value)
     assert o.items() == expected
+
+
+def test_backward_compat_dict_impl():
+    """Test backward compatibility for deprecated _dict_impl method."""
+    from odict.odict import _odict
+    import warnings
+
+    # Create subclass using old API
+    class OldStyleODict(_odict, dict):
+        def _dict_impl(self):
+            """Old API method."""
+            return dict
+
+    # Test that _dict_cls() calls _dict_impl() and issues warning
+    obj = OldStyleODict()
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = obj._dict_cls()
+        assert len(w) == 1
+        assert issubclass(w[0].category, UserWarning)
+        assert '_dict_impl` is deprecated' in str(w[0].message)
+        assert result == dict
+
+
+def test_backward_compat_list_factory():
+    """Test backward compatibility for deprecated _list_factory method."""
+    from odict.odict import _odict
+    import warnings
+
+    # Create subclass using old API - don't override _list_factory to test base impl
+    class OldStyleODict(_odict, dict):
+        def _dict_impl(self):
+            return dict
+
+    # Test that _entry_cls() calls _list_factory() and issues warning
+    obj = OldStyleODict()
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = obj._entry_cls()
+        assert len(w) == 1
+        assert issubclass(w[0].category, UserWarning)
+        assert '_list_factory` is deprecated' in str(w[0].message)
+        assert result == list
+
+
+def test_backward_compat_old_api_works():
+    """Test that objects using old API still work correctly."""
+    from odict.odict import _odict
+    import warnings
+
+    # Create subclass using old API
+    class OldStyleODict(_odict, dict):
+        def _dict_impl(self):
+            return dict
+
+        def _list_factory(self):
+            return list
+
+    # Suppress warnings for this test
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        o = OldStyleODict([('a', 1), ('b', 2), ('c', 3)])
+        assert o.keys() == ['a', 'b', 'c']
+        assert o.values() == [1, 2, 3]
+        o['d'] = 4
+        assert o.keys() == ['a', 'b', 'c', 'd']
