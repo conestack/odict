@@ -4,9 +4,6 @@ import functools
 import sys
 
 
-ITER_FUNC = 'iteritems' if sys.version_info[0] < 3 else 'items'
-
-
 class _Nil(object):
     # Q: it feels like using the class with "is" and "is not" instead of "=="
     #    and "!=" should be faster.
@@ -65,8 +62,8 @@ class _odict(object):
             raise TypeError('No dict implementation class provided.')
         dict_.__init__(self)
         # If you give a normal dict, then the order of elements is undefined
-        if hasattr(data, ITER_FUNC):
-            for key, val in getattr(data, ITER_FUNC)():
+        if hasattr(data, 'items'):
+            for key, val in data.items():
                 self[key] = val
         else:
             for key, val in data:
@@ -139,7 +136,7 @@ class _odict(object):
         memo[id(self)] = new
         for k, v in self.iteritems():
             new[k] = copy.deepcopy(v, memo)
-        for k, v in getattr(self.__dict__, ITER_FUNC)():
+        for k, v in self.__dict__.items():
             setattr(new, k, copy.deepcopy(v, memo))
         return new
 
@@ -157,12 +154,12 @@ class _odict(object):
         return len(self.keys())
 
     def __str__(self):
-        pairs = ('%r: %r' % (k, v) for k, v in getattr(self, ITER_FUNC)())
+        pairs = ('%r: %r' % (k, v) for k, v in self.items())
         return '{%s}' % ', '.join(pairs)
 
     def __repr__(self):
         if self:
-            pairs = ('(%r, %r)' % (k, v) for k, v in getattr(self, ITER_FUNC)())
+            pairs = ('(%r, %r)' % (k, v) for k, v in self.items())
             return '%s([%s])' % (self.__class__.__name__, ', '.join(pairs))
         else:
             return '%s()' % self.__class__.__name__
@@ -251,8 +248,8 @@ class _odict(object):
                 'update() of ordered dict takes no keyword arguments to avoid '
                 'an ordering trap.'
             )
-        if hasattr(data, ITER_FUNC):
-            data = getattr(data, ITER_FUNC)()
+        if hasattr(data, 'items'):
+            data = data.items()
         for key, val in data:
             self[key] = val
 

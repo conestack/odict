@@ -7,6 +7,9 @@ Changes
 - Refactor package layout to use ``pyproject.toml`` and implecit namespace packages.
   [rnix]
 
+- Drop Python 2 support.
+  [rnix]
+
 
 1.9.0 (2022-05-15)
 ------------------
