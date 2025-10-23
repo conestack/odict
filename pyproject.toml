@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "odict"
-version = "1.9.1.dev0"
+version = "2.0.0.dev0"
 description = "Ordered Dictionary."
 readme = "README.rst"
 license = {text = "Python Software Foundation License"}
@@ -21,7 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "Programming Language :: Python :: 3.10",
 ]
 
 [project.urls]
@@ -29,5 +28,12 @@ Homepage = "https://github.com/conestack/odict"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/odict"]
+
 [tool.zest-releaser]
 create-wheel = true
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "single"

@@ -1,10 +1,11 @@
 Changes
 =======
 
-1.9.1 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Refactor package layout to use ``pyproject.toml`` and implecit namespace packages.
+  [rnix]
 
 
 1.9.0 (2022-05-15)

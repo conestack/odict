@@ -619,13 +619,3 @@ class TestOdict(unittest.TestCase):
             o.prev_key('x')
         o['y'] = 'y'
         self.assertEqual(o.prev_key('y'), 'x')
-
-
-if __name__ == '__main__':
-    from odict import tests
-
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.findTestCases(tests))
-    runner = unittest.TextTestRunner(failfast=True)
-    result = runner.run(suite)
-    sys.exit(not result.wasSuccessful())
