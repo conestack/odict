@@ -1,61 +1,124 @@
 # Usage Guide
 
-## Basic Usage
+## Importing odict
 
-### Creating a Codict
+### Automatic Implementation Selection
+
+The package automatically uses the best available implementation:
 
 ```python
+from odict import odict
+
+# This imports:
+# - codict (Cython-optimized) if compiled
+# - odict (pure Python) otherwise
+```
+
+The selection happens transparently at import time in `__init__.py`:
+
+```python
+try:
+    from .codict import codict as odict
+except ImportError:
+    from .odict import odict
+```
+
+### Checking Active Implementation
+
+To determine which implementation is active:
+
+```python
+from odict import odict
+
+# Check the module name
+print(odict.__module__)
+# Output: 'odict.codict' or 'odict.odict'
+
+# More explicit check
+if odict.__module__ == 'odict.codict':
+    print("Using Cython-optimized codict")
+else:
+    print("Using pure Python odict")
+```
+
+### Explicit Implementation Selection
+
+If you need a specific implementation:
+
+```python
+# Always use pure Python (portable, better for bulk operations)
+from odict.odict import odict
+
+# Always use Cython (requires compilation, faster for basic ops)
 from odict.codict import codict
+```
 
-# Create from list of tuples
-cd = codict([('a', 1), ('b', 2), ('c', 3)])
+**Recommendation**: Use the automatic selection (`from odict import odict`) unless you have specific performance requirements verified by benchmarking.
 
-# Create from keyword arguments
-cd = codict(a=1, b=2, c=3)
+## Basic Usage
 
-# Create from dict
-cd = codict({'a': 1, 'b': 2, 'c': 3})
+### Creating an Ordered Dictionary
+
+```python
+from odict import odict
+
+# Create from list of tuples (preserves order)
+od = odict([('a', 1), ('b', 2), ('c', 3)])
+
+# Create from dict (order undefined in Python < 3.7)
+od = odict({'a': 1, 'b': 2, 'c': 3})
 
 # Create empty and populate
-cd = codict()
-cd['a'] = 1
-cd['b'] = 2
-cd['c'] = 3
+od = odict()
+od['a'] = 1
+od['b'] = 2
+od['c'] = 3
+```
+
+**Note**: Avoid keyword arguments for initialization - not supported due to ordering issues:
+
+```python
+# This will raise TypeError
+od = odict(a=1, b=2, c=3)  # Error!
 ```
 
 ### Accessing Items
 
 ```python
-cd = codict([('a', 1), ('b', 2), ('c', 3)])
+from odict import odict
+
+od = odict([('a', 1), ('b', 2), ('c', 3)])
 
 # Get item by key
-value = cd['a']  # 1
+value = od['a']  # 1
 
 # Get with default
-value = cd.get('d', 'default')  # 'default'
+value = od.get('d', 'default')  # 'default'
 
 # Check if key exists
-if 'a' in cd:
+if 'a' in od:
     print("Key exists")
 
 # Alternative check (odict-specific)
-if cd.has_key('a'):
+if od.has_key('a'):
     print("Key exists")
 ```
 
 ### Accessing in Order
 
 ```python
-cd = codict([('a', 1), ('b', 2), ('c', 3)])
+from odict import odict
+
+od = odict([('a', 1), ('b', 2), ('c', 3)])
 
 # Get all keys in order
-keys = cd.keys()  # ['a', 'b', 'c']
+keys = od.keys()  # ['a', 'b', 'c']
 
 # Get all values in order
-values = cd.values()  # [1, 2, 3]
+values = od.values()  # [1, 2, 3]
 
 # Get all items in order
-items = cd.items()  # [('a', 1), ('b', 2), ('c', 3)]
+items = od.items()  # [('a', 1), ('b', 2), ('c', 3)]
 ```
 
 ### Iteration

@@ -2,14 +2,28 @@
 
 ## Prerequisites
 
-- Python 3.7 or later
-- C compiler (gcc, clang, or MSVC)
-- Cython 3.0 or later
+- **Python 3.10 or later** (3.10-3.14 supported)
+- C compiler (gcc, clang, or MSVC) - **optional, only for codict**
+- Cython 3.0 or later - **optional, only for codict**
 - make (for Makefile-based builds)
+
+**Note**: The Cython-optimized `codict` extension is optional. If not compiled, the package automatically falls back to the pure Python `odict` implementation.
 
 ## Quick Start
 
-### Full Installation
+### Installing from PyPI
+
+```bash
+# Install package (pure Python odict)
+pip install odict
+
+# Test installation
+python -c "from odict import odict; print('odict installed successfully')"
+```
+
+### Installing with Cython Extension
+
+For the Cython-optimized `codict`:
 
 ```bash
 # Clone or navigate to odict directory
@@ -18,9 +32,20 @@ cd odict/
 # Build and install everything (includes codict extension)
 make install
 
-# Verify installation
-python3 -c "from odict.codict import codict; print('codict installed successfully')"
+# Verify codict is available
+python -c "from odict import odict; print(f'Using: {odict.__module__}')"
+# Output: 'Using: odict.codict' if compiled, 'Using: odict.odict' otherwise
 ```
+
+### Automatic Fallback
+
+The package uses automatic implementation selection:
+
+```python
+from odict import odict  # Automatically uses codict if available, else odict
+```
+
+This means **compilation is optional** - the package works without Cython.
 
 ## Build Options
 
@@ -268,6 +293,21 @@ If you only want Python odict without the Cython extension:
 ```bash
 # Set BUILD_CODICT to false in Makefile or environment
 BUILD_CODICT=false make install
+```
+
+### Performance Considerations
+
+Before building `codict`, be aware of its performance characteristics:
+
+- **✅ Faster**: Basic operations (get/set), move operations
+- **❌ Slower**: Bulk operations (values/items/copy), reverse iteration
+
+**Recommendation**: Use pure Python `odict` unless you've benchmarked your specific workload and confirmed `codict` is faster. See [Performance Analysis](../technical/performance.md) for details.
+
+To explicitly use pure Python odict:
+
+```python
+from odict.odict import odict  # Explicitly use pure Python
 ```
 
 ## Next Steps

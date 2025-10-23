@@ -6,12 +6,12 @@ Codict is a Cython-optimized implementation of ordered dictionaries that uses C 
 
 ## Core Components
 
-### Cython Node Class
+### Cython Entry Class
 
 The fundamental building block is a C extension type that replaces Python lists:
 
 ```cython
-cdef class Node:
+cdef class Entry:
     cdef public object prev_key
     cdef public object value
     cdef public object next_key
@@ -19,14 +19,11 @@ cdef class Node:
 
 **Benefits over Python lists `[prev_key, value, next_key]`**:
 - **C-level attribute access**: Faster than Python list indexing
-- **Lower memory overhead**: ~36% less memory per node
+- **Lower memory overhead**: Reduced memory per entry
 - **Type-safe operations**: Cython type checking at compile time
 - **Full pickle compatibility**: Custom `__reduce__` support
 
-**Memory Comparison**:
-- Python list node: ~88 bytes (list object + 3 references + overhead)
-- Cython Node: ~56 bytes (extension object + 3 references)
-- **Savings: 32 bytes per node (36%)**
+**Note**: While Entry provides C-level attribute access, actual performance varies by operation. See [Performance Analysis](performance.md) for detailed benchmarks.
 
 ### Class Hierarchy
 
@@ -48,23 +45,29 @@ codict (_codict + dict)  [multiple inheritance]
    - Provides dict interface (`isinstance(cd, dict)` → `True`)
    - Maintains ordered dict behavior from `_codict`
 
-3. **`_dict_impl()` method**:
+3. **`_dict_cls()` method**:
    ```python
-   def _dict_impl(self):
+   def _dict_cls(self):
        return dict  # Returns the dict class for dict operations
+   ```
+
+4. **`_entry_cls()` method**:
+   ```python
+   def _entry_cls(self):
+       return Entry  # Returns the Entry cdef class for nodes
    ```
 
 ### Internal Structure
 
 **Double-linked list with sentinel**:
 ```
-_nil (sentinel node)
+_nil (sentinel entry)
   ↓
-[Node: prev='_nil', key='a', value=1, next='b']
+[Entry: prev='_nil', key='a', value=1, next='b']
   ↓
-[Node: prev='a', key='b', value=2, next='c']
+[Entry: prev='a', key='b', value=2, next='c']
   ↓
-[Node: prev='b', key='c', value=3, next='_nil']
+[Entry: prev='b', key='c', value=3, next='_nil']
   ↓
 _nil (circular back to sentinel)
 ```
@@ -72,26 +75,28 @@ _nil (circular back to sentinel)
 **Internal dictionary for O(1) lookups**:
 ```python
 {
-    'a': Node(prev='_nil', value=1, next='b'),
-    'b': Node(prev='a', value=2, next='c'),
-    'c': Node(prev='b', value=3, next='_nil')
+    'a': Entry(prev='_nil', value=1, next='b'),
+    'b': Entry(prev='a', value=2, next='c'),
+    'c': Entry(prev='b', value=3, next='_nil')
 }
 ```
 
 ## Implementation Details
 
-### Node Allocation
+### Entry Allocation
 
-Nodes are created using Cython's object creation:
+Entries are created using Cython's object creation:
 ```cython
 # C-optimized allocation
-cdef Node node = Node(prev_key, value, next_key)
+cdef Entry entry = Entry(prev_key, value, next_key)
 ```
 
-This is faster than Python list allocation because:
+This provides C-level access benefits:
 - Single allocation (vs. list + 3 elements)
 - Direct C struct access
 - No list resize overhead
+
+However, benchmarks show that type conversion overhead can impact bulk operations (e.g., `values()`, `items()`).
 
 ### Key Operations
 
@@ -107,24 +112,24 @@ def __getitem__(self, key):
 def __setitem__(self, key, value):
     if key in self:
         # Update existing
-        node = dict.__getitem__(self, key)
-        node.value = value
+        entry = dict.__getitem__(self, key)
+        entry.value = value
     else:
         # Insert at end
-        node = Node(self.lt, value, None)
-        dict.__setitem__(self, key, node)
+        entry = Entry(self.lt, value, None)
+        dict.__setitem__(self, key, entry)
         # Update linked list
 ```
 
 **Deletion (`__delitem__`)**: O(1)
 ```python
 def __delitem__(self, key):
-    node = dict.__getitem__(self, key)
+    entry = dict.__getitem__(self, key)
     # Unlink from list
-    prev_node = dict.__getitem__(self, node.prev_key)
-    next_node = dict.__getitem__(self, node.next_key)
-    prev_node.next_key = node.next_key
-    next_node.prev_key = node.prev_key
+    prev_entry = dict.__getitem__(self, entry.prev_key)
+    next_entry = dict.__getitem__(self, entry.next_key)
+    prev_entry.next_key = entry.next_key
+    next_entry.prev_key = entry.prev_key
     # Remove from dict
     dict.__delitem__(self, key)
 ```
@@ -135,8 +140,8 @@ def __iter__(self):
     key = self.lh  # Start at list head
     while key is not None:
         yield key
-        node = dict.__getitem__(self, key)
-        key = node.next_key
+        entry = dict.__getitem__(self, key)
+        key = entry.next_key
         if key == None:  # Reached sentinel
             break
 ```
@@ -157,8 +162,8 @@ def __reduce__(self):
 
 This ensures:
 - Order is preserved across pickle/unpickle
-- All Node connections are rebuilt correctly
-- Works with all pickle protocols (0-5)
+- All Entry connections are rebuilt correctly
+- Works with all pickle protocols (2+)
 
 ## Performance Characteristics
 
@@ -184,22 +189,23 @@ This ensures:
 
 ### Space Complexity
 
-- **Per-node overhead**: 56 bytes (Cython Node)
+- **Per-entry overhead**: Cython Entry cdef class
 - **Dictionary overhead**: ~8 bytes per key (dict hash table)
-- **Total per item**: ~64 bytes (vs. ~96 bytes for Python odict)
-- **Reduction**: **~33% less memory**
+- **Memory usage**: Competitive with Python odict for most operations
 
 ### Trade-offs
 
 **Advantages**:
-- Fast C-level attribute access
-- Lower memory footprint
-- Compiled code (no interpretation overhead)
+- C-level attribute access for Entry objects
+- Compiled code for core operations
+- Competitive performance for basic operations (get/set/delete)
+- Slightly faster for move operations
 
 **Disadvantages**:
-- Type conversion overhead (C ↔ Python)
+- Type conversion overhead (C ↔ Python) affects bulk operations
 - Cannot use `cpdef` optimization (architectural constraint)
 - Requires compilation (not pure Python)
+- Significantly slower for: `values()`, `items()`, `copy()`, reverse iteration
 
 ## Design Rationale
 
@@ -237,10 +243,11 @@ def process_dict(d):
 
 **Cython codict**:
 - Cython/C implementation
-- Uses C extension type for nodes
+- Uses C extension type for entries
 - Compiled (requires C compiler)
-- Lower memory usage (36% less)
-- Faster (15-38% creation speedup)
+- Competitive performance for basic operations
+- Faster for move operations
+- **Note**: Slower for bulk operations like `values()`, `items()`, `copy()`
 - Platform-specific binary
 
 ### vs. collections.OrderedDict

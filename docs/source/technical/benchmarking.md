@@ -2,39 +2,131 @@
 
 ## Overview
 
-The refactored `bench.py` provides comprehensive performance and memory benchmarking for **all 50+ public API methods** across four implementations:
+The `bench.py` module provides comprehensive performance and memory benchmarking for **all 50+ public API methods** across four implementations:
 - `dict` (Python built-in)
 - `OrderedDict` (collections.OrderedDict)
-- `odict` (Python implementation)
+- `odict` (Pure Python implementation)
 - `codict` (Cython-optimized implementation)
+
+The benchmarking suite supports **configurable baseline comparison** and is fully parameterizable via command-line arguments.
 
 ## Quick Start
 
 ### Run Full Benchmark Suite
 
 ```bash
-python3 -m odict.bench
+# Run comprehensive benchmarks with default settings
+python -m odict.bench
+
+# Or from within the virtual environment
+venv/bin/python -m odict.bench
 ```
 
-**Note**: Full benchmark takes ~10-30 minutes depending on your system, as it tests 50+ methods across 4 sizes (1K, 10K, 100K, 1M objects) and 4 implementations.
+**Note**: Full benchmark takes ~10-30 minutes depending on your system, as it tests 50+ methods across multiple sizes and 4 implementations.
 
-### Run Specific Benchmarks
+### Run Micro-Benchmarks Only
 
-```python
-from odict.bench import BenchmarkRunner, setup_populated, test_getitem
-import odict.bench as bench
-
-# Test with smaller sizes for faster results
-bench.SIZES = [1000, 10000]
-
-runner = BenchmarkRunner()
-runner.benchmark_and_print('__getitem__', setup_populated, test_getitem,
-                           description="Access item by key: d['key']")
+```bash
+# Run only micro-benchmarks (single operation timing)
+python -m odict.bench --mode micro
 ```
+
+### Custom Configuration
+
+```bash
+# Custom sizes
+python -m odict.bench --sizes "100,1000,10000"
+
+# Custom iteration counts
+python -m odict.bench --micro-iterations 50000 --macro-iterations 5000
+
+# Different baseline for comparison
+python -m odict.bench --baseline dict
+
+# Combine options
+python -m odict.bench --mode comprehensive --sizes "1000,10000" --baseline fastest
+```
+
+## Command-Line Arguments
+
+### --mode
+
+**Choices**: `comprehensive` (default), `micro`
+
+- **comprehensive**: Run all benchmark categories (basic ops, iteration, ordered dict methods)
+- **micro**: Run micro-benchmarks only (fine-grained single-operation timing)
+
+```bash
+python -m odict.bench --mode micro
+```
+
+### --sizes
+
+**Format**: Comma-separated list of integers
+**Default**: `1000,10000,100000,1000000`
+
+Specify which dict sizes to benchmark. Smaller sizes run faster but may not reveal scalability issues.
+
+```bash
+# Quick test with small sizes
+python -m odict.bench --sizes "100,1000"
+
+# Test large dictionaries
+python -m odict.bench --sizes "10000,100000,1000000"
+```
+
+### --micro-iterations
+
+**Type**: Integer
+**Default**: `10000`
+
+Number of iterations for micro-benchmarks (single operation timing). Higher values give more accurate results but take longer.
+
+```bash
+python -m odict.bench --micro-iterations 50000
+```
+
+### --macro-iterations
+
+**Type**: Integer
+**Default**: `1000`
+
+Number of iterations for macro-benchmarks (bulk operations). Typically lower than micro-iterations since bulk ops are slower.
+
+```bash
+python -m odict.bench --macro-iterations 5000
+```
+
+### --baseline
+
+**Choices**: `fastest` (default), `dict`, `OrderedDict`, `odict`, `codict`, `none`
+
+Select which implementation to use as the baseline for percentage comparisons.
+
+```bash
+# Compare all implementations to fastest
+python -m odict.bench --baseline fastest
+
+# Compare all to standard dict
+python -m odict.bench --baseline dict
+
+# Compare all to odict
+python -m odict.bench --baseline odict
+
+# No baseline comparison (absolute times only)
+python -m odict.bench --baseline none
+```
+
+**Baseline selection behavior**:
+- `fastest`: Automatically selects the fastest implementation for each operation/size
+- Specific implementation: Always compares to that implementation
+- `none`: Shows absolute times with no percentage comparisons
 
 ## Output Format
 
-Each method gets its own comprehensive table:
+### Comprehensive Mode
+
+Each method gets its own table showing performance across all sizes and implementations:
 
 ```
 ==============================================================================================================
@@ -43,185 +135,223 @@ Description: Access item by key: d['key']
 ==============================================================================================================
 
 --- Size: 1,000 objects ---
-Implementation  | Time (ms)    | vs odict     | Memory (KB)  | vs odict
+Implementation  | Time (ms)    | vs fastest   | Memory (KB)  | vs fastest
 --------------------------------------------------------------------------------------------------------------
-dict            |     22.126ms |   -74.2%     |      0.156KB |   +17.6%
-OrderedDict     |     22.834ms |   -73.4%     |      0.133KB |    +0.0%
-odict           |     85.835ms | -            |      0.133KB | -
-codict          |     93.490ms |    +8.9%     |      0.133KB |    +0.0%
-
---- Size: 10,000 objects ---
-[... similar table ...]
+dict ★          |     22.126ms | -            |      0.156KB | -
+OrderedDict     |     22.834ms |    +3.2%     |      0.133KB |   -14.7%
+odict           |     85.835ms |  +287.8%     |      0.133KB |   -14.7%
+codict          |     82.426ms |  +272.5%     |      0.133KB |   -14.7%
 ```
 
-### Reading the Results
-
+**Table Legend**:
+- **★**: Marks the baseline implementation for this operation/size
 - **Time (ms)**: Total time in milliseconds for all iterations
-- **vs odict**: Percentage difference compared to odict baseline
-  - Negative % = **faster/less memory** than odict (good for codict!)
-  - Positive % = slower/more memory than odict
+- **vs baseline**: Percentage difference compared to baseline
+  - Negative % = faster/less memory (better)
+  - Positive % = slower/more memory (worse)
 - **Memory (KB)**: Memory delta in kilobytes
 - **N/A**: Method not available on that implementation
 
-## Benchmark Categories
+### Summary Output
 
-### Category 1: Basic Dictionary Operations (17 methods)
-- `__getitem__`, `__setitem__`, `__delitem__`, `__contains__`, `__len__`
-- `get()`, `has_key()`, `keys()`, `values()`, `items()`
-- `clear()`, `copy()`, `update()`, `setdefault()`
-- `pop()`, `popitem()`, `fromkeys()`
-
-### Category 2: Iteration Operations (11 methods)
-- `__iter__`, `__reversed__`
-- `iterkeys()`, `itervalues()`, `iteritems()`
-- `riterkeys()`, `ritervalues()`, `riteritems()`
-- `rkeys()`, `rvalues()`, `ritems()`
-
-### Category 3: Ordered Dict Specific (22 methods)
-- **Access**: `firstkey()`, `lastkey()`, `first_key`, `last_key`, `next_key()`, `prev_key()`
-- **Modification**: `sort()`, `alter_key()`, `swap()`
-- **Insertion**: `insertbefore()`, `insertafter()`, `insertfirst()`, `insertlast()`
-- **Movement**: `movebefore()`, `moveafter()`, `movefirst()`, `movelast()`
-- **Other**: `as_dict()`, `lh`, `lt`
-
-## Configuration
-
-Edit `bench.py` to customize:
-
-```python
-# Test sizes (default: [1000, 10000, 100000, 1000000])
-SIZES = [1000, 10000, 100000, 1000000]
-
-# Number of iterations for fast operations (default: 10000)
-MICRO_ITERATIONS = 10000
-
-# Number of iterations for slow operations (default: 1000)
-MACRO_ITERATIONS = 1000
-```
-
-## Performance Tips
-
-### For Faster Results
-
-1. **Reduce sizes**: Use smaller SIZES list
-   ```python
-   bench.SIZES = [1000, 10000]  # Only test small sizes
-   ```
-
-2. **Reduce iterations**: Lower iteration counts
-   ```python
-   bench.MICRO_ITERATIONS = 1000
-   bench.MACRO_ITERATIONS = 100
-   ```
-
-3. **Test specific methods**: Run individual benchmarks instead of full suite
-
-### For More Accurate Results
-
-1. **Increase iterations**: More iterations = more stable results
-2. **Close other applications**: Reduce system noise
-3. **Run multiple times**: Average results across multiple runs
-4. **Use larger sizes**: Better representation of real-world usage
-
-## Memory Measurement
-
-Memory usage is measured using Python's `tracemalloc` module:
-- Measures **memory delta** (change before/after operation)
-- Garbage collection forced before each measurement
-- Results show per-operation memory footprint
-- Negative memory values possible (garbage collection during test)
-
-## Summary Statistics
-
-At the end of the full benchmark, you'll see:
+After all benchmarks complete, a summary shows overall performance:
 
 ```
 ==============================================================================================================
 BENCHMARK SUMMARY
 ==============================================================================================================
 
-Codict vs Odict Performance:
-  Methods tested: 180
-  Codict faster: 120 times
-  Codict slower: 60 times
-  Average speedup: +12.3%
-  Best speedup: +93.9%
-  Worst speedup: -15.2%
+Overall Performance Summary:
+Implementation  | Wins     | Win Rate   | Avg Time
+------------------------------------------------------------
+dict            | 48       |    88.9% |     82.648ms
+OrderedDict     | 6        |    11.1% |    166.618ms
+odict           | 55       |    38.2% |   1394.861ms
+codict          | 35       |    24.3% |   2851.733ms
 ```
 
-## Example: Benchmarking Custom Methods
+**Summary Metrics**:
+- **Wins**: Number of operations where this implementation was fastest
+- **Win Rate**: Percentage of all benchmarks won
+- **Avg Time**: Average time across all benchmarks
+
+## Benchmark Categories
+
+### Category 1: Basic Dictionary Operations
+
+**17 methods**: Core dict operations that all implementations support
+
+- `__getitem__`, `__setitem__`, `__delitem__`, `__contains__`, `__len__`
+- `get()`, `keys()`, `values()`, `items()`
+- `clear()`, `copy()`, `update()`, `setdefault()`
+- `pop()`, `popitem()`, `fromkeys()`
+- `has_key()` (odict/codict only)
+
+### Category 2: Iteration Operations
+
+**11 methods**: Iteration and reverse iteration
+
+- `__iter__`, `__reversed__`
+- `iterkeys()`, `itervalues()`, `iteritems()`
+- `riterkeys()`, `ritervalues()`, `riteritems()` (odict/codict only)
+- `rkeys()`, `rvalues()`, `ritems()` (odict/codict only)
+
+### Category 3: Ordered Dict Specific Operations
+
+**22 methods**: Extended API for order manipulation (odict/codict only)
+
+- **Access**: `first_key`, `last_key`, `next_key()`, `prev_key()`
+- **Modification**: `sort()`, `alter_key()`, `swap()`
+- **Insertion**: `insertbefore()`, `insertafter()`, `insertfirst()`, `insertlast()`
+- **Movement**: `movebefore()`, `moveafter()`, `movefirst()`, `movelast()`
+- **Other**: `as_dict()`, `lh`, `lt`
+
+## Programmatic Usage
+
+### Custom Benchmark Script
 
 ```python
 from odict.bench import BenchmarkRunner
 
-def my_setup(impl_class, size):
-    """Custom setup function"""
-    return impl_class([(f"key_{i}", i) for i in range(size)])
+# Create runner with custom config
+config = {
+    'sizes': [1000, 10000],
+    'micro_iterations': 5000,
+    'macro_iterations': 1000,
+    'baseline': 'fastest'
+}
 
-def my_test(obj, size, iterations):
-    """Custom test function"""
-    for _ in range(iterations):
-        # Your operation here
-        for key in list(obj.keys())[:10]:
-            _ = obj[key]
+runner = BenchmarkRunner(config=config)
+
+# Run comprehensive benchmarks
+runner.run_comprehensive()
+
+# Or run micro-benchmarks only
+runner.run_micro()
+
+# Access results
+for (impl, size), metrics in runner.results.items():
+    print(f"{impl} at size {size}: {metrics['time_ms']}ms")
+```
+
+### Running Individual Benchmarks
+
+```python
+from odict.bench import BenchmarkRunner, setup_populated, test_getitem
 
 runner = BenchmarkRunner()
-runner.benchmark_and_print('custom_operation', my_setup, my_test,
-                           iterations=1000,
-                           description="My custom benchmark")
+
+# Run a single benchmark
+runner.benchmark_and_print(
+    method_name='__getitem__',
+    setup_func=setup_populated,
+    test_func=test_getitem,
+    description="Access item by key: d['key']"
+)
 ```
+
+## Performance Analysis Tips
+
+### Identifying Performance Characteristics
+
+1. **Basic Operations (get/set/delete)**:
+   - Compare `dict`, `OrderedDict`, `odict`, `codict` for `__getitem__`, `__setitem__`, `__delitem__`
+   - Expected: `dict` fastest, ordered implementations 2-5x slower
+
+2. **Bulk Operations (values/items/copy)**:
+   - Check `values()`, `items()`, `copy()` benchmarks
+   - Note: `codict` may be significantly slower due to C↔Python conversion overhead
+
+3. **Order-Specific Operations**:
+   - Compare `odict` vs `codict` for `movefirst()`, `movelast()`, `swap()`, etc.
+   - Note: `codict` is typically competitive or slightly faster for these
+
+4. **Memory Usage**:
+   - Compare memory columns across implementations
+   - `OrderedDict` and `codict` generally use less memory than `odict`
+
+### Understanding Baseline Selection
+
+**Use `--baseline fastest`** (default) when:
+- Comparing all implementations objectively
+- Identifying the best implementation for each operation
+- Generating neutral performance reports
+
+**Use `--baseline odict`** when:
+- Evaluating `codict` optimization effectiveness
+- Measuring improvement over pure Python implementation
+- Documentation and release notes
+
+**Use `--baseline dict`** when:
+- Understanding ordering overhead
+- Comparing to standard library baseline
+- Evaluating if ordered dict is worth the performance cost
 
 ## Interpreting Results
 
-### What to Look For
+### Codict Performance Characteristics
 
-1. **dict Performance**: Usually fastest for non-ordered operations (expected)
-2. **codict vs odict**: Look for negative % in "vs odict" column
-   - Negative = codict is faster/more memory efficient
-   - Typical range: -20% to +10%
-3. **OrderedDict Comparison**: codict should be competitive or faster
-4. **Memory Usage**: codict typically uses less memory due to C-optimized Node class
+Based on benchmark data, `codict` exhibits:
 
-### Known Performance Characteristics
+**Strengths**:
+- Competitive with `odict` for basic operations (`__getitem__`, `__setitem__`)
+- Slightly faster for move operations (`movefirst`, `movelast`, `moveafter`)
+- Similar memory usage to `odict`
 
-**codict Strengths**:
-- Creation operations (15-38% faster)
-- Memory footprint (36% less per node)
-- Read operations (competitive or faster)
+**Weaknesses**:
+- **Significantly slower** for bulk operations: `values()`, `items()`, `copy()`
+- **10-50x slower** for reverse iteration methods
+- Type conversion overhead impacts Python object creation
 
-**codict Weaknesses**:
-- Some deletion operations (7% slower due to type conversion overhead)
-- Very small dictionaries (<100 items) may not show benefits
+### When to Use Each Implementation
 
-## Troubleshooting
+**Use `dict`** when:
+- Maximum performance needed
+- Order maintenance not required (or Python 3.7+ insertion order sufficient)
+- No need for order manipulation methods
 
-### Benchmark Takes Too Long
+**Use `OrderedDict`** when:
+- Need standard library solution
+- Basic ordered dict functionality sufficient
+- Good balance of performance and features
 
-- Reduce SIZES: `bench.SIZES = [1000, 10000]`
-- Reduce iterations
-- Run specific methods instead of full suite
+**Use `odict`** when:
+- Need extended API (move, swap, insertbefore, etc.)
+- Frequent bulk operations (`values()`, `items()`)
+- Pure Python portability required
 
-### Memory Errors with Large Sizes
+**Use `codict`** when:
+- Need extended API
+- Workload dominated by basic operations and move operations
+- Few bulk operations or reverse iterations
 
-- Use smaller SIZES
-- Close other applications
-- The 1M object tests require ~500MB RAM
+## Benchmarking Best Practices
 
-### Inconsistent Results
+### Accurate Measurements
 
-- Run multiple times and average
-- Ensure system is idle
-- Increase iterations for more stable results
+1. **Disable CPU frequency scaling**: Use `cpupower` or similar to set performance governor
+2. **Close background applications**: Minimize system load during benchmarks
+3. **Run multiple times**: Benchmark variance can be significant; average multiple runs
+4. **Warm-up iterations**: First run may include compilation overhead
 
-## Files
+### Interpreting Variance
 
-- `src/odict/bench.py` - Main benchmark suite (846 lines)
-- `PERFORMANCE_ANALYSIS.md` - Detailed performance analysis
-- `CPDEF_ANALYSIS.md` - cpdef optimization investigation
-- `benchmark_cpdef.py` - Micro-benchmark tool
+- **<5% difference**: Likely within measurement noise
+- **5-20% difference**: Noticeable but may vary by workload
+- **>20% difference**: Significant performance difference
 
-## See Also
+### System Dependencies
 
-- [Overview](../user-guide/overview.md) - Complete codict implementation summary
-- [Performance Analysis](performance.md) - Detailed performance analysis
-- [Optimizations](../development/optimizations.md) - cpdef optimization findings
+Performance characteristics depend on:
+- **CPU architecture**: x86_64 vs ARM
+- **Python version**: CPython 3.10 vs 3.11 vs 3.14
+- **Memory hierarchy**: Cache size, memory speed
+- **Compilation**: GCC vs Clang vs MSVC
+
+Always benchmark on your target deployment environment.
+
+## Related Documentation
+
+- [Performance Analysis](performance.md) - Detailed performance discussion
+- [Architecture](architecture.md) - Implementation details
+- [Memory Analysis](memory.md) - Memory usage breakdown

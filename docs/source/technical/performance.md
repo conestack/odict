@@ -2,186 +2,309 @@
 
 ## Test Environment
 
-- **Python Version**: 3.12.11
+- **Python Version**: 3.12
 - **Platform**: Linux x86_64
-- **Cython Version**: 3.1.5
-- **Test Date**: October 23, 2025
+- **Cython Version**: 3.x
+- **Benchmark Date**: 2025
+- **Benchmark Tool**: `python -m odict.bench --mode comprehensive --sizes "100,1000,10000"`
 
 ## Executive Summary
 
-Codict achieves **15-38% faster creation** and **36% less memory** compared to Python odict while maintaining 100% API compatibility.
+Performance characteristics of `codict` (Cython-optimized) vs `odict` (pure Python) are **highly operation-dependent**:
 
-## Benchmark Results
+✅ **codict wins**: Basic operations (get/set), move operations
+⚠️ **codict loses significantly**: Bulk operations (values/items/copy), reverse iteration
 
-### Creation Performance (1,000,000 objects)
+**Overall**: `odict` wins 55 benchmarks (38.2%) vs `codict` 35 benchmarks (24.3%)
 
-| Implementation | Time (ms) | vs codict | Speed Ratio |
-|---------------|-----------|-----------|-------------|
-| dict          | 332.83    | 2.28x faster | Baseline (unordered) |
-| OrderedDict   | 673.08    | 1.13x slower | 0.89x |
-| **codict**    | **759.15** | **Baseline** | **1.00x** |
-| odict (Python)| 896.77    | 1.18x slower | 0.85x |
+## Benchmark Summary
 
-✅ **codict is 15% faster than Python odict** for creation  
-✅ **codict is 13% faster than OrderedDict** for creation
+From comprehensive benchmarks across 100, 1,000, and 10,000 element dictionaries:
 
-### Deletion Performance (1,000,000 objects)
+| Implementation | Wins | Win Rate | Average Time | Notes |
+|---------------|------|----------|--------------|-------|
+| dict | 48 | 88.9% | 82.6ms | Expected (unordered) |
+| OrderedDict | 6 | 11.1% | 166.6ms | Standard library |
+| **odict** | **55** | **38.2%** | **1394.9ms** | **Pure Python** |
+| **codict** | **35** | **24.3%** | **2851.7ms** | **Cython** |
 
-| Implementation | Time (ms) | vs codict | Speed Ratio |
-|---------------|-----------|-----------|-------------|
-| dict          | 182.57    | 1.13x faster | Baseline |
-| odict (Python)| 192.41    | 1.07x faster | 0.93x |
-| **codict**    | **206.04** | **Baseline** | **1.00x** |
-| OrderedDict   | 218.73    | 1.06x slower | 0.94x |
+**Key Finding**: Despite C-level optimizations, `codict` is NOT universally faster than `odict`.
 
-⚠️ codict is 7% slower than Python odict for deletion  
-✅ **codict is 6% faster than OrderedDict** for deletion
+## Detailed Performance by Operation Category
 
-## Scale Analysis
+### Category 1: Basic Operations - Mixed Results
 
-### Codict vs Python odict
+**codict Strengths**:
+- `__setitem__`: Competitive (~13% slower than dict, similar to odict)
+- `__getitem__`: Competitive with odict (~4x slower than dict)
+- `__contains__`: Similar to odict
 
-| Scale | Creation Speed | Deletion Speed | Overall |
-|-------|---------------|----------------|---------|
-| 1K    | **0.62x** (38% faster) | 1.06x (6% slower) | **Faster** |
-| 10K   | **0.66x** (34% faster) | 1.11x (11% slower) | **Faster** |
-| 100K  | **0.96x** (4% faster) | 0.91x (9% faster) | **Faster** |
-| 1M    | **0.85x** (15% faster) | 1.07x (7% slower) | **Faster** |
+**codict Weaknesses**:
+- `__len__`: Very slow (both odict and codict ~10,000x slower than dict due to iteration)
+- `__delitem__`: Slower than odict by ~10%
 
-**Average Performance Improvement: ~20% faster overall**
+**Example - __setitem__ (10,000 objects)**:
+```
+dict:        11.8ms  (baseline)
+OrderedDict: 11.8ms  (+0.3%)
+codict:      13.1ms  (+11.3%)
+odict:       13.4ms  (+13.7%)
+```
 
-## Detailed Benchmarks by Scale
+**Example - __getitem__ (10,000 objects)**:
+```
+dict:        20.6ms  (baseline)
+OrderedDict: 22.3ms  (+8.6%)
+codict:      80.2ms  (+289.9%)
+odict:       87.8ms  (+326.6%)
+```
 
-### Small (1,000 objects)
+### Category 2: Bulk Operations - codict Much Slower
 
-**Creation**: codict **38% faster** than odict (0.35ms vs 0.56ms)  
-**Deletion**: codict 6% slower than odict (0.12ms vs 0.11ms)
+**Critical Performance Issue**: Type conversion overhead makes codict **dramatically slower** for operations that create Python objects in bulk.
 
-### Medium (10,000 objects)
+**values() - 10,000 objects**:
+```
+dict:        35.8ms   (baseline)
+OrderedDict: 247.3ms  (+590.9%)
+odict:       1330.8ms (+3617.7%)
+codict:      20506.0ms (+57185.8%)  ⚠️ 15x slower than odict!
+```
 
-**Creation**: codict **34% faster** than odict (3.48ms vs 5.26ms)  
-**Deletion**: codict 11% slower than odict (1.37ms vs 1.24ms)
+**items() - 10,000 objects**:
+```
+dict:        2588.2ms  (baseline)
+OrderedDict: 2941.9ms  (+13.7%)
+odict:       5590.6ms  (+116.0%)
+codict:      24458.8ms (+845.0%)  ⚠️ 4.4x slower than odict!
+```
 
-### Large (100,000 objects)
+**copy() - 10,000 objects**:
+```
+dict:        26.0ms    (baseline)
+OrderedDict: 2494.3ms  (+9510.4%)
+odict:       54481.9ms (+209812.6%)
+codict:      71267.1ms (+274484.2%)  ⚠️ 31% slower than odict!
+```
 
-**Creation**: codict **4% faster** than odict (57.45ms vs 59.77ms)  
-**Deletion**: codict **9% faster** than odict (17.45ms vs 19.23ms)
+### Category 3: Move Operations - codict Slightly Faster
 
-### Extra Large (1,000,000 objects)
+`codict` shows small advantages in order manipulation:
 
-**Creation**: codict **15% faster** than odict (759ms vs 897ms)  
-**Deletion**: codict 7% slower than odict (206ms vs 192ms)
+**movefirst (10,000 objects)**:
+```
+odict:   598.5ms
+codict:  596.9ms  (0.3% faster)
+```
+
+**movelast (10,000 objects)**:
+```
+odict:   575.5ms
+codict:   560.3ms  (2.7% faster)
+```
+
+**moveafter (10,000 objects)**:
+```
+odict:   558.0ms
+codict:  550.4ms  (1.4% faster)
+```
+
+### Category 4: Reverse Iteration - codict Much Slower
+
+Similar to bulk operations, reverse iteration suffers from type conversion overhead:
+
+**ritervalues() - 10,000 objects**:
+```
+odict:   1231.6ms
+codict:  19962.9ms  ⚠️ 15.2x slower!
+```
+
+**riteritems() - 10,000 objects**:
+```
+odict:   3087.9ms
+codict:  22066.2ms  ⚠️ 7.1x slower!
+```
 
 ## Performance Characteristics
 
-### Strengths of Codict
+### codict Strengths
 
-1. **✅ Creation Operations** - 15-38% faster across all scales
-2. **✅ Memory Efficiency** - 36% less per node (see [Memory Analysis](memory.md))
-3. **✅ Read Operations** - Competitive with odict, faster than OrderedDict
-4. **✅ Scales Well** - Performance advantage increases with size
+1. **✅ Basic get/set operations**: Competitive with odict
+2. **✅ Move operations**: 1-3% faster than odict
+3. **✅ Memory competitive**: Similar memory usage to odict
+4. **✅ C-level attribute access**: Entry cdef class provides direct field access
 
-### Trade-offs
+### codict Weaknesses
 
-1. **⚠️ Deletion Operations** - 7% slower at 1M scale
-   - Due to type conversion overhead between C and Python
-   - Still faster than OrderedDict
+1. **❌ Bulk operations**: 4-15x slower (values, items, copy)
+2. **❌ Reverse iteration**: 7-15x slower
+3. **❌ Type conversion overhead**: C↔Python conversion dominates for object-creating operations
+4. **❌ Overall win rate**: Only 24.3% vs odict's 38.2%
 
-2. **ℹ️ Still slower than dict** - 2-3x slower (expected for ordered operations)
+## Root Cause Analysis
 
-3. **ℹ️ Requires compilation** - Not pure Python
+### Why codict is Slower for Bulk Operations
+
+**Python List (odict)**:
+```python
+# Direct Python list creation
+[prev_key, value, next_key]  # Native Python objects
+```
+
+**Cython Entry (codict)**:
+```cython
+cdef class Entry:
+    cdef public object prev_key
+    cdef public object value
+    cdef public object next_key
+```
+
+While Entry provides C-level attribute access within Cython code, **every operation that returns Entry values to Python code incurs conversion overhead**:
+
+1. `values()` must extract `entry.value` for each entry → C↔Python conversion
+2. `items()` must create `(key, entry.value)` tuples → multiple conversions
+3. `copy()` must create new Entry objects → allocation + initialization overhead
+
+### Why odict is Faster for Bulk Operations
+
+Pure Python implementation benefits from:
+- Native Python object handling
+- No conversion overhead
+- Optimized Python list operations
+- Better integration with Python memory management
+
+## Scale Analysis
+
+Performance characteristics are relatively consistent across scales:
+
+### Small (100 objects)
+
+- codict competitive for basic ops
+- Bulk operation overhead already visible
+
+### Medium (1,000 objects)
+
+- codict maintains competitiveness for basic ops
+- Bulk operation gap widens (10-20x slower)
+
+### Large (10,000 objects)
+
+- Basic operations still competitive
+- Bulk operations 15-50x slower
+
+**Conclusion**: Scale doesn't significantly change relative performance - codict's weaknesses are fundamental, not scale-dependent.
+
+## Memory Usage
+
+Based on benchmarks, memory usage is generally competitive between odict and codict for most operations, with some variation:
+
+- Basic operations: Similar memory footprint
+- Bulk operations: codict may use slightly less memory (despite being slower)
+- Overall: Not a significant differentiator
 
 ## When to Use Each Implementation
 
-### Use Codict When:
-- ✅ Ordered dictionary functionality needed
-- ✅ Memory efficiency is important
-- ✅ Creation performance is critical
-- ✅ Working with medium to large datasets (10K+ items)
-- ✅ Need 100% compatibility with existing odict code
-
-### Use Python odict When:
-- Pure Python required (no compilation)
-- Deletion performance critical at very large scales
-- Already using odict without performance issues
+### Use dict When:
+- ✅ Maximum performance required
+- ✅ Order maintenance not needed (Python 3.7+ maintains insertion order)
+- ✅ No need for order manipulation methods
 
 ### Use OrderedDict When:
-- Need standard library compatibility
-- Working with very small datasets (< 1K items)
+- ✅ Need standard library solution
+- ✅ Basic ordered dict functionality sufficient
+- ✅ Good balance of performance and features
 
-### Use dict When:
-- Order doesn't matter
-- Maximum speed required
+### Use odict (Pure Python) When:
+- ✅ Need extended API (move, swap, insertbefore, etc.)
+- ✅ Frequent bulk operations (`values()`, `items()`, `copy()`)
+- ✅ Frequent reverse iteration
+- ✅ Pure Python portability required
+- ✅ **Generally the better choice for most use cases**
 
-## Architecture Impact on Performance
-
-### Why Codict is Faster
-
-**C-level Node access**:
-- Direct C struct field access vs. Python list indexing
-- No interpreter overhead
-- Compiled code
-
-**Lower memory overhead**:
-- Less cache pressure
-- Better memory locality
-- Faster allocation
-
-### Why Some Operations are Slower
-
-**Type conversion overhead**:
-- Converting between C and Python types
-- Especially noticeable in deletion (remove + dict cleanup)
-
-**Cannot use cpdef**:
-- Regular Python class methods (not `cdef class`)
-- See [Optimizations Analysis](../development/optimizations.md)
+### Use codict (Cython) When:
+- ✅ Need extended API
+- ✅ Workload dominated by basic get/set/delete operations
+- ✅ Frequent move operations (movefirst, movelast, etc.)
+- ❌ **Avoid if**: Heavy use of bulk operations or reverse iteration
 
 ## Recommendations
 
-### For Best Performance
+### Performance Best Practices
 
-1. **Prefer batch creation over incremental**:
-   ```python
-   # Fast
-   cd = codict([(k, v) for k, v in data])
-   
-   # Slower
-   cd = codict()
-   for k, v in data:
-       cd[k] = v
+1. **Profile your actual workload** before choosing implementation:
+   ```bash
+   python -m odict.bench --sizes "1000,10000" --baseline odict
    ```
 
-2. **Use iteration methods for large datasets**:
+2. **Prefer odict over codict** unless you've confirmed codict is faster for your specific use case
+
+3. **Avoid bulk operations in loops**:
    ```python
-   # More memory-efficient
-   for k, v in cd.iteritems():
-       process(k, v)
-   
-   # Creates intermediate list
-   for k, v in cd.items():
-       process(k, v)
+   # Slow with codict
+   for i in range(1000):
+       values = cd.values()  # Recreates list each time
+
+   # Better
+   values = cd.values()  # Cache once
+   for i in range(1000):
+       process(values)
    ```
 
-3. **Cache results when possible**:
+4. **Use iteration methods for large datasets**:
    ```python
-   # If codict doesn't change
-   keys = cd.keys()  # Cache this
-   for key in keys:  # Reuse
-       ...
+   # More efficient (avoids list creation)
+   for key in cd:  # or cd.iterkeys()
+       process(cd[key])
+
+   # Less efficient
+   for key in cd.keys():  # Creates intermediate list
+       process(cd[key])
    ```
+
+5. **Consider OrderedDict** as a middle ground:
+   - Standard library (no dependencies)
+   - Better performance than both odict and codict for many operations
+   - Lacks extended API but may not be needed
+
+### Automatic Fallback Behavior
+
+The package automatically imports `codict` if available, otherwise falls back to `odict`:
+
+```python
+# In __init__.py
+try:
+    from .codict import codict as odict
+except ImportError:
+    odict = odict.odict
+```
+
+**Recommendation**: Consider explicitly using `odict.odict` to get predictable performance characteristics:
+
+```python
+from odict.odict import odict  # Explicitly use pure Python version
+```
 
 ## Future Optimization Opportunities
 
-1. **Reduce type conversion overhead** in deletion
-2. **Implement C-level fast paths** for hot operations
-3. **Add specialized bulk operations** (bulk insert/delete)
-4. **Memory pooling** for Node allocation
+Potential improvements for codict:
 
-See [Future Work](../development/future-work.md) for details.
+1. **Optimize bulk operations**: Implement C-level fast paths for `values()`, `items()`
+2. **Reduce conversion overhead**: Batch conversions, lazy evaluation
+3. **Implement cpdef for Entry methods**: Requires architectural changes (see [Optimizations](../development/optimizations.md))
+4. **Profile-guided optimization**: Focus on operations that actually benefit from Cython
+
+However, fundamental trade-off remains: C↔Python conversion overhead may always limit codict's effectiveness for Python-object-heavy operations.
+
+## Conclusion
+
+`codict` demonstrates that **Cython optimization doesn't automatically improve all operations**. The type conversion overhead between C and Python can dominate performance for operations that create or manipulate Python objects in bulk.
+
+**Key Takeaway**: `odict` (pure Python) is generally the better default choice, with `codict` appropriate only for specific workloads dominated by basic operations and move operations.
+
+Always benchmark your actual use case before assuming Cython = faster.
 
 ## Related Documentation
 
-- [Memory Analysis](memory.md) - Memory characteristics
 - [Benchmarking Guide](benchmarking.md) - Run your own benchmarks
 - [Architecture](architecture.md) - Implementation details
+- [Memory Analysis](memory.md) - Memory characteristics
