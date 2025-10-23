@@ -1,4 +1,4 @@
-# Comprehensive Benchmark Suite Usage Guide
+# Benchmarking Guide
 
 ## Overview
 
@@ -222,6 +222,6 @@ runner.benchmark_and_print('custom_operation', my_setup, my_test,
 
 ## See Also
 
-- [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Complete codict implementation summary
-- [PERFORMANCE_ANALYSIS.md](PERFORMANCE_ANALYSIS.md) - Detailed performance analysis
-- [CPDEF_ANALYSIS.md](CPDEF_ANALYSIS.md) - cpdef optimization findings
+- [Overview](../user-guide/overview.md) - Complete codict implementation summary
+- [Performance Analysis](performance.md) - Detailed performance analysis
+- [Optimizations](../development/optimizations.md) - cpdef optimization findings
