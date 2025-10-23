@@ -4,6 +4,7 @@
 This module provides the common implementation for both pyodict (pure Python)
 and codict (Cython-optimized) ordered dictionaries.
 """
+
 import copy
 import functools
 import sys
@@ -53,7 +54,7 @@ class _BaseOrderedDict:
 
     def _entry_cls(self):
         """Return the entry factory. Must be overridden."""
-        raise NotImplementedError("Subclasses must implement _entry_cls()")
+        raise NotImplementedError('Subclasses must implement _entry_cls()')
 
     def __init__(self, data=(), **kwds):
         """Initialize ordered dict.

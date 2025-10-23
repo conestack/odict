@@ -4,6 +4,7 @@
 This module provides a pure Python implementation of ordered dictionaries
 using the common base class from odict.base.
 """
+
 from odict.base import _BaseOrderedDict, _nil
 
 
