@@ -9,8 +9,14 @@ Compares performance and memory usage of all public API methods across:
 - codict (Cython-optimized implementation)
 """
 
+import argparse
+import gc
+import sys
+import time
+import tracemalloc
 from collections import OrderedDict
-from .pyodict import odict
+
+from .odict import odict
 
 try:
     from .codict import codict
@@ -18,31 +24,58 @@ try:
     HAS_CODICT = True
 except ImportError:
     HAS_CODICT = False
-import time
-import gc
-import tracemalloc
-import sys
 
 
-# Configuration
-SIZES = [1000, 10000, 100000, 1000000]
-MICRO_ITERATIONS = 10000  # For fast operations
-MACRO_ITERATIONS = 1000  # For slow operations
-WARMUP_ITERATIONS = 100
+# Default Configuration
+DEFAULT_SIZES = [1000, 10000, 100000, 1000000]
+DEFAULT_MICRO_ITERATIONS = 10000  # For fast operations
+DEFAULT_MACRO_ITERATIONS = 1000  # For slow operations
+DEFAULT_WARMUP_ITERATIONS = 100
 
 
 class BenchmarkRunner:
     """Main benchmark runner for all odict methods."""
 
-    def __init__(self):
-        """Initialize benchmark runner with available implementations."""
-        self.implementations = {
+    def __init__(self, config=None):
+        """Initialize benchmark runner with available implementations.
+
+        Args:
+            config: Configuration dict with keys:
+                - sizes: List of data sizes to test
+                - micro_iterations: Number of iterations for fast operations
+                - macro_iterations: Number of iterations for slow operations
+                - warmup_iterations: Number of warmup iterations
+                - baseline: Baseline implementation name ('fastest', 'dict', 'odict', etc.)
+                - implementations: List of implementation names to test (or None for all)
+        """
+        if config is None:
+            config = {}
+
+        self.sizes = config.get('sizes', DEFAULT_SIZES)
+        self.micro_iterations = config.get('micro_iterations', DEFAULT_MICRO_ITERATIONS)
+        self.macro_iterations = config.get('macro_iterations', DEFAULT_MACRO_ITERATIONS)
+        self.warmup_iterations = config.get(
+            'warmup_iterations', DEFAULT_WARMUP_ITERATIONS
+        )
+        self.baseline = config.get('baseline', 'fastest')
+
+        # All available implementations
+        all_impls = {
             'dict': dict,
             'OrderedDict': OrderedDict,
             'odict': odict,
         }
         if HAS_CODICT:
-            self.implementations['codict'] = codict
+            all_impls['codict'] = codict
+
+        # Filter implementations if requested
+        requested_impls = config.get('implementations')
+        if requested_impls:
+            self.implementations = {
+                name: cls for name, cls in all_impls.items() if name in requested_impls
+            }
+        else:
+            self.implementations = all_impls
 
         self.results = {}
 
@@ -61,9 +94,7 @@ class BenchmarkRunner:
                 impl_class(), method_name
             )
 
-    def benchmark_method(
-        self, method_name, setup_fn, test_fn, iterations=MICRO_ITERATIONS
-    ):
+    def benchmark_method(self, method_name, setup_fn, test_fn, iterations=None):
         """
         Benchmark a specific method across all implementations and sizes.
 
@@ -71,14 +102,17 @@ class BenchmarkRunner:
             method_name: Name of the method being tested
             setup_fn: Function(impl_class, size) -> test object
             test_fn: Function(obj, size, iterations) -> None
-            iterations: Number of times to run the operation
+            iterations: Number of times to run the operation (None = use micro_iterations)
 
         Returns:
             dict: Results keyed by (impl_name, size)
         """
+        if iterations is None:
+            iterations = self.micro_iterations
+
         results = {}
 
-        for size in SIZES:
+        for size in self.sizes:
             for impl_name, impl_class in self.implementations.items():
                 # Skip if method not available
                 if not self.has_method(impl_class, method_name):
@@ -90,7 +124,7 @@ class BenchmarkRunner:
 
                     # Warmup
                     warmup_obj = setup_fn(impl_class, min(size, 100))
-                    test_fn(warmup_obj, min(size, 100), WARMUP_ITERATIONS)
+                    test_fn(warmup_obj, min(size, 100), self.warmup_iterations)
                     del warmup_obj
 
                     # Force garbage collection and reset memory tracking
@@ -145,7 +179,7 @@ class BenchmarkRunner:
             print(f'Description: {description}')
         print(f'{"=" * 110}')
 
-        for size in SIZES:
+        for size in self.sizes:
             # Check if we have any results for this size
             has_results = any(
                 (impl, size) in results for impl in self.implementations.keys()
@@ -154,18 +188,54 @@ class BenchmarkRunner:
                 continue
 
             print(f'\n--- Size: {size:,} objects ---')
-            print(
-                f'{"Implementation":<15} | {"Time (ms)":<12} | {"vs odict":<12} | {"Memory (KB)":<12} | {"vs odict":<12}'
-            )
+
+            # Determine baseline implementation for this size
+            baseline_impl = None
+            baseline_time = None
+            baseline_mem = None
+
+            if self.baseline == 'fastest':
+                # Find fastest implementation
+                min_time = float('inf')
+                for impl in self.implementations.keys():
+                    if (impl, size) in results:
+                        impl_time = results[(impl, size)]['time_ms']
+                        if impl_time < min_time:
+                            min_time = impl_time
+                            baseline_impl = impl
+                            baseline_time = impl_time
+                            baseline_mem = results[(impl, size)]['memory_kb']
+            elif self.baseline == 'none':
+                # No baseline comparison
+                baseline_impl = None
+            elif self.baseline in self.implementations:
+                # Use specified baseline if available
+                baseline_impl = self.baseline
+                if (baseline_impl, size) in results:
+                    baseline_time = results[(baseline_impl, size)]['time_ms']
+                    baseline_mem = results[(baseline_impl, size)]['memory_kb']
+                else:
+                    baseline_impl = None
+
+            # Print header
+            if baseline_impl:
+                time_vs_header = f'vs {baseline_impl}'
+                mem_vs_header = f'vs {baseline_impl}'
+                print(
+                    f'{"Implementation":<15} | {"Time (ms)":<12} | {time_vs_header:<12} | {"Memory (KB)":<12} | {mem_vs_header:<12}'
+                )
+            else:
+                print(
+                    f'{"Implementation":<15} | {"Time (ms)":<12} | {"Relative":<12} | {"Memory (KB)":<12} | {"Relative":<12}'
+                )
             print('-' * 110)
 
-            # Get odict baseline
-            odict_data = results.get(('odict', size))
-            odict_time = odict_data['time_ms'] if odict_data else None
-            odict_mem = odict_data['memory_kb'] if odict_data else None
-
             # Print results for each implementation
-            for impl in ['dict', 'OrderedDict', 'odict', 'codict']:
+            impl_order = ['dict', 'OrderedDict', 'odict', 'codict']
+            # Filter to only implementations we're testing and that exist
+            impl_order = [i for i in impl_order if i in self.implementations]
+
+            for impl in impl_order:
                 if (impl, size) not in results:
                     print(
                         f'{impl:<15} | {"N/A":<12} | {"-":<12} | {"N/A":<12} | {"-":<12}'
@@ -176,21 +246,36 @@ class BenchmarkRunner:
                 time_ms = data['time_ms']
                 mem_kb = data['memory_kb']
 
-                # Calculate percentages vs odict
-                if odict_time and impl != 'odict' and odict_time > 0:
-                    time_pct = ((time_ms - odict_time) / odict_time) * 100
+                # Calculate percentages vs baseline
+                if (
+                    baseline_impl
+                    and baseline_time
+                    and impl != baseline_impl
+                    and baseline_time > 0
+                ):
+                    time_pct = ((time_ms - baseline_time) / baseline_time) * 100
                     time_vs = f'{time_pct:+7.1f}%'
                 else:
-                    time_vs = '-'
+                    time_vs = '-' if baseline_impl else 'baseline'
 
-                if odict_mem and impl != 'odict' and abs(odict_mem) > 0.001:
-                    mem_pct = ((mem_kb - odict_mem) / abs(odict_mem)) * 100
+                if (
+                    baseline_impl
+                    and baseline_mem
+                    and impl != baseline_impl
+                    and abs(baseline_mem) > 0.001
+                ):
+                    mem_pct = ((mem_kb - baseline_mem) / abs(baseline_mem)) * 100
                     mem_vs = f'{mem_pct:+7.1f}%'
                 else:
-                    mem_vs = '-'
+                    mem_vs = '-' if baseline_impl else 'baseline'
+
+                # Mark baseline implementation
+                impl_label = impl
+                if impl == baseline_impl:
+                    impl_label = f'{impl} ★'
 
                 print(
-                    f'{impl:<15} | {time_ms:>10.3f}ms | {time_vs:<12} | {mem_kb:>10.3f}KB | {mem_vs:<12}'
+                    f'{impl_label:<15} | {time_ms:>10.3f}ms | {time_vs:<12} | {mem_kb:>10.3f}KB | {mem_vs:<12}'
                 )
 
     def benchmark_and_print(
@@ -198,7 +283,7 @@ class BenchmarkRunner:
         method_name,
         setup_fn,
         test_fn,
-        iterations=MICRO_ITERATIONS,
+        iterations=None,
         description='',
     ):
         """Convenience method to benchmark and immediately print results."""
@@ -611,19 +696,26 @@ def test_lt_property(obj, size, iterations):
 # ============================================================================
 
 
-def run():
-    """Main benchmark runner."""
-    runner = BenchmarkRunner()
+def run_comprehensive(config=None):
+    """Run comprehensive benchmark suite.
+
+    Args:
+        config: Configuration dict (or None for defaults)
+    """
+    runner = BenchmarkRunner(config)
 
     print('\n' + '=' * 110)
     print('ODICT COMPREHENSIVE BENCHMARK SUITE')
     print('=' * 110)
     print(f'\nComparing implementations: {", ".join(runner.implementations.keys())}')
-    print(f'Test sizes: {", ".join(str(s) for s in SIZES)}')
-    print(f'Micro-benchmark iterations: {MICRO_ITERATIONS:,}')
-    print(f'Macro-benchmark iterations: {MACRO_ITERATIONS:,}')
-    print('\nNote: Negative % means faster/less memory than odict (baseline)')
+    print(f'Test sizes: {", ".join(str(s) for s in runner.sizes)}')
+    print(f'Micro-benchmark iterations: {runner.micro_iterations:,}')
+    print(f'Macro-benchmark iterations: {runner.macro_iterations:,}')
+    print(f'Baseline: {runner.baseline}')
+    baseline_note = 'fastest' if runner.baseline == 'fastest' else f'{runner.baseline}'
+    print(f'\nNote: Comparisons are relative to {baseline_note}')
     print("      'N/A' means method not available on that implementation")
+    print("      '★' marks the baseline implementation")
 
     # ========================================================================
     # CATEGORY 1: Basic Dictionary Operations
@@ -650,7 +742,7 @@ def run():
         '__delitem__',
         setup_populated,
         test_delitem,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description="Delete item by key: del d['key']",
     )
 
@@ -686,7 +778,7 @@ def run():
         'keys',
         setup_populated,
         test_keys,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Get list of keys: d.keys()',
     )
 
@@ -694,7 +786,7 @@ def run():
         'values',
         setup_populated,
         test_values,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Get list of values: d.values()',
     )
 
@@ -702,7 +794,7 @@ def run():
         'items',
         setup_populated,
         test_items,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Get list of items: d.items()',
     )
 
@@ -710,7 +802,7 @@ def run():
         'clear',
         setup_populated,
         test_clear,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Remove all items: d.clear()',
     )
 
@@ -718,7 +810,7 @@ def run():
         'copy',
         setup_populated,
         test_copy,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Create shallow copy: d.copy()',
     )
 
@@ -726,7 +818,7 @@ def run():
         'update',
         setup_populated,
         test_update,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Update with dict: d.update(other)',
     )
 
@@ -741,7 +833,7 @@ def run():
         'pop',
         setup_populated,
         test_pop,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Pop key with default: d.pop(key, default)',
     )
 
@@ -749,7 +841,7 @@ def run():
         'popitem',
         setup_populated,
         test_popitem,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Pop last item: d.popitem()',
     )
 
@@ -757,7 +849,7 @@ def run():
         'fromkeys',
         setup_empty,
         test_fromkeys,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Create from keys: dict.fromkeys(keys, value)',
     )
 
@@ -772,7 +864,7 @@ def run():
         '__iter__',
         setup_populated,
         test_iter,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Forward iteration: for key in d',
     )
 
@@ -780,7 +872,7 @@ def run():
         '__reversed__',
         setup_populated,
         test_reversed,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Reverse iteration: for key in reversed(d)',
     )
 
@@ -788,7 +880,7 @@ def run():
         'iterkeys',
         setup_populated,
         test_iterkeys,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Iterate keys: for key in d.iterkeys() [odict/codict only]',
     )
 
@@ -796,7 +888,7 @@ def run():
         'itervalues',
         setup_populated,
         test_itervalues,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Iterate values: for val in d.itervalues() [odict/codict only]',
     )
 
@@ -804,7 +896,7 @@ def run():
         'iteritems',
         setup_populated,
         test_iteritems,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Iterate items: for k,v in d.iteritems() [odict/codict only]',
     )
 
@@ -812,7 +904,7 @@ def run():
         'riterkeys',
         setup_populated,
         test_riterkeys,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Reverse iterate keys: d.riterkeys() [odict/codict only]',
     )
 
@@ -820,7 +912,7 @@ def run():
         'ritervalues',
         setup_populated,
         test_ritervalues,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Reverse iterate values: d.ritervalues() [odict/codict only]',
     )
 
@@ -828,7 +920,7 @@ def run():
         'riteritems',
         setup_populated,
         test_riteritems,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Reverse iterate items: d.riteritems() [odict/codict only]',
     )
 
@@ -836,7 +928,7 @@ def run():
         'rkeys',
         setup_populated,
         test_rkeys,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Get reverse keys list: d.rkeys() [odict/codict only]',
     )
 
@@ -844,7 +936,7 @@ def run():
         'rvalues',
         setup_populated,
         test_rvalues,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Get reverse values list: d.rvalues() [odict/codict only]',
     )
 
@@ -852,7 +944,7 @@ def run():
         'ritems',
         setup_populated,
         test_ritems,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Get reverse items list: d.ritems() [odict/codict only]',
     )
 
@@ -909,7 +1001,7 @@ def run():
         'sort',
         setup_populated,
         test_sort,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Sort by keys: d.sort() [odict/codict only]',
     )
 
@@ -917,7 +1009,7 @@ def run():
         'alter_key',
         setup_populated,
         test_alter_key,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Rename key: d.alter_key(old, new) [odict/codict only]',
     )
 
@@ -925,7 +1017,7 @@ def run():
         'swap',
         setup_populated,
         test_swap,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Swap two keys: d.swap(a, b) [odict/codict only]',
     )
 
@@ -933,7 +1025,7 @@ def run():
         'insertbefore',
         setup_populated,
         test_insertbefore,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Insert before key: d.insertbefore(ref, key, val) [odict/codict only]',
     )
 
@@ -941,7 +1033,7 @@ def run():
         'insertafter',
         setup_populated,
         test_insertafter,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Insert after key: d.insertafter(ref, key, val) [odict/codict only]',
     )
 
@@ -949,7 +1041,7 @@ def run():
         'insertfirst',
         setup_populated,
         test_insertfirst,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Insert at start: d.insertfirst(key, val) [odict/codict only]',
     )
 
@@ -957,7 +1049,7 @@ def run():
         'insertlast',
         setup_populated,
         test_insertlast,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Insert at end: d.insertlast(key, val) [odict/codict only]',
     )
 
@@ -965,7 +1057,7 @@ def run():
         'movebefore',
         setup_populated,
         test_movebefore,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Move key before ref: d.movebefore(ref, key) [odict/codict only]',
     )
 
@@ -973,7 +1065,7 @@ def run():
         'moveafter',
         setup_populated,
         test_moveafter,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Move key after ref: d.moveafter(ref, key) [odict/codict only]',
     )
 
@@ -981,7 +1073,7 @@ def run():
         'movefirst',
         setup_populated,
         test_movefirst,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Move key to start: d.movefirst(key) [odict/codict only]',
     )
 
@@ -989,7 +1081,7 @@ def run():
         'movelast',
         setup_populated,
         test_movelast,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Move key to end: d.movelast(key) [odict/codict only]',
     )
 
@@ -997,7 +1089,7 @@ def run():
         'as_dict',
         setup_populated,
         test_as_dict,
-        iterations=MACRO_ITERATIONS,
+        iterations=runner.macro_iterations,
         description='Convert to dict: d.as_dict() [odict/codict only]',
     )
 
@@ -1022,39 +1114,56 @@ def run():
     print('BENCHMARK SUMMARY')
     print('=' * 110)
 
-    # Calculate overall statistics
-    if HAS_CODICT and runner.results:
-        codict_wins = 0
-        codict_losses = 0
-        codict_speedups = []
+    # Calculate overall statistics for all implementations
+    if runner.results and len(runner.implementations) > 1:
+        impl_stats = {
+            impl: {'wins': 0, 'total': 0, 'avg_time': []}
+            for impl in runner.implementations
+        }
 
         for method_name, results in runner.results.items():
-            for size in SIZES:
-                odict_data = results.get(('odict', size))
-                codict_data = results.get(('codict', size))
+            for size in runner.sizes:
+                # Find fastest implementation for this method/size combo
+                fastest_impl = None
+                fastest_time = float('inf')
+                available_impls = []
 
-                if odict_data and codict_data:
-                    odict_time = odict_data['time_ms']
-                    codict_time = codict_data['time_ms']
+                for impl in runner.implementations:
+                    if (impl, size) in results:
+                        time_ms = results[(impl, size)]['time_ms']
+                        available_impls.append((impl, time_ms))
+                        if time_ms < fastest_time:
+                            fastest_time = time_ms
+                            fastest_impl = impl
 
-                    if odict_time > 0:
-                        speedup = (odict_time - codict_time) / odict_time * 100
-                        codict_speedups.append(speedup)
+                # Track wins and times
+                for impl, time_ms in available_impls:
+                    impl_stats[impl]['total'] += 1
+                    impl_stats[impl]['avg_time'].append(time_ms)
+                    if impl == fastest_impl:
+                        impl_stats[impl]['wins'] += 1
 
-                        if codict_time < odict_time:
-                            codict_wins += 1
-                        else:
-                            codict_losses += 1
+        print('\nOverall Performance Summary:')
+        print(
+            f'{"Implementation":<15} | {"Wins":<8} | {"Win Rate":<10} | {"Avg Time":<12}'
+        )
+        print('-' * 60)
 
-        if codict_speedups:
-            avg_speedup = sum(codict_speedups) / len(codict_speedups)
-            print(f'\nCodict vs Odict Performance:')
-            print(f'  Methods tested: {len(codict_speedups)}')
-            print(f'  Codict faster: {codict_wins} times')
-            print(f'  Codict slower: {codict_losses} times')
-            print(f'  Average speedup: {avg_speedup:+.1f}%')
-            print(f'  Best speedup: {max(codict_speedups):+.1f}%')
-            print(f'  Worst speedup: {min(codict_speedups):+.1f}%')
+        for impl in ['dict', 'OrderedDict', 'odict', 'codict']:
+            if impl not in impl_stats or impl_stats[impl]['total'] == 0:
+                continue
+            stats = impl_stats[impl]
+            win_rate = (
+                (stats['wins'] / stats['total'] * 100) if stats['total'] > 0 else 0
+            )
+            avg_time = (
+                sum(stats['avg_time']) / len(stats['avg_time'])
+                if stats['avg_time']
+                else 0
+            )
+            print(
+                f'{impl:<15} | {stats["wins"]:<8} | {win_rate:>7.1f}% | {avg_time:>10.3f}ms'
+            )
 
     print('\n' + '=' * 110)
     print('BENCHMARK COMPLETE')
@@ -1062,8 +1171,269 @@ def run():
     print(
         '\nTo run individual benchmarks, import this module and use BenchmarkRunner directly.'
     )
-    print('For detailed analysis, see PERFORMANCE_ANALYSIS.md')
+
+
+def run_micro(config=None):
+    """Run micro-benchmarks focused on codict optimization analysis.
+
+    Args:
+        config: Configuration dict (or None for defaults)
+    """
+    if config is None:
+        config = {}
+
+    # Use higher iteration counts for micro-benchmarks
+    if 'micro_iterations' not in config:
+        config['micro_iterations'] = 100000
+    if 'sizes' not in config:
+        config['sizes'] = [1000]  # Single size for focused analysis
+    if 'implementations' not in config and HAS_CODICT:
+        config['implementations'] = ['codict']  # Focus on codict
+
+    runner = BenchmarkRunner(config)
+
+    print('\n' + '=' * 110)
+    print('ODICT MICRO-BENCHMARK SUITE - CPDEF OPTIMIZATION ANALYSIS')
+    print('=' * 110)
+    print(f'\nFocused on: {", ".join(runner.implementations.keys())}')
+    print(f'Test size: {runner.sizes[0]:,} objects')
+    print(f'Iterations: {runner.micro_iterations:,}')
+
+    print('\n1. ITEM ACCESS OPERATIONS (most critical)')
+    print('-' * 110)
+
+    runner.benchmark_and_print(
+        '__getitem__',
+        setup_populated,
+        test_getitem,
+        description='Direct item access: d["key"]',
+    )
+
+    runner.benchmark_and_print(
+        'get', setup_populated, test_get, description='Safe get: d.get("key")'
+    )
+
+    runner.benchmark_and_print(
+        '__contains__',
+        setup_populated,
+        test_contains,
+        description='Membership test: "key" in d',
+    )
+
+    runner.benchmark_and_print(
+        'has_key', setup_populated, test_has_key, description='has_key() method'
+    )
+
+    print('\n2. MODIFICATION OPERATIONS')
+    print('-' * 110)
+
+    runner.benchmark_and_print(
+        '__setitem__',
+        setup_populated,
+        test_setitem,
+        description='Item assignment: d["key"] = value',
+    )
+
+    runner.benchmark_and_print(
+        '__delitem__',
+        setup_populated,
+        test_delitem,
+        iterations=runner.macro_iterations,
+        description='Item deletion: del d["key"]',
+    )
+
+    print('\n3. COLLECTION OPERATIONS')
+    print('-' * 110)
+
+    runner.benchmark_and_print(
+        '__len__', setup_populated, test_len, description='Length: len(d)'
+    )
+
+    runner.benchmark_and_print(
+        'keys',
+        setup_populated,
+        test_keys,
+        iterations=runner.macro_iterations,
+        description='Get keys: d.keys()',
+    )
+
+    runner.benchmark_and_print(
+        'values',
+        setup_populated,
+        test_values,
+        iterations=runner.macro_iterations,
+        description='Get values: d.values()',
+    )
+
+    runner.benchmark_and_print(
+        'items',
+        setup_populated,
+        test_items,
+        iterations=runner.macro_iterations,
+        description='Get items: d.items()',
+    )
+
+    print('\n4. SPECIALIZED OPERATIONS')
+    print('-' * 110)
+
+    runner.benchmark_and_print(
+        'firstkey',
+        setup_populated,
+        test_firstkey,
+        description='Get first key: d.firstkey()',
+    )
+
+    runner.benchmark_and_print(
+        'lastkey',
+        setup_populated,
+        test_lastkey,
+        description='Get last key: d.lastkey()',
+    )
+
+    runner.benchmark_and_print(
+        'first_key',
+        setup_populated,
+        test_first_key_property,
+        description='First key property: d.first_key',
+    )
+
+    runner.benchmark_and_print(
+        'last_key',
+        setup_populated,
+        test_last_key_property,
+        description='Last key property: d.last_key',
+    )
+
+    print('\n5. NAVIGATION OPERATIONS')
+    print('-' * 110)
+
+    runner.benchmark_and_print(
+        'next_key',
+        setup_populated,
+        test_next_key,
+        iterations=runner.macro_iterations,
+        description='Next key: d.next_key(key)',
+    )
+
+    runner.benchmark_and_print(
+        'prev_key',
+        setup_populated,
+        test_prev_key,
+        iterations=runner.macro_iterations,
+        description='Previous key: d.prev_key(key)',
+    )
+
+    print('\n' + '=' * 110)
+    print('MICRO-BENCHMARK COMPLETE')
+    print('=' * 110)
+
+
+def main():
+    """Main entry point with argument parsing."""
+    parser = argparse.ArgumentParser(
+        description='Benchmark suite for odict implementations',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Run comprehensive benchmarks with defaults
+  python -m odict.bench
+
+  # Run with custom sizes and iterations
+  python -m odict.bench --sizes 1000,10000 --micro-iterations 50000
+
+  # Compare specific implementations
+  python -m odict.bench --implementations dict,odict,codict
+
+  # Use dict as baseline instead of fastest
+  python -m odict.bench --baseline dict
+
+  # Run micro-benchmarks for cpdef optimization analysis
+  python -m odict.bench --mode micro
+
+  # Run micro-benchmarks comparing odict and codict
+  python -m odict.bench --mode micro --implementations odict,codict
+        """,
+    )
+
+    parser.add_argument(
+        '--mode',
+        choices=['comprehensive', 'micro'],
+        default='comprehensive',
+        help='Benchmark mode: comprehensive (all methods) or micro (focused cpdef analysis)',
+    )
+
+    parser.add_argument(
+        '--sizes',
+        type=str,
+        default=None,
+        help=f'Comma-separated list of test sizes (default: {",".join(map(str, DEFAULT_SIZES))})',
+    )
+
+    parser.add_argument(
+        '--micro-iterations',
+        type=int,
+        default=None,
+        help=f'Number of iterations for fast operations (default: {DEFAULT_MICRO_ITERATIONS})',
+    )
+
+    parser.add_argument(
+        '--macro-iterations',
+        type=int,
+        default=None,
+        help=f'Number of iterations for slow operations (default: {DEFAULT_MACRO_ITERATIONS})',
+    )
+
+    parser.add_argument(
+        '--warmup-iterations',
+        type=int,
+        default=None,
+        help=f'Number of warmup iterations (default: {DEFAULT_WARMUP_ITERATIONS})',
+    )
+
+    parser.add_argument(
+        '--baseline',
+        choices=['fastest', 'dict', 'OrderedDict', 'odict', 'codict', 'none'],
+        default='fastest',
+        help='Baseline for comparison: fastest (auto-select), specific impl, or none (no comparison)',
+    )
+
+    parser.add_argument(
+        '--implementations',
+        type=str,
+        default=None,
+        help='Comma-separated list of implementations to test (default: all available)',
+    )
+
+    args = parser.parse_args()
+
+    # Build configuration from arguments
+    config = {}
+
+    if args.sizes:
+        config['sizes'] = [int(s.strip()) for s in args.sizes.split(',')]
+
+    if args.micro_iterations:
+        config['micro_iterations'] = args.micro_iterations
+
+    if args.macro_iterations:
+        config['macro_iterations'] = args.macro_iterations
+
+    if args.warmup_iterations:
+        config['warmup_iterations'] = args.warmup_iterations
+
+    config['baseline'] = args.baseline
+
+    if args.implementations:
+        config['implementations'] = [
+            impl.strip() for impl in args.implementations.split(',')
+        ]
+
+    # Run appropriate benchmark mode
+    if args.mode == 'micro':
+        run_micro(config)
+    else:
+        run_comprehensive(config)
 
 
 if __name__ == '__main__':
-    run()
+    main()
