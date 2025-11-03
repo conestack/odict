@@ -165,7 +165,8 @@ class _base_odict:
         return key in self
 
     def __len__(self):
-        return len(self.keys())
+        dict_ = self._dict_cls()
+        return dict_.__len__(self)
 
     def __str__(self):
         pairs = ('%r: %r' % (k, v) for k, v in self.items())
