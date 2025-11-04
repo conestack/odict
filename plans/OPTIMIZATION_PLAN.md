@@ -465,3 +465,175 @@ diff before.txt after.txt
    - Always uses `_dict_cls()` not hardcoded `dict`
    - Compatible with custom implementations (PersistentDict, etc.)
    - Follows existing codebase patterns
+
+---
+
+## Phase 2 Experimental Results (2025-01-04)
+
+### Implementation Status: ✅ Phase 1 COMPLETED | ⚠️ Phase 2 NOT RECOMMENDED
+
+**Phase 1 (`__len__()` fix)**: Successfully implemented and **~1,416x faster** at 10,000 objects!
+- Before: 12,540ms → After: 8.859ms
+- All tests pass ✅
+- **Status: MERGED** ✅
+
+**Phase 2 (odict optimizations)**: Tested but **NOT RECOMMENDED** due to compatibility concerns and mixed results.
+
+---
+
+### Tested Optimizations
+
+Six methods were tested with various optimization approaches:
+
+#### 1. `keys()` - List Comprehension ❌ NOT RECOMMENDED
+**Tested code**:
+```python
+def keys(self):
+    # List comprehension from __iter__
+    return [k for k in self]
+```
+
+**Results**: ~4% SLOWER (1,432ms → 1,489ms)
+**Reason**: In Python 3.13+, `list(generator)` is equally fast or faster
+
+---
+
+#### 2. `values()` - List Comprehension ❌ NOT RECOMMENDED
+**Tested code**:
+```python
+def values(self):
+    dict_ = self._dict_cls()
+    return [dict_.__getitem__(self, k)[1] for k in self]
+```
+
+**Results**: ~26% SLOWER (1,512ms → 1,775ms)
+**Reason**: Additional dict lookups not compensated by list comprehension benefits
+
+---
+
+#### 3. `items()` - List Comprehension ✅ POTENTIAL 2.7x SPEEDUP (Compatibility Issue)
+**Tested code**:
+```python
+def items(self):
+    dict_ = self._dict_cls()
+    return [(k, dict_.__getitem__(self, k)[1]) for k in self]
+```
+
+**Results**: **2.7x FASTER** (5,718ms → 2,120ms) 🎉
+**Why it works**: Eliminates generator overhead + reduces function call overhead
+
+**⚠️ NOT MERGED**: May break packages depending on current generator-based behavior
+
+**Potential compatibility issues**:
+- Changes iteration mechanics
+- May affect code that relies on specific lazy evaluation patterns
+- Downstream packages may depend on current implementation details
+
+---
+
+#### 4. `rkeys()` - List Comprehension ❌ NOT RECOMMENDED
+**Tested code**:
+```python
+def rkeys(self):
+    return [k for k in self.riterkeys()]
+```
+
+**Results**: ~same performance
+**Reason**: No measurable benefit
+
+---
+
+#### 5. `rvalues()` - Optimized Loop ❌ NOT RECOMMENDED
+**Tested code**:
+```python
+def rvalues(self):
+    dict_ = self._dict_cls()
+    curr_key = dict_.__getattribute__(self, 'lt')
+    result = []
+    while curr_key != _nil:
+        entry = dict_.__getitem__(self, curr_key)
+        result.append(entry[1])
+        curr_key = entry[0]
+    return result
+```
+
+**Results**: ~same performance
+**Reason**: No measurable benefit over generator approach
+
+---
+
+#### 6. `ritems()` - Optimized Loop ✅ POTENTIAL 1.6x SPEEDUP (Compatibility Issue)
+**Tested code**:
+```python
+def ritems(self):
+    dict_ = self._dict_cls()
+    curr_key = dict_.__getattribute__(self, 'lt')
+    result = []
+    while curr_key != _nil:
+        entry = dict_.__getitem__(self, curr_key)
+        result.append((curr_key, entry[1]))
+        curr_key = entry[0]
+    return result
+```
+
+**Results**: **1.6x FASTER** (3,088ms → 1,952ms) 🎉
+**Why it works**: Eliminates generator overhead
+
+**⚠️ NOT MERGED**: May break packages depending on current generator-based behavior
+
+**Potential compatibility issues**:
+- Changes iteration mechanics
+- May affect code that relies on specific lazy evaluation patterns
+- Downstream packages may depend on current implementation details
+
+---
+
+### Key Findings
+
+1. **List comprehensions aren't always faster in Python 3.13+**
+   - Simple `list(generator)` is well-optimized in modern Python
+   - Only optimizations that reduce indirection show benefits
+
+2. **Significant wins exist but have compatibility concerns**
+   - `items()`: 2.7x faster, but may break dependent packages
+   - `ritems()`: 1.6x faster, but may break dependent packages
+
+3. **Compatibility is critical**
+   - Many packages in the Conestack ecosystem depend on odict
+   - Changing implementation details (even with same API) risks breaking code
+   - Generator-based vs list-based implementation may have subtle behavioral differences
+
+---
+
+### Recommendation
+
+**For odict (Pure Python)**:
+- ✅ Keep Phase 1 (`__len__()` fix) - clear win, no compatibility issues
+- ❌ Do NOT implement Phase 2 optimizations due to compatibility concerns
+- 🔄 Consider as **future enhancement** only if:
+  - Comprehensive testing across all dependent packages
+  - Major version bump (e.g., 3.0.0)
+  - Explicit breaking change announcement
+
+**For codict (Cython)**:
+- ✅ Proceed with Phase 3 Cython optimizations
+- Cython implementation can have different internals while maintaining same API
+- Potential for 5-14x speedups as originally planned
+
+---
+
+### If Compatibility Concerns Are Resolved
+
+If future testing confirms no breaking changes in dependent packages, the following optimizations show clear benefits:
+
+**Priority 1**: `items()` optimization
+- File: `src/odict/odict.py:235`
+- Expected: 2.7x faster (5,718ms → 2,120ms)
+- Code: Use list comprehension with direct dict access (see above)
+
+**Priority 2**: `ritems()` optimization
+- File: `src/odict/odict.py:331`
+- Expected: 1.6x faster (3,088ms → 1,952ms)
+- Code: Use optimized while loop (see above)
+
+**Do NOT implement**: `keys()`, `values()`, `rkeys()`, `rvalues()` - no measurable benefit or performance regression
