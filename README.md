@@ -8,8 +8,7 @@
 
 ## Features
 
-- **Pure Python implementation** (`odict`) with optional **Cython-optimized version** (`codict`)
-- **Automatic drop-in replacement**: When Cython extension is compiled, `codict` is used transparently
+- **Pure Python implementation**: No compilation required, works everywhere
 - **Flexible base class**: Create custom ordered dicts for special use cases (e.g., ZODB persistence)
 - **Extended API**: Additional methods for moving, swapping, and reordering items
 - **100% test coverage**
@@ -20,7 +19,7 @@
 pip install odict
 ```
 
-The package will automatically use the Cython-optimized `codict` implementation if the extension was compiled during installation. Otherwise, it gracefully falls back to the pure Python `odict` implementation.
+Pure Python implementation - no C compiler required.
 
 ## Quick Start
 
@@ -67,23 +66,7 @@ odict uses a **double-linked list** embedded within dictionary values:
 
 This design allows O(1) ordering operations while maintaining dict-like O(1) lookups.
 
-### Cython Optimization (codict)
-
-When the Cython extension is available, `from odict import odict` automatically imports the optimized `codict` implementation. The fallback to pure Python `odict` is completely transparent.
-
-**Performance characteristics:**
-- `codict` is competitive with `odict` for basic operations (get/set/delete)
-- `codict` is slightly faster for move operations (movefirst, movelast, etc.)
-- `codict` may be slower for bulk operations (values(), items(), copy())
-
 See the [benchmarking documentation](docs/source/technical/benchmarking.md) for detailed performance comparisons.
-
-**To check which implementation is active:**
-
-```python
-from odict import odict
-print(odict.__module__)  # 'odict.codict' or 'odict.odict'
-```
 
 ## Custom Ordered Dictionary Implementations
 
@@ -143,7 +126,6 @@ When this package was created, `collections.OrderedDict` didn't exist yet. Even 
 1. **Replacing preserves position**: Unlike `OrderedDict`, updating an existing key doesn't move it
 2. **Flexible base class**: Avoid instance layout conflicts by using `_odict` abstract base
 3. **Extended API**: Move, swap, and reorder operations not available in `OrderedDict`
-4. **Transparent optimization**: Automatic Cython acceleration without code changes
 
 ## Development
 

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-cython"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -32,16 +32,6 @@ Homepage = "https://github.com/conestack/odict"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/odict"]
-
-[tool.hatch.build.targets.wheel.hooks.cython]
-dependencies = ["hatch-cython"]
-
-[tool.hatch.build.targets.wheel.hooks.cython.options]
-directives = { language_level = 3, embedsignature = true }
-compile_py = false
-
-[tool.hatch.build.targets.wheel.hooks.cython.files]
-targets = ["*.pyx"]
 
 [tool.zest-releaser]
 create-wheel = true

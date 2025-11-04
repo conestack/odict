@@ -7,13 +7,8 @@ import pytest
 def test_abstract_superclass_no_dict_impl(AbstractODict, ODict):
     """Abstract superclass without _dict_cls implementation raises error."""
     # _odict has backward compat wrapper that returns None -> TypeError
-    # _codict has no _dict_cls -> NotImplementedError from base class
-    if AbstractODict.__name__ == '_odict':
-        with pytest.raises(TypeError, match='No dict implementation class provided'):
-            AbstractODict()
-    else:  # _codict
-        with pytest.raises(NotImplementedError, match='Subclasses must implement _dict_cls'):
-            AbstractODict()
+    with pytest.raises(TypeError, match='No dict implementation class provided'):
+        AbstractODict()
 
     o = ODict()
     assert o._dict_cls() == dict

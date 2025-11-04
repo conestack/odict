@@ -1,9 +1,8 @@
 # Python Software Foundation License
 """Pure Python ordered dictionary implementation.
 
-This module provides the common base class and pure Python implementation
-for ordered dictionaries. The Cython-optimized version (codict) also uses
-this base class.
+This module provides an ordered dictionary implementation that maintains
+insertion order while providing O(1) lookups, insertions, and deletions.
 """
 
 import copy

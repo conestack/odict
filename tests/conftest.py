@@ -3,7 +3,6 @@
 
 import pytest
 from odict.odict import odict, _odict, _nil
-from odict.codict import codict, _codict, Entry
 
 
 @pytest.fixture(params=[
@@ -11,13 +10,9 @@ from odict.codict import codict, _codict, Entry
         (odict, _odict, _nil),
         id='odict'
     ),
-    pytest.param(
-        (codict, _codict, _nil),
-        id='codict'
-    ),
 ])
 def impl(request):
-    """Parametrize tests with both odict and codict implementations.
+    """Provides the odict implementation for tests.
 
     Returns:
         tuple: (concrete_class, abstract_class, _nil_singleton)
@@ -27,13 +22,13 @@ def impl(request):
 
 @pytest.fixture
 def ODict(impl):
-    """Concrete ordered dict class (odict or codict)."""
+    """Concrete ordered dict class (odict)."""
     return impl[0]
 
 
 @pytest.fixture
 def AbstractODict(impl):
-    """Abstract ordered dict class (_odict or _codict)."""
+    """Abstract ordered dict class (_odict)."""
     return impl[1]
 
 

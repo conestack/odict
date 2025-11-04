@@ -1,12 +1,11 @@
 # Python Software Foundation License
 """
-Comprehensive benchmark suite for odict implementations.
+Comprehensive benchmark suite for odict implementation.
 
 Compares performance and memory usage of all public API methods across:
 - dict (Python built-in)
 - OrderedDict (collections.OrderedDict)
 - odict (Python implementation from this package)
-- codict (Cython-optimized implementation)
 """
 
 import argparse
@@ -17,13 +16,6 @@ import tracemalloc
 from collections import OrderedDict
 
 from .odict import odict
-
-try:
-    from .codict import codict
-
-    HAS_CODICT = True
-except ImportError:
-    HAS_CODICT = False
 
 
 # Default Configuration
@@ -65,8 +57,6 @@ class BenchmarkRunner:
             'OrderedDict': OrderedDict,
             'odict': odict,
         }
-        if HAS_CODICT:
-            all_impls['codict'] = codict
 
         # Filter implementations if requested
         requested_impls = config.get('implementations')
@@ -231,7 +221,7 @@ class BenchmarkRunner:
             print('-' * 110)
 
             # Print results for each implementation
-            impl_order = ['dict', 'OrderedDict', 'odict', 'codict']
+            impl_order = ['dict', 'OrderedDict', 'odict']
             # Filter to only implementations we're testing and that exist
             impl_order = [i for i in impl_order if i in self.implementations]
 
@@ -299,12 +289,12 @@ class BenchmarkRunner:
 
 
 def setup_populated(impl_class, size):
-    """Create a populated dict/odict/codict with 'size' items."""
+    """Create a populated dict/odict with 'size' items."""
     return impl_class([(str(i), i * 2) for i in range(size)])
 
 
 def setup_empty(impl_class, size):
-    """Create an empty dict/odict/codict."""
+    """Create an empty dict/odict."""
     return impl_class()
 
 
@@ -368,7 +358,7 @@ def test_get(obj, size, iterations):
 
 
 def test_has_key(obj, size, iterations):
-    """Test has_key(key) - odict/codict only"""
+    """Test has_key(key) - odict only"""
     keys = [str(i) for i in range(min(size, 100))]
     for _ in range(iterations):
         for key in keys:
@@ -469,61 +459,61 @@ def test_reversed(obj, size, iterations):
 
 
 def test_iterkeys(obj, size, iterations):
-    """Test iterkeys() - odict/codict only"""
+    """Test iterkeys() - odict only"""
     for _ in range(iterations):
         for key in obj.iterkeys():
             pass
 
 
 def test_itervalues(obj, size, iterations):
-    """Test itervalues() - odict/codict only"""
+    """Test itervalues() - odict only"""
     for _ in range(iterations):
         for value in obj.itervalues():
             pass
 
 
 def test_iteritems(obj, size, iterations):
-    """Test iteritems() - odict/codict only"""
+    """Test iteritems() - odict only"""
     for _ in range(iterations):
         for key, value in obj.iteritems():
             pass
 
 
 def test_riterkeys(obj, size, iterations):
-    """Test riterkeys() - odict/codict only"""
+    """Test riterkeys() - odict only"""
     for _ in range(iterations):
         for key in obj.riterkeys():
             pass
 
 
 def test_ritervalues(obj, size, iterations):
-    """Test ritervalues() - odict/codict only"""
+    """Test ritervalues() - odict only"""
     for _ in range(iterations):
         for value in obj.ritervalues():
             pass
 
 
 def test_riteritems(obj, size, iterations):
-    """Test riteritems() - odict/codict only"""
+    """Test riteritems() - odict only"""
     for _ in range(iterations):
         for key, value in obj.riteritems():
             pass
 
 
 def test_rkeys(obj, size, iterations):
-    """Test rkeys() - odict/codict only"""
+    """Test rkeys() - odict only"""
     for _ in range(iterations):
         _ = obj.rkeys()
 
 
 def test_rvalues(obj, size, iterations):
-    """Test rvalues() - odict/codict only"""
+    """Test rvalues() - odict only"""
     for _ in range(iterations):
         _ = obj.rvalues()
 
 
 def test_ritems(obj, size, iterations):
-    """Test ritems() - odict/codict only"""
+    """Test ritems() - odict only"""
     for _ in range(iterations):
         _ = obj.ritems()
 
@@ -534,31 +524,31 @@ def test_ritems(obj, size, iterations):
 
 
 def test_firstkey(obj, size, iterations):
-    """Test firstkey() - odict/codict only"""
+    """Test firstkey() - odict only"""
     for _ in range(iterations):
         _ = obj.firstkey()
 
 
 def test_lastkey(obj, size, iterations):
-    """Test lastkey() - odict/codict only"""
+    """Test lastkey() - odict only"""
     for _ in range(iterations):
         _ = obj.lastkey()
 
 
 def test_first_key_property(obj, size, iterations):
-    """Test first_key property - odict/codict only"""
+    """Test first_key property - odict only"""
     for _ in range(iterations):
         _ = obj.first_key
 
 
 def test_last_key_property(obj, size, iterations):
-    """Test last_key property - odict/codict only"""
+    """Test last_key property - odict only"""
     for _ in range(iterations):
         _ = obj.last_key
 
 
 def test_next_key(obj, size, iterations):
-    """Test next_key(key) - odict/codict only"""
+    """Test next_key(key) - odict only"""
     key = str(size // 2) if size > 0 else '0'
     for _ in range(iterations):
         try:
@@ -568,7 +558,7 @@ def test_next_key(obj, size, iterations):
 
 
 def test_prev_key(obj, size, iterations):
-    """Test prev_key(key) - odict/codict only"""
+    """Test prev_key(key) - odict only"""
     key = str(size // 2) if size > 0 else '0'
     for _ in range(iterations):
         try:
@@ -578,7 +568,7 @@ def test_prev_key(obj, size, iterations):
 
 
 def test_sort(obj, size, iterations):
-    """Test sort() - odict/codict only"""
+    """Test sort() - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -586,7 +576,7 @@ def test_sort(obj, size, iterations):
 
 
 def test_alter_key(obj, size, iterations):
-    """Test alter_key(old, new) - odict/codict only"""
+    """Test alter_key(old, new) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -595,7 +585,7 @@ def test_alter_key(obj, size, iterations):
 
 
 def test_swap(obj, size, iterations):
-    """Test swap(a, b) - odict/codict only"""
+    """Test swap(a, b) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -604,7 +594,7 @@ def test_swap(obj, size, iterations):
 
 
 def test_insertbefore(obj, size, iterations):
-    """Test insertbefore(ref, key, value) - odict/codict only"""
+    """Test insertbefore(ref, key, value) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -613,7 +603,7 @@ def test_insertbefore(obj, size, iterations):
 
 
 def test_insertafter(obj, size, iterations):
-    """Test insertafter(ref, key, value) - odict/codict only"""
+    """Test insertafter(ref, key, value) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -622,7 +612,7 @@ def test_insertafter(obj, size, iterations):
 
 
 def test_insertfirst(obj, size, iterations):
-    """Test insertfirst(key, value) - odict/codict only"""
+    """Test insertfirst(key, value) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -630,7 +620,7 @@ def test_insertfirst(obj, size, iterations):
 
 
 def test_insertlast(obj, size, iterations):
-    """Test insertlast(key, value) - odict/codict only"""
+    """Test insertlast(key, value) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -638,7 +628,7 @@ def test_insertlast(obj, size, iterations):
 
 
 def test_movebefore(obj, size, iterations):
-    """Test movebefore(ref, key) - odict/codict only"""
+    """Test movebefore(ref, key) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -647,7 +637,7 @@ def test_movebefore(obj, size, iterations):
 
 
 def test_moveafter(obj, size, iterations):
-    """Test moveafter(ref, key) - odict/codict only"""
+    """Test moveafter(ref, key) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -656,7 +646,7 @@ def test_moveafter(obj, size, iterations):
 
 
 def test_movefirst(obj, size, iterations):
-    """Test movefirst(key) - odict/codict only"""
+    """Test movefirst(key) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -665,7 +655,7 @@ def test_movefirst(obj, size, iterations):
 
 
 def test_movelast(obj, size, iterations):
-    """Test movelast(key) - odict/codict only"""
+    """Test movelast(key) - odict only"""
     impl_class = type(obj)
     for _ in range(iterations):
         test_obj = impl_class([(str(i), i) for i in range(min(size, 100))])
@@ -674,19 +664,19 @@ def test_movelast(obj, size, iterations):
 
 
 def test_as_dict(obj, size, iterations):
-    """Test as_dict() - odict/codict only"""
+    """Test as_dict() - odict only"""
     for _ in range(iterations):
         _ = obj.as_dict()
 
 
 def test_lh_property(obj, size, iterations):
-    """Test lh property (list head) - odict/codict only"""
+    """Test lh property (list head) - odict only"""
     for _ in range(iterations):
         _ = obj.lh
 
 
 def test_lt_property(obj, size, iterations):
-    """Test lt property (list tail) - odict/codict only"""
+    """Test lt property (list tail) - odict only"""
     for _ in range(iterations):
         _ = obj.lt
 
@@ -771,7 +761,7 @@ def run_comprehensive(config=None):
         'has_key',
         setup_populated,
         test_has_key,
-        description='Check if key exists: d.has_key(key) [odict/codict only]',
+        description='Check if key exists: d.has_key(key) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -881,7 +871,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_iterkeys,
         iterations=runner.macro_iterations,
-        description='Iterate keys: for key in d.iterkeys() [odict/codict only]',
+        description='Iterate keys: for key in d.iterkeys() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -889,7 +879,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_itervalues,
         iterations=runner.macro_iterations,
-        description='Iterate values: for val in d.itervalues() [odict/codict only]',
+        description='Iterate values: for val in d.itervalues() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -897,7 +887,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_iteritems,
         iterations=runner.macro_iterations,
-        description='Iterate items: for k,v in d.iteritems() [odict/codict only]',
+        description='Iterate items: for k,v in d.iteritems() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -905,7 +895,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_riterkeys,
         iterations=runner.macro_iterations,
-        description='Reverse iterate keys: d.riterkeys() [odict/codict only]',
+        description='Reverse iterate keys: d.riterkeys() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -913,7 +903,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_ritervalues,
         iterations=runner.macro_iterations,
-        description='Reverse iterate values: d.ritervalues() [odict/codict only]',
+        description='Reverse iterate values: d.ritervalues() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -921,7 +911,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_riteritems,
         iterations=runner.macro_iterations,
-        description='Reverse iterate items: d.riteritems() [odict/codict only]',
+        description='Reverse iterate items: d.riteritems() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -929,7 +919,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_rkeys,
         iterations=runner.macro_iterations,
-        description='Get reverse keys list: d.rkeys() [odict/codict only]',
+        description='Get reverse keys list: d.rkeys() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -937,7 +927,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_rvalues,
         iterations=runner.macro_iterations,
-        description='Get reverse values list: d.rvalues() [odict/codict only]',
+        description='Get reverse values list: d.rvalues() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -945,7 +935,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_ritems,
         iterations=runner.macro_iterations,
-        description='Get reverse items list: d.ritems() [odict/codict only]',
+        description='Get reverse items list: d.ritems() [odict only]',
     )
 
     # ========================================================================
@@ -959,42 +949,42 @@ def run_comprehensive(config=None):
         'firstkey',
         setup_populated,
         test_firstkey,
-        description='Get first key: d.firstkey() [odict/codict only]',
+        description='Get first key: d.firstkey() [odict only]',
     )
 
     runner.benchmark_and_print(
         'lastkey',
         setup_populated,
         test_lastkey,
-        description='Get last key: d.lastkey() [odict/codict only]',
+        description='Get last key: d.lastkey() [odict only]',
     )
 
     runner.benchmark_and_print(
         'first_key',
         setup_populated,
         test_first_key_property,
-        description='Get first key property: d.first_key [odict/codict only]',
+        description='Get first key property: d.first_key [odict only]',
     )
 
     runner.benchmark_and_print(
         'last_key',
         setup_populated,
         test_last_key_property,
-        description='Get last key property: d.last_key [odict/codict only]',
+        description='Get last key property: d.last_key [odict only]',
     )
 
     runner.benchmark_and_print(
         'next_key',
         setup_populated,
         test_next_key,
-        description='Get next key: d.next_key(key) [odict/codict only]',
+        description='Get next key: d.next_key(key) [odict only]',
     )
 
     runner.benchmark_and_print(
         'prev_key',
         setup_populated,
         test_prev_key,
-        description='Get previous key: d.prev_key(key) [odict/codict only]',
+        description='Get previous key: d.prev_key(key) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1002,7 +992,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_sort,
         iterations=runner.macro_iterations,
-        description='Sort by keys: d.sort() [odict/codict only]',
+        description='Sort by keys: d.sort() [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1010,7 +1000,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_alter_key,
         iterations=runner.macro_iterations,
-        description='Rename key: d.alter_key(old, new) [odict/codict only]',
+        description='Rename key: d.alter_key(old, new) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1018,7 +1008,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_swap,
         iterations=runner.macro_iterations,
-        description='Swap two keys: d.swap(a, b) [odict/codict only]',
+        description='Swap two keys: d.swap(a, b) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1026,7 +1016,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_insertbefore,
         iterations=runner.macro_iterations,
-        description='Insert before key: d.insertbefore(ref, key, val) [odict/codict only]',
+        description='Insert before key: d.insertbefore(ref, key, val) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1034,7 +1024,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_insertafter,
         iterations=runner.macro_iterations,
-        description='Insert after key: d.insertafter(ref, key, val) [odict/codict only]',
+        description='Insert after key: d.insertafter(ref, key, val) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1042,7 +1032,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_insertfirst,
         iterations=runner.macro_iterations,
-        description='Insert at start: d.insertfirst(key, val) [odict/codict only]',
+        description='Insert at start: d.insertfirst(key, val) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1050,7 +1040,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_insertlast,
         iterations=runner.macro_iterations,
-        description='Insert at end: d.insertlast(key, val) [odict/codict only]',
+        description='Insert at end: d.insertlast(key, val) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1058,7 +1048,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_movebefore,
         iterations=runner.macro_iterations,
-        description='Move key before ref: d.movebefore(ref, key) [odict/codict only]',
+        description='Move key before ref: d.movebefore(ref, key) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1066,7 +1056,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_moveafter,
         iterations=runner.macro_iterations,
-        description='Move key after ref: d.moveafter(ref, key) [odict/codict only]',
+        description='Move key after ref: d.moveafter(ref, key) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1074,7 +1064,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_movefirst,
         iterations=runner.macro_iterations,
-        description='Move key to start: d.movefirst(key) [odict/codict only]',
+        description='Move key to start: d.movefirst(key) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1082,7 +1072,7 @@ def run_comprehensive(config=None):
         setup_populated,
         test_movelast,
         iterations=runner.macro_iterations,
-        description='Move key to end: d.movelast(key) [odict/codict only]',
+        description='Move key to end: d.movelast(key) [odict only]',
     )
 
     runner.benchmark_and_print(
@@ -1090,21 +1080,21 @@ def run_comprehensive(config=None):
         setup_populated,
         test_as_dict,
         iterations=runner.macro_iterations,
-        description='Convert to dict: d.as_dict() [odict/codict only]',
+        description='Convert to dict: d.as_dict() [odict only]',
     )
 
     runner.benchmark_and_print(
         'lh',
         setup_populated,
         test_lh_property,
-        description='Get list head: d.lh [odict/codict only]',
+        description='Get list head: d.lh [odict only]',
     )
 
     runner.benchmark_and_print(
         'lt',
         setup_populated,
         test_lt_property,
-        description='Get list tail: d.lt [odict/codict only]',
+        description='Get list tail: d.lt [odict only]',
     )
 
     # ========================================================================
@@ -1149,7 +1139,7 @@ def run_comprehensive(config=None):
         )
         print('-' * 60)
 
-        for impl in ['dict', 'OrderedDict', 'odict', 'codict']:
+        for impl in ['dict', 'OrderedDict', 'odict']:
             if impl not in impl_stats or impl_stats[impl]['total'] == 0:
                 continue
             stats = impl_stats[impl]
@@ -1174,7 +1164,7 @@ def run_comprehensive(config=None):
 
 
 def run_micro(config=None):
-    """Run micro-benchmarks focused on codict optimization analysis.
+    """Run micro-benchmarks with higher iteration counts for detailed performance analysis.
 
     Args:
         config: Configuration dict (or None for defaults)
@@ -1187,13 +1177,11 @@ def run_micro(config=None):
         config['micro_iterations'] = 100000
     if 'sizes' not in config:
         config['sizes'] = [1000]  # Single size for focused analysis
-    if 'implementations' not in config and HAS_CODICT:
-        config['implementations'] = ['codict']  # Focus on codict
 
     runner = BenchmarkRunner(config)
 
     print('\n' + '=' * 110)
-    print('ODICT MICRO-BENCHMARK SUITE - CPDEF OPTIMIZATION ANALYSIS')
+    print('ODICT MICRO-BENCHMARK SUITE')
     print('=' * 110)
     print(f'\nFocused on: {", ".join(runner.implementations.keys())}')
     print(f'Test size: {runner.sizes[0]:,} objects')
@@ -1342,16 +1330,16 @@ Examples:
   python -m odict.bench --sizes 1000,10000 --micro-iterations 50000
 
   # Compare specific implementations
-  python -m odict.bench --implementations dict,odict,codict
+  python -m odict.bench --implementations dict,odict
 
   # Use dict as baseline instead of fastest
   python -m odict.bench --baseline dict
 
-  # Run micro-benchmarks for cpdef optimization analysis
+  # Run micro-benchmarks with higher iteration counts
   python -m odict.bench --mode micro
 
-  # Run micro-benchmarks comparing odict and codict
-  python -m odict.bench --mode micro --implementations odict,codict
+  # Run micro-benchmarks for odict only
+  python -m odict.bench --mode micro --implementations odict
         """,
     )
 
@@ -1359,7 +1347,7 @@ Examples:
         '--mode',
         choices=['comprehensive', 'micro'],
         default='comprehensive',
-        help='Benchmark mode: comprehensive (all methods) or micro (focused cpdef analysis)',
+        help='Benchmark mode: comprehensive (all methods) or micro (higher iteration counts)',
     )
 
     parser.add_argument(
@@ -1392,7 +1380,7 @@ Examples:
 
     parser.add_argument(
         '--baseline',
-        choices=['fastest', 'dict', 'OrderedDict', 'odict', 'codict', 'none'],
+        choices=['fastest', 'dict', 'OrderedDict', 'odict', 'none'],
         default='fastest',
         help='Baseline for comparison: fastest (auto-select), specific impl, or none (no comparison)',
     )

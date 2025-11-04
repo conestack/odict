@@ -146,22 +146,3 @@ def test_pickle_operations_on_unpickled(ODict):
 
     # Reverse iteration
     assert unpickled.rkeys() == ['c', 'new', 'a', 'd']
-
-
-# Entry pickle test (codict-specific, but safe for both)
-
-def test_entry_pickle(impl):
-    """Test that Entry objects (codict) pickle correctly."""
-    _, _, _nil = impl
-
-    # Skip for odict since it doesn't have Entry
-    if impl[0].__name__ == 'odict':
-        pytest.skip('Entry is codict-specific')
-
-    from odict.codict import Entry
-    entry = Entry('prev', 'value', 'next')
-    pickled = pickle.dumps(entry)
-    unpickled = pickle.loads(pickled)
-    assert unpickled.prev_key == 'prev'
-    assert unpickled.value == 'value'
-    assert unpickled.next_key == 'next'

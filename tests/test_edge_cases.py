@@ -87,14 +87,7 @@ def test_casting_to_dict_python_version_dependent(ODict, nil):
         # (this was a known limitation)
         result = dict(o)
         # odict uses [prev, val, next] structure
-        # The exact structure depends on implementation (odict vs codict)
         assert isinstance(result, dict)
     else:  # pragma: no cover
-        # In Python >= 3.7, dict() cast works correctly for both
-        # odict and codict
-        if ODict.__name__ == 'codict':
-            # codict may have different behavior
-            assert dict(o.items()) == {1: 1}
-        else:
-            # odict works correctly in Python >= 3.7
-            assert dict(o) == {1: 1}
+        # In Python >= 3.7, dict() cast works correctly
+        assert dict(o) == {1: 1}

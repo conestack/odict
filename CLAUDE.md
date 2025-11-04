@@ -11,12 +11,11 @@ This is a **single package repository** (not part of the larger Conestack monore
 ```
 odict/
 ├── src/odict/
-│   ├── __init__.py       # Auto-selects codict or odict
+│   ├── __init__.py       # Main module exports
 │   ├── odict.py          # Pure Python implementation (_odict, odict)
-│   ├── codict.pyx        # Cython-optimized implementation (_codict, codict, Entry)
 │   └── bench.py          # Benchmarking suite with argparse
 ├── tests/
-│   └── test_*.py         # Parametrized test suite (odict + codict)
+│   └── test_*.py         # Test suite
 ├── docs/                 # Sphinx documentation
 ├── pyproject.toml        # Package configuration (hatchling)
 ├── mx.ini                # mxdev/mxmake configuration
@@ -85,16 +84,11 @@ See [README.md](README.md) for architecture overview and [docs/source/technical/
 1. **`_base_odict`** (abstract base class in `odict.py`)
    - Core ordered dict logic
    - Subclasses must implement `_dict_cls()` (returns dict class)
-   - Subclasses must implement `_entry_cls()` (returns list/Entry class for internal [prev, value, next] storage)
+   - Subclasses must implement `_entry_cls()` (returns list class for internal [prev, value, next] storage)
 
 2. **`odict`** (pure Python in `odict.py`)
    - Inherits from `_base_odict` and `dict`
    - Uses standard `dict` and `list`
-
-3. **`codict`** (Cython optimized in `codict.pyx`)
-   - Inherits from `_codict` and `dict`
-   - Uses Cython `Entry` cdef class for internal nodes
-   - Automatically selected in `__init__.py` if compiled
 
 ### Backward Compatibility
 
@@ -114,7 +108,6 @@ Uses **mxmake** with **mxdev**:
 ## Testing Notes
 
 - Tests use **pytest** with parametrized fixtures
-- Tests are parametrized to run against both `odict` and `codict` implementations
 - Fixtures in `tests/conftest.py` provide: `ODict`, `AbstractODict`, `nil`, `empty_od`, `sample_od`, `five_items_od`
 - Coverage target: **100%** of `src/odict` (excluding `bench.py`)
 - Test files: `tests/test_*.py`
