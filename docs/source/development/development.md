@@ -2,9 +2,9 @@
 
 ## What Worked Well
 
-### 1. Cython `cdef class` Approach
+### 1. `cdef class` Approach
 
-**Decision**: Use Cython extension types for Node class
+**Decision**: Use extension types for Node class
 
 **Benefits**:
 - Provides C-level performance
@@ -42,7 +42,7 @@ cdef class Node:
 
 ### 4. Comprehensive Test Mirroring
 
-**Approach**: Mirror all odict tests for codict
+**Approach**: Mirror all odict tests f
 
 **Benefits**:
 - Ensured 100% API compatibility
@@ -62,7 +62,7 @@ cdef class Node:
 
 ## Challenges Overcome
 
-### 1. Cython Syntax Constraints
+### 1. Syntax Constraints
 
 **Challenge**: Cannot use `cdef` in regular Python classes
 
@@ -107,9 +107,9 @@ AttributeError: module 'time' has no attribute 'clock'
 
 **Learning**: Stay current with Python deprecations
 
-### 4. Cython Module Import
+### 4. Module Import
 
-**Challenge**: `ModuleNotFoundError` for Cython during build
+**Challenge**: `ModuleNotFoundError` for during build
 
 **Root cause**: Build dependencies not installed in correct order
 
@@ -121,7 +121,7 @@ AttributeError: module 'time' has no attribute 'clock'
 
 ## Lessons Learned
 
-### 1. Cython Extension Types are Ideal for Data Structures
+### 1. Extension Types are Ideal for Data Structures
 
 **Why**:
 - Heavy attribute access patterns
@@ -255,7 +255,7 @@ Integrate with existing infrastructure (Makefile, mx.ini) rather than creating n
 ## Tools and Techniques
 
 ### Development Tools
-- Cython 3.0+ (language_level=3)
+- 3.0+ (language_level=3)
 - pytest for testing
 - tracemalloc for memory profiling
 - time.perf_counter() for timing

@@ -3,11 +3,11 @@
 ## Prerequisites
 
 - **Python 3.10 or later** (3.10-3.14 supported)
-- C compiler (gcc, clang, or MSVC) - **optional, only for codict**
-- Cython 3.0 or later - **optional, only for codict**
+- C compiler (gcc, clang, or MSVC) - **optional, only f**
+- 3.0 or later - **optional, only f**
 - make (for Makefile-based builds)
 
-**Note**: The Cython-optimized `codict` extension is optional. If not compiled, the package automatically falls back to the pure Python `odict` implementation.
+**Note**: The `odict` extension is optional. If not compiled, the package automatically falls back to the pure Python `odict` implementation.
 
 ## Quick Start
 
@@ -21,9 +21,9 @@ pip install odict
 python -c "from odict import odict; print('odict installed successfully')"
 ```
 
-### Installing with Cython Extension
+### Installing with Extension
 
-For the Cython-optimized `codict`:
+For the `odict`:
 
 ```bash
 # Clone or navigate to odict directory
@@ -77,7 +77,7 @@ python setup.py build_ext --inplace
 ### Option 3: Using pip (Development Install)
 
 ```bash
-# Install in development mode with Cython dependency
+# Install in development mode with dependency
 pip install -e .
 
 # Build the extension
@@ -88,7 +88,7 @@ python setup.py build_ext --inplace
 
 ### pyproject.toml
 
-The project uses `hatchling` as the build backend with Cython as a build dependency:
+The project uses `hatchling` as the build backend with as a build dependency:
 
 ```toml
 [build-system]
@@ -98,7 +98,7 @@ build-backend = "hatchling.build"
 
 ### setup.py
 
-Defines the Cython extension configuration:
+Defines the extension configuration:
 
 ```python
 from setuptools import Extension
@@ -119,14 +119,14 @@ setup(
 
 ### include.mk
 
-Custom Makefile targets for codict build:
+Custom Makefile targets f build:
 
 ```makefile
 CODICT_TARGET:=$(SENTINEL_FOLDER)/codict.sentinel
 
 $(CODICT_TARGET): $(PACKAGES_TARGET)
 ifeq ("$(BUILD_CODICT)", "true")
-    @echo "Building Cython codict extension"
+    @echo "Building codict extension"
     @$(MXENV_PYTHON) setup.py build_ext --inplace
     @touch $(CODICT_TARGET)
 endif
@@ -140,7 +140,7 @@ endif
 from odict.codict import codict
 import sys
 
-# Check if codict is the Cython version
+# Check if codict is the version
 print(f"codict module: {codict.__module__}")
 print(f"codict file: {sys.modules['odict.codict'].__file__}")
 
@@ -184,7 +184,7 @@ tests/test_odict.py ...................................   [35/35] ✓
 
 ## Troubleshooting
 
-### Cython Not Found
+### Not Found
 
 ```bash
 # Install Cython
@@ -212,7 +212,7 @@ xcode-select --install
 
 ### Build Fails with "language_level" Error
 
-This indicates an older Cython version. Upgrade:
+This indicates an older version. Upgrade:
 ```bash
 pip install --upgrade "cython>=3.0"
 ```
@@ -248,7 +248,7 @@ After successful build, you should see:
 
 ```
 src/odict/
-├── codict.pyx              # Source Cython file
+├── codict.pyx              # Source file
 ├── codict.c                # Generated C code (~1.4 MB)
 └── codict.*.so             # Compiled extension (~1.9 MB)
     # Filename varies by platform:
@@ -288,7 +288,7 @@ CFLAGS="-O3" python setup.py build_ext --inplace
 
 ### Disable codict Build
 
-If you only want Python odict without the Cython extension:
+If you only want Python odict without the extension:
 
 ```bash
 # Set BUILD_CODICT to false in Makefile or environment
@@ -297,12 +297,12 @@ BUILD_CODICT=false make install
 
 ### Performance Considerations
 
-Before building `codict`, be aware of its performance characteristics:
+Before building `odict`, be aware of its performance characteristics:
 
 - **✅ Faster**: Basic operations (get/set), move operations
 - **❌ Slower**: Bulk operations (values/items/copy), reverse iteration
 
-**Recommendation**: Use pure Python `odict` unless you've benchmarked your specific workload and confirmed `codict` is faster. See [Performance Analysis](../technical/performance.md) for details.
+**Recommendation**: Use pure Python `odict` unless you've benchmarked your specific workload and confirmed `odict` is faster. See [Performance Analysis](../technical/performance.md) for details.
 
 To explicitly use pure Python odict:
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Codict achieves **36% memory reduction** per node compared to Python odict through the use of C-optimized Cython extension types.
+Codict achieves **36% memory reduction** per node compared to Python odict through the use of C-optimized extension types.
 
 ## Node Memory Footprint
 
@@ -19,7 +19,7 @@ node = [prev_key, value, next_key]  # Python list object
 - List overhead (capacity, etc.): ~8 bytes
 - **Total: ~88 bytes per node**
 
-### Cython codict Node
+### codict Node
 
 **Structure**:
 ```cython
@@ -30,7 +30,7 @@ cdef class Node:
 ```
 
 **Memory breakdown**:
-- Cython extension object header: ~40 bytes
+- extension object header: ~40 bytes
 - 3 object references: 3 × 8 bytes = 24 bytes
 - **Total: ~56 bytes per node**
 
@@ -42,7 +42,7 @@ cdef class Node:
 
 ### Memory Savings by Scale
 
-| Scale | Python odict | Cython codict | Savings | Reduction |
+| Scale | Python odict | codict | Savings | Reduction |
 |-------|--------------|---------------|---------|-----------|
 | 1,000 | ~88 KB | ~56 KB | ~32 KB | 36% |
 | 10,000 | ~880 KB | ~560 KB | ~320 KB | 36% |
@@ -69,7 +69,7 @@ Assuming keys are short strings (~10 chars) and values are integers:
 - Values (ints): ~28 MB
 - **Total: ~134 MB**
 
-**Cython codict**:
+**codict**:
 - Nodes: ~56 MB ✅ (32 MB less)
 - Dict table: ~8 MB
 - Keys (strings): ~10 MB
@@ -89,7 +89,7 @@ Smaller node size means:
 
 ### 2. Better Memory Locality
 
-Cython Nodes are:
+Nodes are:
 - Allocated as single objects
 - More compact in memory
 - Better spatial locality

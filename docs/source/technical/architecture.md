@@ -2,11 +2,11 @@
 
 ## Overview
 
-Codict is a Cython-optimized implementation of ordered dictionaries that uses C extension types for improved performance and memory efficiency.
+Codict is a implementation of ordered dictionaries that uses C extension types for improved performance and memory efficiency.
 
 ## Core Components
 
-### Cython Entry Class
+### Entry Class
 
 The fundamental building block is a C extension type that replaces Python lists:
 
@@ -20,7 +20,7 @@ cdef class Entry:
 **Benefits over Python lists `[prev_key, value, next_key]`**:
 - **C-level attribute access**: Faster than Python list indexing
 - **Lower memory overhead**: Reduced memory per entry
-- **Type-safe operations**: Cython type checking at compile time
+- **Type-safe operations**: type checking at compile time
 - **Full pickle compatibility**: Custom `__reduce__` support
 
 **Note**: While Entry provides C-level attribute access, actual performance varies by operation. See [Performance Analysis](performance.md) for detailed benchmarks.
@@ -41,7 +41,7 @@ codict (_codict + dict)  [multiple inheritance]
    - Reason: Enables multiple inheritance with built-in `dict`
    - Trade-off: Cannot use `cpdef` methods (see [Optimizations](../development/optimizations.md))
 
-2. **`codict` inherits from both `_codict` and `dict`**
+2. **`odict` inherits from both `_codict` and `dict`**
    - Provides dict interface (`isinstance(cd, dict)` → `True`)
    - Maintains ordered dict behavior from `_codict`
 
@@ -189,7 +189,7 @@ This ensures:
 
 ### Space Complexity
 
-- **Per-entry overhead**: Cython Entry cdef class
+- **Per-entry overhead**: Entry cdef class
 - **Dictionary overhead**: ~8 bytes per key (dict hash table)
 - **Memory usage**: Competitive with Python odict for most operations
 
@@ -217,7 +217,7 @@ See [Optimizations Analysis](../development/optimizations.md) for detailed expla
 
 ### Why Multiple Inheritance?
 
-Having `codict` inherit from `dict` provides:
+Having `odict` inherit from `dict` provides:
 - `isinstance(cd, dict)` returns `True`
 - Duck-typing compatibility with dict-expecting code
 - Direct access to optimized dict C methods
@@ -241,7 +241,7 @@ def process_dict(d):
 - Higher memory usage
 - Slower due to interpretation overhead
 
-**Cython codict**:
+**codict**:
 - Cython/C implementation
 - Uses C extension type for entries
 - Compiled (requires C compiler)

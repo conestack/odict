@@ -36,7 +36,7 @@ print(odict.__module__)
 
 # More explicit check
 if odict.__module__ == 'odict.codict':
-    print("Using Cython-optimized codict")
+    print("Using codict")
 else:
     print("Using pure Python odict")
 ```
@@ -49,7 +49,7 @@ If you need a specific implementation:
 # Always use pure Python (portable, better for bulk operations)
 from odict.odict import odict
 
-# Always use Cython (requires compilation, faster for basic ops)
+# Always use (requires compilation, faster for basic ops)
 from odict.codict import codict
 ```
 

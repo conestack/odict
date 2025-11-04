@@ -87,7 +87,7 @@ cdef class NodePool:
 
 **Techniques**:
 - Inline critical operations in `__getitem__`/`__setitem__`
-- Use Cython type hints and `@cython.locals()`
+- Use type hints and `@cython.locals()`
 - Profile-guided optimization
 - Cache frequently accessed attributes
 

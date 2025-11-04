@@ -6,7 +6,7 @@ The `bench.py` module provides comprehensive performance and memory benchmarking
 - `dict` (Python built-in)
 - `OrderedDict` (collections.OrderedDict)
 - `odict` (Pure Python implementation)
-- `codict` (Cython-optimized implementation)
+- `odict` (implementation)
 
 The benchmarking suite supports **configurable baseline comparison** and is fully parameterizable via command-line arguments.
 
@@ -99,7 +99,7 @@ python -m odict.bench --macro-iterations 5000
 
 ### --baseline
 
-**Choices**: `fastest` (default), `dict`, `OrderedDict`, `odict`, `codict`, `none`
+**Choices**: `fastest` (default), `dict`, `OrderedDict`, `odict`, `odict`, `none`
 
 Select which implementation to use as the baseline for percentage comparisons.
 
@@ -255,20 +255,20 @@ runner.benchmark_and_print(
 ### Identifying Performance Characteristics
 
 1. **Basic Operations (get/set/delete)**:
-   - Compare `dict`, `OrderedDict`, `odict`, `codict` for `__getitem__`, `__setitem__`, `__delitem__`
+   - Compare `dict`, `OrderedDict`, `odict`, `odict` for `__getitem__`, `__setitem__`, `__delitem__`
    - Expected: `dict` fastest, ordered implementations 2-5x slower
 
 2. **Bulk Operations (values/items/copy)**:
    - Check `values()`, `items()`, `copy()` benchmarks
-   - Note: `codict` may be significantly slower due to C↔Python conversion overhead
+   - Note: `odict` may be significantly slower due to C↔Python conversion overhead
 
 3. **Order-Specific Operations**:
-   - Compare `odict` vs `codict` for `movefirst()`, `movelast()`, `swap()`, etc.
-   - Note: `codict` is typically competitive or slightly faster for these
+   - Compare `odict` vs `odict` for `movefirst()`, `movelast()`, `swap()`, etc.
+   - Note: `odict` is typically competitive or slightly faster for these
 
 4. **Memory Usage**:
    - Compare memory columns across implementations
-   - `OrderedDict` and `codict` generally use less memory than `odict`
+   - `OrderedDict` and `odict` generally use less memory than `odict`
 
 ### Understanding Baseline Selection
 
@@ -278,7 +278,7 @@ runner.benchmark_and_print(
 - Generating neutral performance reports
 
 **Use `--baseline odict`** when:
-- Evaluating `codict` optimization effectiveness
+- Evaluating `odict` optimization effectiveness
 - Measuring improvement over pure Python implementation
 - Documentation and release notes
 
@@ -291,7 +291,7 @@ runner.benchmark_and_print(
 
 ### Codict Performance Characteristics
 
-Based on benchmark data, `codict` exhibits:
+Based on benchmark data, `odict` exhibits:
 
 **Strengths**:
 - Competitive with `odict` for basic operations (`__getitem__`, `__setitem__`)
@@ -320,7 +320,7 @@ Based on benchmark data, `codict` exhibits:
 - Frequent bulk operations (`values()`, `items()`)
 - Pure Python portability required
 
-**Use `codict`** when:
+**Use `odict`** when:
 - Need extended API
 - Workload dominated by basic operations and move operations
 - Few bulk operations or reverse iterations

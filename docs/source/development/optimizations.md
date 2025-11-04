@@ -4,11 +4,11 @@
 
 **Finding**: `cpdef` optimizations are **not feasible** with the current codict architecture without major refactoring.
 
-**Reason**: The `_codict` class must remain a regular Python `class` (not a `cdef class`) to support multiple inheritance with `dict`. Regular Python classes cannot have `cpdef` methods in Cython - this is a fundamental Cython limitation.
+**Reason**: The `_codict` class must remain a regular Python `class` (not a `cdef class`) to support multiple inheritance with `dict`. Regular Python classes cannot have `cpdef` methods in - this is a fundamental limitation.
 
 ## Background
 
-`cpdef` is a Cython method declaration that creates a dual-interface method callable from both Python and C code, providing significant performance improvements for frequently-called methods. It generates:
+`cpdef` is a method declaration that creates a dual-interface method callable from both Python and C code, providing significant performance improvements for frequently-called methods. It generates:
 1. A C-level function for fast C-to-C calls
 2. A Python wrapper for Python-to-C calls
 
@@ -25,11 +25,11 @@ class codict(_codict, dict):     # Multiple inheritance
         return dict
 ```
 
-**Key constraint**: `codict` inherits from both `_codict` and `dict` (built-in type). This multiple inheritance pattern requires `_codict` to be a regular Python class.
+**Key constraint**: `odict` inherits from both `_codict` and `dict` (built-in type). This multiple inheritance pattern requires `_codict` to be a regular Python class.
 
 ## Why cpdef Cannot Be Used
 
-### Cython Rule
+### Rule
 **Only `cdef class` (extension types) can have `cpdef` methods.**
 
 Regular Python classes (declared with `class`) cannot use:
@@ -160,7 +160,7 @@ From benchmarks (1,000,000 objects):
 
 ### Theoretical cpdef Gains
 
-Based on Cython documentation and typical use cases:
+Based on documentation and typical use cases:
 - `cpdef` methods: 2-5x faster for C-to-C calls
 - Python-to-C calls: 10-30% faster due to reduced call overhead
 
