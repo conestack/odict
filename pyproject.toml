@@ -1,12 +1,13 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
 [project]
 name = "odict"
 version = "2.0.0.dev0"
 description = "Ordered Dictionary."
-readme = "README.rst"
+dynamic = ["readme"]
+requires-python = ">=3.10"
 license = {text = "Python Software Foundation License"}
 authors = [{name = "Node Contributors", email = "dev@conestack.org"}]
 keywords = ["odict", "dict", "ordered", "dictionary", "mapping", "collection", "tree"]
@@ -25,6 +26,24 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/conestack/odict"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/x-rst"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.rst"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "CHANGES.rst"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "LICENSE.rst"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/odict"]
