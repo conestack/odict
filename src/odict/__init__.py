@@ -1,1 +1,1 @@
-from odict.pyodict import odict  # noqa
+from .pyodict import odict  # noqa

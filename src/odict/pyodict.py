@@ -1,10 +1,7 @@
-# Python Software Foundation License
 import copy
 import functools
 import sys
-
-
-ITER_FUNC = 'iteritems' if sys.version_info[0] < 3 else 'items'
+import warnings
 
 
 class _Nil(object):
@@ -34,23 +31,29 @@ class _Nil(object):
 _nil = _Nil()
 
 
-class _odict(object):
-    """Ordered dict data structure, with O(1) complexity for dict operations
-    that modify one element.
+class _base_odict:
+    """Base class for ordered dict data structures.
 
+    Provides O(1) complexity for dict operations that modify one element.
     Overwriting values doesn't change their original sequential order.
+
+    Subclasses must implement:
+    - _dict_cls(): Return the dict class to use
+    - _list_cls(): Return the entry factory (list or Entry class)
     """
 
-    def _dict_impl(self):
-        # XXX: rename to _dict_cls
-        return None
+    def _dict_cls(self):
+        """Return the dict implementation class. Must be overridden."""
+        raise NotImplementedError('Subclasses must implement _dict_cls()')
 
-    def _list_factory(self):
-        # XXX: rename to _list_cls
-        return list
+    def _list_cls(self):
+        """Return the entry factory. Must be overridden."""
+        raise NotImplementedError('Subclasses must implement _list_cls()')
 
     def __init__(self, data=(), **kwds):
-        """This doesn't accept keyword initialization as normal dicts to avoid
+        """Initialize ordered dict.
+
+        This doesn't accept keyword initialization as normal dicts to avoid
         a trap - inside a function or method the keyword args are accessible
         only as a dict, without a defined order, so their original order is
         lost.
@@ -60,13 +63,10 @@ class _odict(object):
                 '__init__() of ordered dict takes no keyword '
                 'arguments to avoid an ordering trap.'
             )
-        dict_ = self._dict_impl()
-        if dict_ is None:
-            raise TypeError('No dict implementation class provided.')
-        dict_.__init__(self)
+        self._dict_cls().__init__(self)
         # If you give a normal dict, then the order of elements is undefined
-        if hasattr(data, ITER_FUNC):
-            for key, val in getattr(data, ITER_FUNC)():
+        if hasattr(data, 'items'):
+            for key, val in data.items():
                 self[key] = val
         else:
             for key, val in data:
@@ -75,36 +75,36 @@ class _odict(object):
     # Double-linked list header
     @property
     def lh(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         if not hasattr(self, '_lh'):
             dict_.__setattr__(self, '_lh', _nil)
         return dict_.__getattribute__(self, '_lh')
 
     @lh.setter
     def lh(self, val):
-        self._dict_impl().__setattr__(self, '_lh', val)
+        self._dict_cls().__setattr__(self, '_lh', val)
 
     # Double-linked list tail
     @property
     def lt(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         if not hasattr(self, '_lt'):
             dict_.__setattr__(self, '_lt', _nil)
         return dict_.__getattribute__(self, '_lt')
 
     @lt.setter
     def lt(self, val):
-        self._dict_impl().__setattr__(self, '_lt', val)
+        self._dict_cls().__setattr__(self, '_lt', val)
 
     def __getitem__(self, key):
-        return self._dict_impl().__getitem__(self, key)[1]
+        return self._dict_cls().__getitem__(self, key)[1]
 
     def __setitem__(self, key, val):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         try:
             dict_.__getitem__(self, key)[1] = val
         except KeyError:
-            list_ = self._list_factory()
+            list_ = self._list_cls()
             lt = dict_.__getattribute__(self, 'lt')
             new = list_([lt, val, _nil])
             dict_.__setitem__(self, key, new)
@@ -115,7 +115,7 @@ class _odict(object):
             dict_.__setattr__(self, 'lt', key)
 
     def __delitem__(self, key):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         pred, _, succ = dict_.__getitem__(self, key)
         if pred == _nil:
             dict_.__setattr__(self, 'lh', succ)
@@ -139,7 +139,7 @@ class _odict(object):
         memo[id(self)] = new
         for k, v in self.iteritems():
             new[k] = copy.deepcopy(v, memo)
-        for k, v in getattr(self.__dict__, ITER_FUNC)():
+        for k, v in self.__dict__.items():
             setattr(new, k, copy.deepcopy(v, memo))
         return new
 
@@ -154,27 +154,28 @@ class _odict(object):
         return key in self
 
     def __len__(self):
-        return len(self.keys())
+        dict_ = self._dict_cls()
+        return dict_.__len__(self)
 
     def __str__(self):
-        pairs = ('%r: %r' % (k, v) for k, v in getattr(self, ITER_FUNC)())
+        pairs = ('%r: %r' % (k, v) for k, v in self.items())
         return '{%s}' % ', '.join(pairs)
 
     def __repr__(self):
         if self:
-            pairs = ('(%r, %r)' % (k, v) for k, v in getattr(self, ITER_FUNC)())
+            pairs = ('(%r, %r)' % (k, v) for k, v in self.items())
             return '%s([%s])' % (self.__class__.__name__, ', '.join(pairs))
         else:
             return '%s()' % self.__class__.__name__
 
     def get(self, k, x=None):
         if k in self:
-            return self._dict_impl().__getitem__(self, k)[1]
+            return self._dict_cls().__getitem__(self, k)[1]
         else:
             return x
 
     def __iter__(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             yield curr_key
@@ -186,8 +187,8 @@ class _odict(object):
         return list(self.iterkeys())
 
     def alter_key(self, old_key, new_key):
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        list_ = self._list_cls()
         val = dict_.__getitem__(self, old_key)
         dict_.__delitem__(self, old_key)
         if val[0] != _nil:
@@ -203,7 +204,7 @@ class _odict(object):
         dict_.__setitem__(self, new_key, val)
 
     def itervalues(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             _, val, curr_key = dict_.__getitem__(self, curr_key)
@@ -213,7 +214,7 @@ class _odict(object):
         return list(self.itervalues())
 
     def iteritems(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lh')
         while curr_key != _nil:
             _, val, next_key = dict_.__getitem__(self, curr_key)
@@ -237,7 +238,7 @@ class _odict(object):
         self.__init__(items)
 
     def clear(self):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         dict_.clear(self)
         dict_.__setattr__(self, 'lh', _nil)
         dict_.__setattr__(self, 'lt', _nil)
@@ -251,8 +252,8 @@ class _odict(object):
                 'update() of ordered dict takes no keyword arguments to avoid '
                 'an ordering trap.'
             )
-        if hasattr(data, ITER_FUNC):
-            data = getattr(data, ITER_FUNC)()
+        if hasattr(data, 'items'):
+            data = data.items()
         for key, val in data:
             self[key] = val
 
@@ -275,7 +276,7 @@ class _odict(object):
 
     def popitem(self):
         try:
-            dict_ = self._dict_impl()
+            dict_ = self._dict_cls()
             key = dict_.__getattribute__(self, 'lt')
             return key, self.pop(key)
         except KeyError:
@@ -283,7 +284,7 @@ class _odict(object):
 
     def riterkeys(self):
         """To iterate on keys in reversed order."""
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             yield curr_key
@@ -297,7 +298,7 @@ class _odict(object):
 
     def ritervalues(self):
         """To iterate on values in reversed order."""
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             curr_key, val, _ = dict_.__getitem__(self, curr_key)
@@ -309,7 +310,7 @@ class _odict(object):
 
     def riteritems(self):
         """To iterate on (key, value) in reversed order."""
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr_key = dict_.__getattribute__(self, 'lt')
         while curr_key != _nil:
             pred_key, val, _ = dict_.__getitem__(self, curr_key)
@@ -322,7 +323,7 @@ class _odict(object):
 
     def firstkey(self):
         if self:
-            return self._dict_impl().__getattribute__(self, 'lh')
+            return self._dict_cls().__getattribute__(self, 'lh')
         else:
             raise KeyError('Ordered dictionary is empty')
 
@@ -332,7 +333,7 @@ class _odict(object):
 
     def lastkey(self):
         if self:
-            return self._dict_impl().__getattribute__(self, 'lt')
+            return self._dict_cls().__getattribute__(self, 'lt')
         else:
             raise KeyError('Ordered dictionary is empty')
 
@@ -341,14 +342,15 @@ class _odict(object):
         return self.lastkey()
 
     def as_dict(self):
-        return self._dict_impl()(self.iteritems())
+        return self._dict_cls()(self.iteritems())
 
     def _repr(self):
         """_repr(): low level repr of the whole data contained in the odict.
         Useful for debugging.
         """
-        dict_ = self._dict_impl()
-        form = 'odict low level repr lh,lt,data: %r, %r, %s'
+        dict_ = self._dict_cls()
+        class_name = self.__class__.__name__
+        form = f'{class_name} low level repr lh,lt,data: %r, %r, %s'
         return form % (
             dict_.__getattribute__(self, 'lh'),
             dict_.__getattribute__(self, 'lt'),
@@ -358,8 +360,8 @@ class _odict(object):
     def swap(self, a, b):
         if a == b:
             raise ValueError('Swap keys are equal')
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        list_ = self._list_cls()
         orgin_a = dict_.__getitem__(self, a)
         orgin_b = dict_.__getitem__(self, b)
         new_a = list_([orgin_b[0], orgin_a[1], orgin_b[2]])
@@ -397,8 +399,8 @@ class _odict(object):
         except ValueError:
             raise KeyError("Reference key '{}' not found".format(ref))
         prevkey = prevval = None
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        list_ = self._list_cls()
         if index > 0:
             prevkey = self.keys()[index - 1]
             prevval = dict_.__getitem__(self, prevkey)
@@ -420,8 +422,8 @@ class _odict(object):
             raise KeyError("Reference key '{}' not found".format(ref))
         nextkey = nextval = None
         keys = self.keys()
-        dict_ = self._dict_impl()
-        list_ = self._list_factory()
+        dict_ = self._dict_cls()
+        list_ = self._list_cls()
         if index < len(keys) - 1:
             nextkey = keys[index + 1]
             nextval = dict_.__getitem__(self, nextkey)
@@ -449,7 +451,7 @@ class _odict(object):
     def movebefore(self, ref, key):
         if ref == key:
             raise ValueError('Move keys are equal')
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         val = dict_.__getitem__(self, key)
         ref_val = dict_.__getitem__(self, ref)
         if val[0] == _nil:
@@ -474,7 +476,7 @@ class _odict(object):
     def moveafter(self, ref, key):
         if ref == key:
             raise ValueError('Move keys are equal')
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         val = dict_.__getitem__(self, key)
         ref_val = dict_.__getitem__(self, ref)
         if val[0] == _nil:
@@ -507,20 +509,51 @@ class _odict(object):
             self.moveafter(last_key, key)
 
     def next_key(self, key):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr = dict_.__getitem__(self, key)
         if curr[2] == _nil:
             raise KeyError('No next key')
         return curr[2]
 
     def prev_key(self, key):
-        dict_ = self._dict_impl()
+        dict_ = self._dict_cls()
         curr = dict_.__getitem__(self, key)
         if curr[0] == _nil:
             raise KeyError('No previous key')
         return curr[0]
 
 
-class odict(_odict, dict):
+class _odict(_base_odict):
+    """B/C abstract `_odict`. Subject to be removed. Use `_base_odict` instead.
+    """
+
+    def __init__(self, data=(), **kwds):
+        warnings.warn('`_odict` is deprecated. Adopt your code to use `_base_odict`')
+        dict_ = self._dict_cls()
+        if dict_ is None:
+            raise TypeError('No dict implementation class provided.')
+        _base_odict.__init__(self, data, **kwds)
+
     def _dict_impl(self):
+        return None
+
+    def _dict_cls(self):
+        warnings.warn('`_dict_impl` is deprecated. Adopt your code to use `_dict_cls`')
+        return self._dict_impl()
+
+    def _list_factory(self):
+        return list
+
+    def _list_cls(self):
+        warnings.warn(
+            '`_list_factory` is deprecated. Adopt your code to use `_list_cls`'
+        )
+        return self._list_factory()
+
+
+class odict(_base_odict, dict):
+    def _dict_cls(self):
         return dict
+
+    def _list_cls(self):
+        return list

@@ -2,6 +2,7 @@
 from odict import odict
 from odict.pyodict import _nil
 from odict.pyodict import _odict
+from odict.pyodict import _base_odict
 import copy
 import pickle
 import sys
@@ -9,27 +10,54 @@ import unittest
 
 
 class TestOdict(unittest.TestCase):
-    def assertRaisesWithMessage(self, msg, func, exc, *args, **kwargs):
-        try:
-            func(*args, **kwargs)
-        except exc as inst:
-            self.assertEqual(str(inst), msg)
-
     def test_abstract_superclass(self):
-        # Abstract superclass provides no concrete _dict_impl class.
-        msg = 'No dict implementation class provided.'
-        self.assertRaisesWithMessage(msg, _odict, TypeError)
+        # Abstract superclass provides no concrete _dict_cls and _list_cls.
+        with self.assertRaises(NotImplementedError) as exc:
+            _base_odict()
+        self.assertEqual(
+            str(exc.exception),
+            'Subclasses must implement _dict_cls()'
+        )
+
+        class _incomplete_odict(_base_odict, dict):
+            def _dict_cls(self):
+                return dict
+
+        with self.assertRaises(NotImplementedError) as exc:
+            _incomplete_odict()._list_cls()
+        self.assertEqual(
+            str(exc.exception),
+            'Subclasses must implement _list_cls()'
+        )
+
+        # Abstract superclass provides no concrete _dict_cls class.
+        with self.assertRaises(TypeError) as exc:
+            _odict()
+        self.assertEqual(
+            str(exc.exception),
+            'No dict implementation class provided.'
+        )
+
+        class _bc_odict(_odict, dict):
+            def _dict_impl(self):
+                return dict
+        self.assertTrue(_bc_odict()._dict_cls() is dict)
+        self.assertTrue(_bc_odict()._list_cls() is list)
+
+    def test_odict_defaults(self):
         o = odict()
-        self.assertEqual(o._dict_impl(), dict)
-        del o
+        self.assertEqual(o._dict_cls(), dict)
+        self.assertEqual(o._list_cls(), list)
 
     def test_init_with_kw(self):
         # Initialization with keyword arguments fails.
+        with self.assertRaises(TypeError) as exc:
+            odict(a=1)
         msg = (
             '__init__() of ordered dict takes no keyword arguments to avoid '
             'an ordering trap.'
         )
-        self.assertRaisesWithMessage(msg, odict, TypeError, a=1)
+        self.assertEqual(str(exc.exception), msg)
 
     def test_init_with_dict(self):
         # When initialized with a dict instance, the order of elements is
@@ -46,6 +74,11 @@ class TestOdict(unittest.TestCase):
         # preserved.
         o = odict([('a', 1), ('b', 2), ('c', 3), ('d', 4)])
         self.assertEqual(o.items(), [('a', 1), ('b', 2), ('c', 3), ('d', 4)])
+
+    def test_bounds(self):
+        o = odict()
+        self.assertEqual(o.lh, _nil)
+        self.assertEqual(o.lt, _nil)
 
     def test_containment(self):
         # Test key containment with __iter__() and has_key().
@@ -68,11 +101,13 @@ class TestOdict(unittest.TestCase):
     def test_update_with_kw(self):
         # update() with keyword arguments fails.
         o = odict()
+        with self.assertRaises(TypeError) as exc:
+            o.update(foo=1)
         msg = (
             'update() of ordered dict takes no keyword arguments to avoid '
             'an ordering trap.'
         )
-        self.assertRaisesWithMessage(msg, o.update, TypeError, foo=1)
+        self.assertEqual(str(exc.exception), msg)
 
     def test_update(self):
         # Test update().
@@ -91,11 +126,18 @@ class TestOdict(unittest.TestCase):
         self.assertEqual(o.last_key, 'd')
         o = odict()
         msg = "'Ordered dictionary is empty'"
-        self.assertRaisesWithMessage(msg, o.firstkey, KeyError)
-        self.assertRaisesWithMessage(msg, lambda: o.first_key, KeyError)
-        msg = "'Ordered dictionary is empty'"
-        self.assertRaisesWithMessage(msg, o.lastkey, KeyError)
-        self.assertRaisesWithMessage(msg, lambda: o.last_key, KeyError)
+        with self.assertRaises(KeyError) as e1:
+            o.firstkey()
+        self.assertEqual(str(e1.exception), msg)
+        with self.assertRaises(KeyError) as e2:
+            o.first_key
+        self.assertEqual(str(e2.exception), msg)
+        with self.assertRaises(KeyError) as e3:
+            o.lastkey()
+        self.assertEqual(str(e3.exception), msg)
+        with self.assertRaises(KeyError) as e4:
+            o.last_key
+        self.assertEqual(str(e4.exception), msg)
 
     def test_reverse_iteration(self):
         # Reverse iteration
@@ -123,12 +165,18 @@ class TestOdict(unittest.TestCase):
     def test_pop(self):
         # Test pop and popitem
         o = odict([(1, 'a'), (2, 'b')])
-        self.assertRaisesWithMessage('3', o.pop, KeyError, 3)
+        with self.assertRaises(KeyError) as exc:
+            o.pop(3)
+        self.assertEqual(str(exc.exception), '3')
         self.assertEqual(o.pop(3, 'foo'), 'foo')
         self.assertEqual(o.pop(2), 'b')
         self.assertEqual(o.popitem(), (1, 'a'))
-        msg = '"\'popitem(): ordered dictionary is empty\'"'
-        self.assertRaisesWithMessage(msg, o.popitem, KeyError)
+        with self.assertRaises(KeyError) as exc:
+             o.popitem()
+        self.assertEqual(
+            str(exc.exception),
+            '"\'popitem(): ordered dictionary is empty\'"'
+        )
 
     def test_delete(self):
         # Removal from empty odict
@@ -137,7 +185,9 @@ class TestOdict(unittest.TestCase):
         def delete():
             del o['1']
 
-        self.assertRaisesWithMessage("'1'", delete, KeyError)
+        with self.assertRaises(KeyError) as exc:
+            delete()
+        self.assertEqual(str(exc.exception), "'1'")
         # Removal from odict with one element
         o['1'] = 1
         del o['1']
@@ -251,8 +301,8 @@ class TestOdict(unittest.TestCase):
         o.alter_key('1', 'foo')
         self.assertEqual(o.keys(), ['foo', '2', '3'])
         self.assertEqual(o.rkeys(), ['3', '2', 'foo'])
-        self.assertTrue(o._dict_impl() is dict)
-        dict_values = o._dict_impl().values(o)
+        self.assertTrue(o._dict_cls() is dict)
+        dict_values = o._dict_cls().values(o)
         self.assertEqual(len(dict_values), 3)
         self.assertTrue(['foo', 'b', '3'] in dict_values)
         self.assertTrue(['2', 'c', _nil] in dict_values)
@@ -263,7 +313,7 @@ class TestOdict(unittest.TestCase):
         o.alter_key('2', 'bar')
         self.assertEqual(o.keys(), ['foo', 'bar', '3'])
         self.assertEqual(o.rkeys(), ['3', 'bar', 'foo'])
-        dict_values = o._dict_impl().values(o)
+        dict_values = o._dict_cls().values(o)
         self.assertEqual(len(dict_values), 3)
         self.assertTrue(['bar', 'c', _nil] in dict_values)
         self.assertTrue(['foo', 'b', '3'] in dict_values)
@@ -273,7 +323,7 @@ class TestOdict(unittest.TestCase):
         o.alter_key('3', 'baz')
         self.assertEqual(o.keys(), ['foo', 'bar', 'baz'])
         self.assertEqual(o.rkeys(), ['baz', 'bar', 'foo'])
-        dict_values = o._dict_impl().values(o)
+        dict_values = o._dict_cls().values(o)
         self.assertEqual(len(dict_values), 3)
         self.assertTrue(['foo', 'b', 'baz'] in dict_values)
         self.assertTrue([_nil, 'a', 'bar'] in dict_values)
@@ -619,13 +669,3 @@ class TestOdict(unittest.TestCase):
             o.prev_key('x')
         o['y'] = 'y'
         self.assertEqual(o.prev_key('y'), 'x')
-
-
-if __name__ == '__main__':
-    from odict import tests
-
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.findTestCases(tests))
-    runner = unittest.TextTestRunner(failfast=True)
-    result = runner.run(suite)
-    sys.exit(not result.wasSuccessful())

@@ -1,10 +1,23 @@
 Changes
 =======
 
-1.9.1 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Improve ``__len__`` function to use underlying dict implementation directly.
+  [rnix]
+
+- Deprecate ``_odict``. user ``_base_odict`` instead.
+  [rnix]
+
+- Rename ``_dict_impl`` to ``_dict_cls`` and ``_list_factory`` to ``_list_cls``.
+  [rnix]
+
+- Refactor package layout to use ``pyproject.toml`` and implicit namespace packages.
+  [rnix]
+
+- Drop Python 2 support.
+  [rnix]
 
 
 1.9.0 (2022-05-15)

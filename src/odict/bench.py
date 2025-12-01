@@ -1,7 +1,6 @@
 # Python Software Foundation License
-from __future__ import print_function
 from collections import OrderedDict
-from pyodict import odict
+from .pyodict import odict
 import time
 
 
