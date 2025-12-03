@@ -6,8 +6,8 @@
     :target: https://pypi.python.org/pypi/odict
     :alt: Number of PyPI downloads
 
-.. image:: https://github.com/conestack/odict/actions/workflows/test.yaml/badge.svg
-    :target: https://github.com/conestack/odict/actions/workflows/test.yaml
+.. image:: https://github.com/conestack/odict/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/conestack/odict/actions/workflows/test.yml
     :alt: Test odict
 
 
