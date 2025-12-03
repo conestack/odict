@@ -13,7 +13,7 @@ Changes
 - Rename ``_dict_impl`` to ``_dict_cls`` and ``_list_factory`` to ``_list_cls``.
   [rnix]
 
-- Refactor package layout to use ``pyproject.toml`` and implicit namespace packages.
+- Refactor package layout to use ``pyproject.toml``.
   [rnix]
 
 - Drop Python 2 support.
