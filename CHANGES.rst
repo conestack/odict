@@ -4,7 +4,12 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix ``odict.bench`` on Python 3: ``time.clock`` is gone since Python 3.8,
+  use ``time.perf_counter``.
+  [rnix]
+
+- Drop the Python 2 remnants: the Python < 3.7 branch in the tests.
+  [rnix]
 
 
 2.0.0 (2026-02-03)
