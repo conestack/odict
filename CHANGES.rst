@@ -4,6 +4,19 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
+- Modernise the code ruff flags as outdated: ``class X(object)`` and
+  ``.format()`` over f-strings. Behaviour unchanged.
+  [rnix]
+
+- Sort the imports with ruff (one per line, ``from`` imports first, no
+  sections) and format the code with ``ruff format`` (90 characters per line,
+  single quotes).
+  [rnix]
+
+- Pin the ruff configuration in ``pyproject.toml``: rule selection, import
+  sorting and formatter settings, ``make check`` runs ``ruff check`` with it.
+  [rnix]
+
 - Fix ``odict.bench`` on Python 3: ``time.clock`` is gone since Python 3.8,
   use ``time.perf_counter``.
   [rnix]

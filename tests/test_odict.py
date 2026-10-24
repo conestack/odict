@@ -1,8 +1,8 @@
 # Python Software Foundation License
 from odict import odict
+from odict.pyodict import _base_odict
 from odict.pyodict import _nil
 from odict.pyodict import _odict
-from odict.pyodict import _base_odict
 import copy
 import pickle
 import unittest
@@ -13,10 +13,7 @@ class TestOdict(unittest.TestCase):
         # Abstract superclass provides no concrete _dict_cls and _list_cls.
         with self.assertRaises(NotImplementedError) as exc:
             _base_odict()
-        self.assertEqual(
-            str(exc.exception),
-            'Subclasses must implement _dict_cls()'
-        )
+        self.assertEqual(str(exc.exception), 'Subclasses must implement _dict_cls()')
 
         class _incomplete_odict(_base_odict, dict):
             def _dict_cls(self):
@@ -24,22 +21,17 @@ class TestOdict(unittest.TestCase):
 
         with self.assertRaises(NotImplementedError) as exc:
             _incomplete_odict()._list_cls()
-        self.assertEqual(
-            str(exc.exception),
-            'Subclasses must implement _list_cls()'
-        )
+        self.assertEqual(str(exc.exception), 'Subclasses must implement _list_cls()')
 
         # Abstract superclass provides no concrete _dict_cls class.
         with self.assertRaises(TypeError) as exc:
             _odict()
-        self.assertEqual(
-            str(exc.exception),
-            'No dict implementation class provided.'
-        )
+        self.assertEqual(str(exc.exception), 'No dict implementation class provided.')
 
         class _bc_odict(_odict, dict):
             def _dict_impl(self):
                 return dict
+
         self.assertTrue(_bc_odict()._dict_cls() is dict)
         self.assertTrue(_bc_odict()._list_cls() is list)
 
@@ -171,10 +163,9 @@ class TestOdict(unittest.TestCase):
         self.assertEqual(o.pop(2), 'b')
         self.assertEqual(o.popitem(), (1, 'a'))
         with self.assertRaises(KeyError) as exc:
-             o.popitem()
+            o.popitem()
         self.assertEqual(
-            str(exc.exception),
-            '"\'popitem(): ordered dictionary is empty\'"'
+            str(exc.exception), '"\'popitem(): ordered dictionary is empty\'"'
         )
 
     def test_delete(self):
@@ -233,9 +224,7 @@ class TestOdict(unittest.TestCase):
 
     def test_pickle(self):
         # dump and load odict pickle
-        self.assertEqual(
-            pickle.loads(pickle.dumps([odict([(1, 2)])])), [odict([(1, 2)])]
-        )
+        self.assertEqual(pickle.loads(pickle.dumps([odict([(1, 2)])])), [odict([(1, 2)])])
 
     def test_sort(self):
         # basic sorting

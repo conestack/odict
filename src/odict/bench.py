@@ -1,6 +1,6 @@
 # Python Software Foundation License
-from collections import OrderedDict
 from .pyodict import odict
+from collections import OrderedDict
 import time
 
 
@@ -26,31 +26,15 @@ def result(factory, _range):
     mid = time.perf_counter()
     delete(_range)
     end = time.perf_counter()
-    print(
-        '| Add    {0:7d} | {1:11.5f}ms |'.format(
-            _range,
-            (mid - start) * 1000,
-        )
-    )
+    print(f'| Add    {_range:7d} | {(mid - start) * 1000:11.5f}ms |')
     print(CREATE_DELETE_ROW)
-    print(
-        '| Delete {0:7d} | {1:11.5f}ms |'.format(
-            _range,
-            (end - mid) * 1000.0,
-        )
-    )
+    print(f'| Delete {_range:7d} | {(end - mid) * 1000.0:11.5f}ms |')
     print(CREATE_DELETE_ROW)
     return start, mid, end
 
 
 def relation_row(action, _range, relation):
-    print(
-        '| {0:6s} {1:8d} objects |  1:{2:6.3f} |'.format(
-            action,
-            _range,
-            relation,
-        )
-    )
+    print(f'| {action:6s} {_range:8d} objects |  1:{relation:6.3f} |')
     print(RELATION_ROW)
 
 

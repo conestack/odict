@@ -4,7 +4,7 @@ import sys
 import warnings
 
 
-class _Nil(object):
+class _Nil:
     # Q: it feels like using the class with "is" and "is not" instead of "=="
     #    and "!=" should be faster.
     # A: This would break implementations which use pickle for persisting.
@@ -397,7 +397,7 @@ class _base_odict:
         try:
             index = self.keys().index(ref)
         except ValueError:
-            raise KeyError("Reference key '{}' not found".format(ref))
+            raise KeyError(f"Reference key '{ref}' not found")
         prevkey = prevval = None
         dict_ = self._dict_cls()
         list_ = self._list_cls()
@@ -419,7 +419,7 @@ class _base_odict:
         try:
             index = self.keys().index(ref)
         except ValueError:
-            raise KeyError("Reference key '{}' not found".format(ref))
+            raise KeyError(f"Reference key '{ref}' not found")
         nextkey = nextval = None
         keys = self.keys()
         dict_ = self._dict_cls()
@@ -524,8 +524,7 @@ class _base_odict:
 
 
 class _odict(_base_odict):
-    """B/C abstract `_odict`. Subject to be removed. Use `_base_odict` instead.
-    """
+    """B/C abstract `_odict`. Subject to be removed. Use `_base_odict` instead."""
 
     def __init__(self, data=(), **kwds):
         warnings.warn('`_odict` is deprecated. Adopt your code to use `_base_odict`')
@@ -545,9 +544,7 @@ class _odict(_base_odict):
         return list
 
     def _list_cls(self):
-        warnings.warn(
-            '`_list_factory` is deprecated. Adopt your code to use `_list_cls`'
-        )
+        warnings.warn('`_list_factory` is deprecated. Adopt your code to use `_list_cls`')
         return self._list_factory()
 
 
