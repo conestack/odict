@@ -25,15 +25,18 @@ class TestOdict(unittest.TestCase):
 
         # Abstract superclass provides no concrete _dict_cls class.
         with self.assertRaises(TypeError) as exc:
-            _odict()
+            with self.assertWarns(UserWarning):
+                _odict()
         self.assertEqual(str(exc.exception), 'No dict implementation class provided.')
 
         class _bc_odict(_odict, dict):
             def _dict_impl(self):
                 return dict
 
-        self.assertTrue(_bc_odict()._dict_cls() is dict)
-        self.assertTrue(_bc_odict()._list_cls() is list)
+        with self.assertWarns(UserWarning):
+            self.assertTrue(_bc_odict()._dict_cls() is dict)
+        with self.assertWarns(UserWarning):
+            self.assertTrue(_bc_odict()._list_cls() is list)
 
     def test_odict_defaults(self):
         o = odict()
